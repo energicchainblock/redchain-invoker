@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utsoft.blockchain.core.dao.mapper.ChaincodeOrgConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.utsoft.blockchain.core.dao.model.ChaincodeOrgConfigPo">
+       <id column="mspid" jdbcType="BIGINT" property="mspId" />
+       <result column="domain_name" jdbcType="VARCHAR" property="domainName" />
+       <result column="channel_name" jdbcType="VARCHAR" property="channelName" />
+       <result column="ca_locations" jdbcType="VARCHAR" property="caLocations" />
+       <result column="peer_locations" jdbcType="VARCHAR" property="peerLocations" />
+       <result column="orgname" jdbcType="VARCHAR" property="orgname" />
+       <result column="order_locations" jdbcType="VARCHAR" property="ordererLocations" />
+       <result column="eventhub_locations" jdbcType="VARCHAR" property="eventhubLocations" />
+       <result column="status" jdbcType="INTEGER" property="status" />
+       <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    </resultMap>
+</mapper>

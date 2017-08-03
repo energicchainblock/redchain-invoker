@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <springProfile name="prod">
+        <logger name="com.utsoft.crawler" level="INFO"/>
+    </springProfile>
+	 <property name="logs.path" value="/data/server/axis/logs"/>
+	 <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%line - %msg%n</pattern>
+		</encoder>
+	 </appender>
+	 <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.path}/crawler.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			 <fileNamePattern>${logs.path}/axis.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<MaxHistory>5</MaxHistory>
+		</rollingPolicy>
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>100MB</MaxFileSize>
+		</triggeringPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%line - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- project default level -->
+	<logger name="com.utsoft.blockchain" level="INFO" />
+	<root level="INFO">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />
+	</root>
+</configuration>

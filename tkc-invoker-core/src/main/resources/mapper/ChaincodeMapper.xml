@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utsoft.blockchain.core.dao.mapper.ChaincodeMapper">
+
+    <resultMap id="BaseResultMap" type="com.utsoft.blockchain.core.dao.model.ChaincodePo">
+       <id column="chainId" jdbcType="BIGINT" property="chainId" />
+       <result column="chain_code_name" jdbcType="VARCHAR" property="codeChainName" />
+       <result column="code_version" jdbcType="VARCHAR" property="codeVersion" />
+       <result column="codePath" jdbcType="VARCHAR" property="codePath" />
+       <result column="status" jdbcType="INTEGER" property="status" />
+       <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    </resultMap>
+    
+    <sql id="Base_Column_List" >
+         chainId, code_version, codePath, status, gmt_create
+    </sql>
+  
+     <select id="listByOrgId" resultMap="BaseResultMap" parameterType="string">
+         select tcode.*  from t_chaincode  tcode INNER JOIN t_chaincode_org_config torg on tcode.chainId = torg.chainId where torg.mspid= #{orgId}
+     </select>
+     
+</mapper>

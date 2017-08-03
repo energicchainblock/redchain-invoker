@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utsoft.blockchain.core.dao.mapper.ChaincodeAccessCodeMapper">
+
+	<resultMap id="BaseResultMap" type="com.utsoft.blockchain.core.dao.model.ChaincodeAccessCodePo">
+       <id column="applyId" jdbcType="BIGINT" property="applyId" />
+       <result column="apply_code" jdbcType="VARCHAR" property="applyCode" />
+       <result column="chainId" jdbcType="INTEGER" property="chainId" />
+       <result column="status" jdbcType="INTEGER" property="status" />
+       <result column="remark" jdbcType="VARCHAR" property="remark" />
+       <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    </resultMap>
+</mapper>

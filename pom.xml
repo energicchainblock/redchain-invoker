@@ -1,0 +1,173 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.utsoft.blockchain</groupId>
+  <artifactId>tkc-invoker</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>digital currency trading platform and digital currency trading center</name>
+  <description>Provide block chain digital trading platform basic functions, such as registration, login, transaction, query historical information</description>
+  
+   <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<jackson.version>2.8.7</jackson.version>
+		<okhttp.version>3.6.0</okhttp.version>
+		<slf4j.version>1.7.24</slf4j.version>
+		<mybatis.version>3.4.4</mybatis.version>
+        <mapper.version>3.3.9</mapper.version>
+        <pagehelper.version>5.0.0</pagehelper.version>
+        <mybatis-spring.version>1.3.1</mybatis-spring.version>
+        <fabric-sdk-java.version>1.0.0</fabric-sdk-java.version>
+        <commons.lang3.version>3.3.2</commons.lang3.version>
+        <motan.version>0.3.0</motan.version>
+	</properties>
+	
+	 <developers>
+        <developer>
+            <name>hunterfox Developers</name>
+            <email>bo.wang@utsoft.cn</email>
+        </developer>
+    </developers>
+    
+     <modules>
+	   <module>tkc-invoker-restful</module>
+	   <module>tkc-invoker-core</module>
+	   <module>tkc-invoker-provider</module>
+	   <module>tkc-invoker-lib</module>
+    </modules>
+    <dependencyManagement>
+		<dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>1.5.1.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons.lang3.version}</version>
+			</dependency>
+            <dependency>
+		     <groupId>tk.mybatis</groupId>
+		     <artifactId>mapper-spring-boot-starter</artifactId>
+		     <version>1.1.0</version>
+		   </dependency> 
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+            <dependency>
+	            <groupId>tk.mybatis</groupId>
+	            <artifactId>mapper</artifactId>
+	            <version>${mapper.version}</version>
+             </dependency>
+	        <dependency>
+	            <groupId>com.alibaba</groupId>
+	            <artifactId>druid</artifactId>
+	            <version>1.0.27</version>
+            </dependency>
+			<dependency>
+			    <groupId>cglib</groupId>
+			    <artifactId>cglib</artifactId>
+			    <version>3.2.2</version>
+			</dependency>
+           <dependency>
+             <groupId>junit</groupId>
+             <artifactId>junit</artifactId>
+			 <version>4.12</version>
+			  <scope>test</scope>
+			</dependency>
+		  <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>${pagehelper.version}</version>
+         </dependency>
+         <dependency>
+			  <groupId>org.hyperledger.fabric-sdk-java</groupId>
+			  <artifactId>fabric-sdk-java</artifactId>
+			  <version>${fabric-sdk-java.version}</version>
+			  <exclusions>
+			  <exclusion>
+		          <groupId>org.apache.commons</groupId>
+		          <artifactId>commons-lang</artifactId>
+		        </exclusion>
+			  </exclusions>
+			</dependency>
+			<dependency>
+			    <groupId>com.google.code.gson</groupId>
+			    <artifactId>gson</artifactId>
+			    <version>2.7</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.alibaba</groupId>
+			    <artifactId>fastjson</artifactId>
+			    <version>1.2.26</version>
+			</dependency>
+	    
+	    <!-- rpc motan import -->
+		   <dependency>
+		     <groupId>com.weibo</groupId>
+		     <artifactId>motan-core</artifactId>
+		     <version>${motan.version}</version>
+		 </dependency>
+		 <dependency>
+		     <groupId>com.weibo</groupId>
+		     <artifactId>motan-transport-netty</artifactId>
+		     <version>${motan.version}</version>
+		 </dependency> 
+		  <!-- dependencies blow were only needed for spring-based features -->
+		  <dependency>
+		     <groupId>com.weibo</groupId>
+		     <artifactId>motan-springsupport</artifactId>
+		     <version>${motan.version}</version>
+		  </dependency>
+		  <dependency>
+		    <groupId>com.weibo</groupId>
+		    <artifactId>motan-registry-zookeeper</artifactId>
+		    <version>${motan.version}</version>
+		  </dependency>
+		 <!-- end of rpc motan import -->
+		 
+	   </dependencies>
+     </dependencyManagement>
+  
+     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+             <plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+            </plugins>
+      </build>
+        <distributionManagement>
+		  <repository>
+				<id>releases</id>
+				<name>Nexus Release Repository</name>
+				<url>http://nexus.dev.utouu.com/content/repositories/releases</url>
+			</repository> 
+			<snapshotRepository>
+				<id>snapshots</id>
+				<name>Nexus Snapshot Repository</name>
+				<url>http://nexus.dev.utouu.com/content/repositories/snapshots</url>
+			</snapshotRepository>
+		</distributionManagement> 
+</project>

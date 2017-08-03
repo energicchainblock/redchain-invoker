@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+   <parent>
+    <groupId>com.utsoft.blockchain</groupId>
+     <artifactId>tkc-invoker</artifactId>
+     <version>0.0.1-SNAPSHOT</version>
+   </parent>
+   <artifactId>tkc-invoker-provider</artifactId>
+   <name>tkc-invoker-rpc call interface</name>
+   <description>interface provider third party</description>
+   <properties>
+        <bouncycastle.version>1.55</bouncycastle.version>
+    </properties>
+   <dependencies>
+      <dependency>
+	     <groupId>org.springframework</groupId>
+	     <artifactId>spring-context</artifactId>
+	 </dependency>
+	  <dependency>
+	     <groupId>com.weibo</groupId>
+	     <artifactId>motan-springsupport</artifactId>
+	 </dependency>
+	  <dependency>
+	     <groupId>com.weibo</groupId>
+	     <artifactId>motan-core</artifactId>
+	 </dependency>
+	 <dependency>
+	     <groupId>com.weibo</groupId>
+	     <artifactId>motan-transport-netty</artifactId>
+	 </dependency>
+	 <dependency>
+		<groupId>com.weibo</groupId>
+		 <artifactId>motan-registry-zookeeper</artifactId>  
+	  </dependency>
+	  <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+          <version>${bouncycastle.version}</version>
+      </dependency>
+	  <dependency>
+			    <groupId>com.alibaba</groupId>
+			    <artifactId>fastjson</artifactId>
+	    </dependency>
+   </dependencies>
+</project>

@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+    <groupId>com.utsoft.blockchain</groupId>
+    <artifactId>tkc-invoker</artifactId>
+     <version>0.0.1-SNAPSHOT</version>
+   </parent>
+   <artifactId>tkc-invoker-core</artifactId>
+   <name>basic support</name>
+   <description>
+     support basic function as fellow:register,enroll ,transaction  and select history
+   </description>
+   <dependencies>
+      <dependency>
+			<groupId>com.utsoft.blockchain</groupId>
+			<artifactId>tkc-invoker-provider</artifactId>
+			<version>${project.version}</version>
+	   </dependency>
+      <!--start of log import -->
+      <dependency>  
+	       <groupId>ch.qos.logback</groupId>  
+	       <artifactId>logback-classic</artifactId>  
+	   </dependency> 
+       <!--  <dependency>  
+	       <groupId>org.slf4j</groupId>  
+	       <artifactId>log4j-over-slf4j</artifactId>  
+	   </dependency>  -->
+	   <!-- end of  log import -->
+	    <dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+       <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+       <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+        </dependency>
+          <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+        </dependency> 
+        
+         <dependency>
+			 <groupId>org.hyperledger.fabric-sdk-java</groupId>
+			 <artifactId>fabric-sdk-java</artifactId>
+	    </dependency> 
+	    <dependency>
+			    <groupId>com.alibaba</groupId>
+			    <artifactId>fastjson</artifactId>
+	    </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,22 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:motan="http://api.weibo.com/schema/motan"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://api.weibo.com/schema/motan http://api.weibo.com/schema/motan.xsd">
+
+	
+	
+    <!-- 注册中心配置 使用不同注册中心需要依赖对应的jar包。
+    <motan:registry regProtocol="zookeeper" name="bc_zookeeper" address="192.168.11.225:2181"/>
+
+    <motan:protocol default="true"  name="motan" haStrategy="failfast" loadbalance="configurableWeight"/>
+
+
+    <motan:basicReferer id="clientBasicConfig" group="blockchainTransaction" registry="bc_zookeeper"
+                        protocol="motan" throwException="false"/>
+
+
+    <motan:referer id="tkcTransactionExportService"   registry="bc_zookeeper"
+                   interface="com.utsoft.blockchain.api.proivder.ITkcTransactionExportService"
+                   connectTimeout="300" requestTimeout="300" basicReferer="clientBasicConfig"/>
+-->
+</beans>
