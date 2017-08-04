@@ -1,9 +1,11 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.codec.binary.Hex;
 import org.hyperledger.fabric.protos.ledger.rwset.kvrwset.KvRwset;
 import org.hyperledger.fabric.sdk.BlockInfo;
@@ -19,8 +21,10 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.ReqtOrderDto;
 import com.utsoft.blockchain.api.pojo.ReqtQueryOrderDto;
 import com.utsoft.blockchain.api.pojo.RspQueryResultDto;
@@ -135,14 +139,30 @@ public class ChannelClientPoolManager {
  	 * @param name
  	 * @param sampleOrg
  	 */
- 	public void connectChannel(String name,ChaincodeID chaincodeID,FabricAuthorizedOrg orgconfig) {
+ 	public void connectChannel(ChaincodeID chaincodeID,FabricAuthorizedOrg orgconfig) {
  		try {
-			channelClientProxy.connectChannel(client, name, orgconfig,chaincodeID);
+			channelClientProxy.connectChannel(client, orgconfig.getChannelName(),orgconfig,chaincodeID);
 		} catch (Exception e) {
 			Object[] agrs = {chaincodeID,orgconfig,e};
 			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
 		}
  	}
+ 	
+ 	/**
+ 	 * 自动重连
+ 	 * @param chaincodeID
+ 	 * @param orgconfig
+ 	 */
+	public void reconnect(ChaincodeID chaincodeID) {
+		 FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgConfigByccId(chaincodeID);
+	 	try {
+			channelClientProxy.connectChannel(client,orgconfig.getChannelName(),orgconfig,chaincodeID);
+		} catch (Exception e) {
+			Object[] agrs = {chaincodeID,orgconfig,e};
+			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
+		}
+ 	}
+	
  	/**
  	 *  查询请求
  	 * @param chaincodeID 链码
@@ -154,110 +174,115 @@ public class ChannelClientPoolManager {
  		return channelClientProxy.queryChaincode(client, channel,chaincodeID, reqtQueryOrderDto);
  	}	
  	
- 	/**
- 	 * 查询交易链码block 信息
- 	 * @param chaincodeID
- 	 * @param testTxID
- 	 * @return 交易链码详细信息
- 	 */
- 	public TkcTransactionBlockInfoDto querySourceBlockByTransactionID(ChaincodeID chaincodeID,String testTxID) {
- 		  Channel channel = getChannel(chaincodeID);
- 		 
- 		  TkcTransactionBlockInfoDto dto = new TkcTransactionBlockInfoDto();
- 	      try {
- 	    	
- 	    	  BlockchainInfo channelInfo = channel.queryBlockchainInfo();
- 	    	  String chainCurrentHash = Hex.encodeHexString(channelInfo.getCurrentBlockHash());
- 	    	  dto.setChainCurrentHash(chainCurrentHash);
- 	    	  
- 	    	   BlockInfo blockInfo = channel.queryBlockByTransactionID(testTxID);
- 	    	   String previousHash = Hex.encodeHexString(blockInfo.getPreviousHash());
- 	    	   String datahash = Hex.encodeHexString(blockInfo.getDataHash());
- 	    	   long blockNumber = blockInfo.getBlockNumber(); 
- 	    	   dto.setBlockNumber(blockNumber);
- 	    	   dto.setPreviousHash(previousHash);
- 	    	   
- 	    	   TransactionInfo txInfo = channel.queryTransactionByID(testTxID);
- 	    	   dto.setTxValCodeNumber(txInfo.getValidationCode().getNumber());
- 	    	   dto.setDatahash(datahash);
- 	    	
- 	    	  List<JSONObject> envelopeObjectList = new ArrayList<>();
- 	    	  dto.getCommits().put("envelopes", envelopeObjectList);
- 	    	
- 	    	  for (BlockInfo.EnvelopeInfo envelopeInfo : blockInfo.getEnvelopeInfos()) {
- 	    		  
- 	    		 JSONObject envelopeObject = new JSONObject();
- 	    		 envelopeObject.put("epoch", envelopeInfo.getEpoch());
- 	    		 envelopeObject.put("timestamp", envelopeInfo.getTimestamp());
- 	    		 envelopeObject.put("channelId", envelopeInfo.getChannelId());
- 	    		 envelopeObjectList.add(envelopeObject);
- 	    		
- 	    		 if (envelopeInfo.getType() == TRANSACTION_ENVELOPE) {
- 	    			
- 	    			 BlockInfo.TransactionEnvelopeInfo transactionEnvelopeInfo = (BlockInfo.TransactionEnvelopeInfo) envelopeInfo;
- 	    			
- 	    			 List<List<JSONObject>> transactionActionInfoList = new ArrayList<>();
- 	    			 envelopeObject.put("transactionActionInfoCount", transactionEnvelopeInfo.getTransactionActionInfoCount());
- 	    			 envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
- 	    			 envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
- 	    		
- 	    			  for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo.getTransactionActionInfos()){
- 	    				  
- 	    				  TxReadWriteSetInfo rwsetInfo = transactionActionInfo.getTxReadWriteSet();
- 	    				  if (null != rwsetInfo) {
- 	    					   
- 	    					 List<JSONObject> rwsetInfoObjects = new ArrayList<>();
- 	    					 for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : rwsetInfo.getNsRwsetInfos()) {
-                                
- 	    						 final String namespace = nsRwsetInfo.getNaamespace();
-                                 KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
-                                
-                                 JSONObject rwsObject = new JSONObject();
-                                 List<JSONObject> readObjects = new ArrayList<>();
-                                 for (KvRwset.KVRead readList : rws.getReadsList()) {
-                                	 
-                                	 JSONObject readObject = new JSONObject();
-                                	 readObject.put("read_version_block",readList.getVersion().getBlockNum());
-                                	 readObject.put("readKey", readList.getKey());
-                                	 readObject.put("readVersionNum", readList.getVersion().getTxNum());
-                                	 readObjects.add(readObject);
-                                 }
-                                 rwsObject.put("readLists", readObjects);
-                                 
-                                 /**
-                                  * 写数据
-                                  */
-                                 List<JSONObject> writerObjects = new ArrayList<>();
-                                 for (KvRwset.KVWrite writeList : rws.getWritesList()) {
-                                	  
-                                	 String valAsString = "";
-                                	 JSONObject writeObject = new JSONObject();
-									 try {
-										 valAsString = CommonUtil.printableString(new String(writeList.getValue().toByteArray(), "UTF-8"));
-										 writeObject.put("writevalue", valAsString);
-										 writerObjects.add(writeObject);
+	/**
+	 * 查询交易链码block 信息
+	 * 
+	 * @param chaincodeID
+	 * @param testTxID
+	 * @return 交易链码详细信息
+	 */
+	public TkcTransactionBlockInfoDto querySourceBlockByTransactionID(ChaincodeID chaincodeID, String testTxID)
+			throws ServiceProcessException {
+		Channel channel = getChannel(chaincodeID);
+
+		TkcTransactionBlockInfoDto dto = new TkcTransactionBlockInfoDto();
+		try {
+
+			BlockchainInfo channelInfo = channel.queryBlockchainInfo();
+			String chainCurrentHash = Hex.encodeHexString(channelInfo.getCurrentBlockHash());
+			dto.setChainCurrentHash(chainCurrentHash);
+
+			BlockInfo blockInfo = channel.queryBlockByTransactionID(testTxID);
+			String previousHash = Hex.encodeHexString(blockInfo.getPreviousHash());
+			String datahash = Hex.encodeHexString(blockInfo.getDataHash());
+			long blockNumber = blockInfo.getBlockNumber();
+			dto.setBlockNumber(blockNumber);
+			dto.setPreviousHash(previousHash);
+
+			TransactionInfo txInfo = channel.queryTransactionByID(testTxID);
+			dto.setTxValCodeNumber(txInfo.getValidationCode().getNumber());
+			dto.setDatahash(datahash);
+
+			List<JSONObject> envelopeObjectList = new ArrayList<>();
+			dto.getCommits().put("envelopes", envelopeObjectList);
+
+			for (BlockInfo.EnvelopeInfo envelopeInfo : blockInfo.getEnvelopeInfos()) {
+
+				JSONObject envelopeObject = new JSONObject();
+				envelopeObject.put("epoch", envelopeInfo.getEpoch());
+				envelopeObject.put("timestamp", envelopeInfo.getTimestamp());
+				envelopeObject.put("channelId", envelopeInfo.getChannelId());
+				envelopeObjectList.add(envelopeObject);
+
+				if (envelopeInfo.getType() == TRANSACTION_ENVELOPE) {
+
+					BlockInfo.TransactionEnvelopeInfo transactionEnvelopeInfo = (BlockInfo.TransactionEnvelopeInfo) envelopeInfo;
+
+					List<List<JSONObject>> transactionActionInfoList = new ArrayList<>();
+					envelopeObject.put("transactionActionInfoCount",
+							transactionEnvelopeInfo.getTransactionActionInfoCount());
+					envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
+					envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
+
+					for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo
+							.getTransactionActionInfos()) {
+
+						TxReadWriteSetInfo rwsetInfo = transactionActionInfo.getTxReadWriteSet();
+						if (null != rwsetInfo) {
+
+							List<JSONObject> rwsetInfoObjects = new ArrayList<>();
+							for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : rwsetInfo.getNsRwsetInfos()) {
+
+								final String namespace = nsRwsetInfo.getNaamespace();
+								KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
+
+								JSONObject rwsObject = new JSONObject();
+								List<JSONObject> readObjects = new ArrayList<>();
+								for (KvRwset.KVRead readList : rws.getReadsList()) {
+
+									JSONObject readObject = new JSONObject();
+									readObject.put("read_version_block", readList.getVersion().getBlockNum());
+									readObject.put("readKey", readList.getKey());
+									readObject.put("readVersionNum", readList.getVersion().getTxNum());
+									readObjects.add(readObject);
+								}
+								rwsObject.put("readLists", readObjects);
+
+								/**
+								 * 写数据
+								 */
+								List<JSONObject> writerObjects = new ArrayList<>();
+								for (KvRwset.KVWrite writeList : rws.getWritesList()) {
+
+									String valAsString = "";
+									JSONObject writeObject = new JSONObject();
+									try {
+										valAsString = CommonUtil.printableString(
+												new String(writeList.getValue().toByteArray(), "UTF-8"));
+										writeObject.put("writevalue", valAsString);
+										writerObjects.add(writeObject);
 									} catch (UnsupportedEncodingException e) {
 										e.printStackTrace();
 									}
-									 writeObject.put("writekey", writeList.getKey());
-									 writeObject.put("writenamespace", namespace);
-									 rwsObject.put("writeLists", writeObject);
-                                 }
-                                 rwsObject.put("writerList", writerObjects);
-                                 
-                                 rwsetInfoObjects.add(rwsObject);
- 	    				      }
- 	    					 transactionActionInfoList.add(rwsetInfoObjects); 
- 	    				  }
- 	    			  }
- 	    			  envelopeObject.put("list", transactionActionInfoList);
- 	    	      } 
- 	    	 }   
- 	      } catch (InvalidProtocolBufferException | InvalidArgumentException | ProposalException e ) {
-			e.printStackTrace();
-		 }
- 	    return dto;
- 	}
+									writeObject.put("writekey", writeList.getKey());
+									writeObject.put("writenamespace", namespace);
+									rwsObject.put("writeLists", writeObject);
+								}
+								rwsObject.put("writerList", writerObjects);
+
+								rwsetInfoObjects.add(rwsObject);
+							}
+							transactionActionInfoList.add(rwsetInfoObjects);
+						}
+					}
+					envelopeObject.put("list", transactionActionInfoList);
+				}
+			}
+		} catch (InvalidProtocolBufferException | InvalidArgumentException | ProposalException e) {
+			throw new ServiceProcessException("query block is error testTxID {" + testTxID + "} e:{} ", e);
+		}
+		return dto;
+	}
  	
 	public TransactionInfo queryBasicInfo(ChaincodeID chaincodeID,String txtId) {
 		  Channel channel = getChannel(chaincodeID);

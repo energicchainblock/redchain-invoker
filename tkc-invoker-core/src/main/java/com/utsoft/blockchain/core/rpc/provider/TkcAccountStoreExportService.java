@@ -31,14 +31,14 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 		    return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		String affliation = IGlobals.getProperty("ca.affliation","org1.department1");
-		String partOforg = IGlobals.getProperty("ca.org","org1");
-		try{
+		String partOforg = IGlobals.getProperty("ca.org.name","org1");
+		try {
 			UserInfoRspModel result = caUserService.registerAndEnroll(requestModel.getUserName(),partOforg, affliation,requestModel.getPassword());
 			if (result != null) {
 			   rspModel.setData(result);
 		     } else 
 		     rspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
-		 } catch (Exception ex) {
+		  } catch (Exception ex) {
 			rspModel.setCode(Constants.SEVER_INNER_ERROR);
 			Object[] args = {requestModel,ex};
 			logger.error("erros:{} :{}",args );

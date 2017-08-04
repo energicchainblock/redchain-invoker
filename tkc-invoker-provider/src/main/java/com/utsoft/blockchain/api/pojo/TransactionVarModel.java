@@ -20,7 +20,7 @@ public class TransactionVarModel implements Serializable {
 	/**
 	 * 指令
 	 */
-	private TransactionCmd cmd;
+	private TransactionCmd cmd = TransactionCmd.MOVE ;
 	/**
 	 * from 转出账户
 	 */

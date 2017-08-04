@@ -35,9 +35,15 @@ public class ApiTest {
 	
 	 private String privateKey;
 	 
+	 @Value("${username}")
+	 private String username ;
+	 
+	 @Value("${username}")
+	 private String password ;
+	 
 	@Before
 	public void setup() {
-		BaseResponseModel<UserInfoRspModel> userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout("hunterfox1236", "adminpw");
+		BaseResponseModel<UserInfoRspModel> userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,password);
 	   if (userPrivateKeyAccess.isSuccess()) {
 		   privateKey = userPrivateKeyAccess.getData().getPrivateKey();
 	   }
@@ -50,7 +56,7 @@ public class ApiTest {
 		SignaturePlayload signaturePlayload = new SignaturePlayload(familyCrypto);
 	
 		String created = SdkUtil.generateId();
-		String from = "a";
+		String from = username;
 		
 		/**
 		 * 注意顺序
@@ -78,9 +84,9 @@ public class ApiTest {
 	public void testRegister() {
 		
 		UserInfoRequstModel requestModel = new UserInfoRequstModel();
-		requestModel.setUserName("hunterfox1236");
-		requestModel.setPassword("123456");
-		String  created ="";
+		requestModel.setUserName(username);
+		requestModel.setPassword(password);
+		String  created = SdkUtil.generateId();
 		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.register(created,requestModel);
 		if (baseResponse.getData()!=null) {
 			String publicKey = baseResponse.getData().getPrivateKey();
@@ -93,7 +99,7 @@ public class ApiTest {
 	@Test
 	public void testGetPublicKey() {
 		
-		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.getIndividualAccout("hunterfox123","123456");
+		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.getIndividualAccout(username,password);
 		if (baseResponse.getData()!=null){
 			String publicKey = baseResponse.getData().getPrivateKey();
 			String password = baseResponse.getData().getPassword();	

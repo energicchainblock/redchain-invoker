@@ -73,4 +73,10 @@ public class SignaturePlayload {
 		 }
 		 return SdkUtil.toHexString(encoded);
 	}
+	
+	@Override
+	public String toString() {
+		return "SignaturePlayload [sb=" + sb + "]";
+	}
+	
 }

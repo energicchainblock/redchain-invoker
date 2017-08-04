@@ -1,4 +1,5 @@
 package com.utsoft.blockchain.config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,6 @@ import com.weibo.api.motan.config.springsupport.RegistryConfigBean;
  */
 @Configuration
 public class ExportServiceConfiguration  {
-
 
 	 @Bean
 	 public AnnotationBean motanAnnotationBean() {
@@ -36,7 +36,7 @@ public class ExportServiceConfiguration  {
 	 public RegistryConfigBean registryConfig() {
 	     
 		 RegistryConfigBean config = new RegistryConfigBean();
-	     String  zookeeper_address = IGlobals.getProperty("zookeeper_address");
+	     String  zookeeper_address = IGlobals.getProperty("zookeeper.address");
 	     config.setRegProtocol("zookeeper");
 	     config.setName("rpc_zookeeper");
 	     config.setAddress(zookeeper_address);
@@ -46,15 +46,17 @@ public class ExportServiceConfiguration  {
 	 @Bean
 	 public BasicServiceConfigBean baseServiceConfig() {
 	   
+		 String  group = IGlobals.getProperty("motan.config.group");
+		 String  application = IGlobals.getProperty("motan.config.application");
+		 
 		 BasicServiceConfigBean config = new BasicServiceConfigBean();
 	     config.setExport("tkcExportServer:8002");
 	     config.setRegistry("registryConfig");
-	     config.setGroup("blockchainTransaction");
-	     config.setHost("192.168.51.129");
+	     config.setGroup(group);
 	     config.setAccessLog(false);
 	     config.setShareChannel(true);
 	     config.setModule("motan--rpc");
-	     config.setApplication("blockchanin");
+	     config.setApplication(application);
 	     return config;
 	 }
 	 

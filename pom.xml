@@ -23,6 +23,7 @@
         <fabric-sdk-java.version>1.0.0</fabric-sdk-java.version>
         <commons.lang3.version>3.3.2</commons.lang3.version>
         <motan.version>0.3.0</motan.version>
+        <spring-cloud-dependencies.version>Dalston.SR2</spring-cloud-dependencies.version>
 	</properties>
 	
 	 <developers>
@@ -40,6 +41,13 @@
     </modules>
     <dependencyManagement>
 		<dependencies>
+		  <dependency>
+			 <groupId>org.springframework.cloud</groupId>
+			 <artifactId>spring-cloud-dependencies</artifactId>
+			 <version>${spring-cloud-dependencies.version}</version>
+			 <type>pom</type>
+			  <scope>import</scope>
+		   </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>

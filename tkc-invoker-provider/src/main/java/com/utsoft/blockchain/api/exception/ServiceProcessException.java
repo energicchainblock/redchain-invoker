@@ -17,4 +17,7 @@ public class ServiceProcessException extends RuntimeException {
 		return  new ServiceProcessException(msg);
 	}
 	
+   public ServiceProcessException(String message, Throwable cause) {
+	        super(message, cause);
+    }
 }

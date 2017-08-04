@@ -142,7 +142,7 @@ public class CommonUtil {
    
    public static Properties getEndPointProperties(final String type, final String name) {
 
-         final String orderRootPath = IGlobals.getProperty("order_root_path");
+         final String orderRootPath = IGlobals.getProperty("fabric.order_root_path");
          final String domainName = getDomainName(name);
 		 String fullpath =  Paths.get(orderRootPath.replace("orderer", type), domainName, type + "s",
 			               name, "tls/server.crt").toString();

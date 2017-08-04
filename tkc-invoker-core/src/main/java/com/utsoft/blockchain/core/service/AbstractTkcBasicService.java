@@ -120,8 +120,8 @@ public abstract class AbstractTkcBasicService {
 	                }
 	                fabricAuthorizedOrg.setCALocation(CommonUtil.httpTLSify(chainOrgpo.getCaLocations()));
 	                
-	                final String peerRootPath = IGlobals.getProperty("peer_root_path");
-	                if(IGlobals.getBooleanProperty("runningFabricCATLS", false)) {
+	                final String peerRootPath = IGlobals.getProperty("fabric.peer_root_path");
+	                if(IGlobals.getBooleanProperty("ca.runningFabricCATLS", false)) {
 	                	
 	                	 String cert = "classpath:"+peerRootPath+"/DNAME/ca/ca.DNAME-cert.pem".replaceAll("DNAME", chainOrgpo.getDomainName());
 	                     File cf =null;
@@ -166,7 +166,7 @@ public abstract class AbstractTkcBasicService {
 	                      * 注册配置信息
 	                      */
 	                     chaincodeManager.registerChannelConfig(chaincodeID, fabricAuthorizedOrg);
-					     chaincodeManager.connectChannel(chainOrgpo.getChannelName(),chaincodeID,fabricAuthorizedOrg);
+					     chaincodeManager.connectChannel(chaincodeID,fabricAuthorizedOrg);
 				   } catch (Exception e) {
 					e.printStackTrace();
 				  } 
