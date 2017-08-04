@@ -1,8 +1,21 @@
-###  tkc-blockchain
-#### tkc-blockchain is an innovative branch between Version 2.0 and Version 3.0
- After half a year of planning, it formally started since early 2016 and took nearly 1 year to move from development to test phases. It is scheduled to launch the trial operation on September 1st, 2017.
-tkc-blockchain is defined as “United (Industries) Block Chains”. Retaining the essential and security characteristics of block chains, and combining with the complex needs of the social network, it has formed a social block chain system of distributed-node trust, which can efficiently implement self-organization and support social economic reform. Between individuals and goods, trade and coins, organizations and society, tkc-blockchain makes them into an organic whole and is foreseen to be a pluralistic economic model.
-#### development road map
- In June 2017, tkc-blockchain related technologies and SDK gradually available to third party manufacturers and users, the specific progress, please pay attention to the company's official website.
+###  Welcome to tkc-boardchain 
+The tkc-boardchain intermediate server is a Java implementation of the hyperledger-fabric protocol, which manage chaincode and allows it and maintain a connect and send/receive transactions without joined blockchain server
+It comes with full documentation and some example apps showing how to use it.
+
+### Technologies
+
+* Java 8 for the core modules, Java 8 for everything else
+* [Maven 3+](http://maven.apache.org) - for building the project
+* [fabric-sdk-java reference](https://github.com/hyperledger/fabric-sdk-java) - encapsulation all function communication server
+
+### tkc-board is blockchain manager which proxy all chaincode request and response
+```
+  tkc-board is serviced from terminal user who proxy for sdk,websocket user,ios user and android users to blockchain server ,it is equivalent to facade or gateway before access really blockchain server. it will do  function as fellows:
+```
+* channel,chaincode manager include install,instantiate,and sign;
+* organization,chaincode and msp configuration before register and image;
+* private key and public key which take part in blockchain logic is secret kepted;
+* concurrent processing and logic verification.
   
-  
+### who care?
+Now you are ready to [reference the guideline](www.tangkc.com).
