@@ -18,4 +18,4 @@ It comes with full documentation and some example apps showing how to use it.
 * concurrent processing and logic verification.
   
 ### who care?
-Now you are ready to [reference the guideline](www.tangkc.com).
+Now you are ready to [reference the guideline](https://www.tangkc.com/).
