@@ -6,13 +6,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Set;
-
 import org.bouncycastle.util.encoders.Hex;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
-
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
-
+import com.utsoft.blockchain.core.util.Constants;
 import io.netty.util.internal.StringUtil;
 /**
  * @author hunterfox
@@ -22,7 +20,10 @@ import io.netty.util.internal.StringUtil;
 public class FabricAuthorizedUser implements User,Serializable {
 	private static final long serialVersionUID = -5498754890945323593L;
 
-
+	/**
+	 * Invalid or valid  ? valid =0  Invalid=1
+	 */
+	private int status = 0;
 	private String name;
     private Set<String> roles;
     private String account;
@@ -34,9 +35,8 @@ public class FabricAuthorizedUser implements User,Serializable {
     private transient LocalKeyPrivateStoreService keyValStore;
     private String keyValStoreName;
 
-   public FabricAuthorizedUser(String name, String org, LocalKeyPrivateStoreService fs) {
+    public FabricAuthorizedUser(String name, String org,LocalKeyPrivateStoreService fs) {
         this.name = name;
-
         this.keyValStore = fs;
         this.organization = org;
         this.keyValStoreName = toKeyValStoreName(this.name, org);
@@ -46,10 +46,31 @@ public class FabricAuthorizedUser implements User,Serializable {
         } else {
             restoreState();
         }
-
+    }
+    
+   public FabricAuthorizedUser(String name, String org,int status,LocalKeyPrivateStoreService fs) {
+        this.name = name;
+        this.status = status;
+        this.keyValStore = fs;
+        this.organization = org;
+        this.keyValStoreName = toKeyValStoreName(this.name, org);
+        String memberStr = keyValStore.getValue(keyValStoreName);
+        if (null == memberStr) {
+            saveState();
+        } else {
+            restoreState();
+        }
     }
 
-    @Override
+    public int getStatus() {
+		return status;
+	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	@Override
     public String getName() {
         return this.name;
     }
@@ -116,7 +137,7 @@ public class FabricAuthorizedUser implements User,Serializable {
      * @return {@code true} if enrolled; otherwise {@code false}.
      */
     public boolean isEnrolled() {
-        return this.enrollment != null;
+        return this.enrollment != null || status == Constants.FABRIC_MANAGER_INVALID;
     }
 
     /**
@@ -169,14 +190,12 @@ public class FabricAuthorizedUser implements User,Serializable {
     public String getEnrollmentSecret() {
         return enrollmentSecret;
     }
-
     public void setEnrollmentSecret(String enrollmentSecret) {
         this.enrollmentSecret = enrollmentSecret;
         saveState();
     }
-
+    
     public void setEnrollment(Enrollment enrollment) {
-
         this.enrollment = enrollment;
         saveState();
     }

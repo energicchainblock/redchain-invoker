@@ -19,7 +19,7 @@ import com.utsoft.blockchain.core.service.ICaUserService;
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
-
+import com.utsoft.blockchain.core.util.SystemExceptionHandler;
 import tk.mybatis.mapper.entity.Example;
 /**
  * 用户ca 信息获取
@@ -44,24 +44,28 @@ public class CaUserServiceImpl implements ICaUserService {
 	
 	@PostConstruct
 	public void install() {
-		
-		caClientManager.serviceInstall(localKeyPrivateStoreService);
-		Example example = new Example(FabricCaUserPo.class);
-		String admin = IGlobals.getProperty("ca.root.admin","admin");
-		example.createCriteria().andEqualTo("userName", admin);
-		List<FabricCaUserPo> userlist = fabricCaUserMapper.selectByExample(example);
-		if (CommonUtil.isCollectNotEmpty(userlist)) {
-			
-			FabricCaUserPo fabricCaUserPo = userlist.get(0);
-			FabricAuthorizedUser adminUser = new FabricAuthorizedUser(fabricCaUserPo.getUserName(),fabricCaUserPo.getOrganization(),localKeyPrivateStoreService);
-			adminUser.setAccount(fabricCaUserPo.getAccount());
-			adminUser.setAffiliation(fabricCaUserPo.getAffiliation());
-			adminUser.setEnrollmentSecret(fabricCaUserPo.getEnrollmentSecret());
-			adminUser.setMspId(fabricCaUserPo.getMspId());
-			//adminUser.setRoles(null);
-			caClientManager.adminInstall(adminUser);
-		}
 		familySecCrypto = FamilySecCrypto.Factory.getCryptoSuite();
+		try {
+			caClientManager.serviceInstall(localKeyPrivateStoreService);
+			Example example = new Example(FabricCaUserPo.class);
+			String admin = IGlobals.getProperty("ca.root.admin","admin");
+			example.createCriteria().andEqualTo("userName", admin);
+			List<FabricCaUserPo> userlist = fabricCaUserMapper.selectByExample(example);
+			if (CommonUtil.isCollectNotEmpty(userlist)) {
+				
+				FabricCaUserPo fabricCaUserPo = userlist.get(0);
+				FabricAuthorizedUser adminUser = new FabricAuthorizedUser(fabricCaUserPo.getUserName(),fabricCaUserPo.getOrganization(),fabricCaUserPo.getStatus(),localKeyPrivateStoreService);
+				adminUser.setAccount(fabricCaUserPo.getAccount());
+				adminUser.setAffiliation(fabricCaUserPo.getAffiliation());
+				adminUser.setEnrollmentSecret(fabricCaUserPo.getEnrollmentSecret());
+				adminUser.setMspId(fabricCaUserPo.getMspId());
+				if (caClientManager.adminInstall(adminUser)) {
+					fabricCaUserMapper.updateFabricUserStatus(adminUser.getName());
+				}
+			}
+		 } catch (Exception ex) {
+			SystemExceptionHandler.getInstance().handlerException(ex);
+		}
 	}
 	
 	

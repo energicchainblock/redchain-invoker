@@ -20,6 +20,7 @@ import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
+import com.utsoft.blockchain.core.util.SystemExceptionHandler;
 
 import tk.mybatis.mapper.entity.Example;
 /**
@@ -166,9 +167,9 @@ public abstract class AbstractTkcBasicService {
 	                      * 注册配置信息
 	                      */
 	                     chaincodeManager.registerChannelConfig(chaincodeID, fabricAuthorizedOrg);
-					     chaincodeManager.connectChannel(chaincodeID,fabricAuthorizedOrg);
-				   } catch (Exception e) {
-					e.printStackTrace();
+					     chaincodeManager.start(chaincodeID,fabricAuthorizedOrg);
+				    } catch (Exception ex) {
+					   SystemExceptionHandler.getInstance().handlerException(ex);
 				  } 
 	    	});
 	    }); 

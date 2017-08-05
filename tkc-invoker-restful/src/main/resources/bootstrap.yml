@@ -3,6 +3,7 @@ spring:
     name: tkc-invoker-server
   cloud: 
     config: 
+      failFast: true
       enabled: true
       name: tkc-invoker-server
       discovery: 
@@ -25,8 +26,8 @@ spring:
   profiles: development
   cloud:
     config:
-      username: 
-      password: 
+      username: client
+      password: 'QWE123zxc'
   
 eureka: 
   client: 
@@ -38,8 +39,8 @@ spring:
   profiles: test
   cloud:
     config:
-      username: 
-      password: 
+      username: client
+      password: 'QWE123zxc'
 eureka: 
   client: 
     serviceUrl: 
@@ -49,8 +50,8 @@ spring:
   profiles: production
   cloud:
     config:
-      username: 
-      password: 
+      username: client
+      password: 'QWE123zxc!@#'
 eureka: 
   client: 
     serviceUrl: 

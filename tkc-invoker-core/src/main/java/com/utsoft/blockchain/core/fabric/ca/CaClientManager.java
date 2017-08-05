@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
@@ -21,11 +22,14 @@ import org.hyperledger.fabric_ca.sdk.exception.RevocationException;
 import org.hyperledger.fabric_ca.sdk.helper.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.core.fabric.GobalFabricMapStore;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
 import com.utsoft.blockchain.core.util.CommonUtil;
+import com.utsoft.blockchain.core.util.Constants;
 import com.utsoft.blockchain.core.util.IGlobals;
 /**
  * @author hunterfox
@@ -63,17 +67,52 @@ public class CaClientManager {
 	 * 管理员实例化
 	 * @param admin
 	 */
-	public void adminInstall(FabricAuthorizedUser admin) {
+	public boolean adminInstall(FabricAuthorizedUser admin) throws InstantiationException {
 		this.admin =admin;
+		if (this.admin.getStatus()==Constants.FABRIC_MANAGER_INVALID) {
+			install();
+			return true;
+		}
+		return false;
 	}
 	
-	private void checkFabricClientInstall() {
+	/**
+	 * 安装检查
+	 * @throws InstantiationException
+	 */
+	 private void install () throws  InstantiationException {
+			
+		if (fabricCaClient==null) {
+			Collection<FabricAuthorizedOrg> caList = orgsConfigMap.getCollections();
+			if (CommonUtil.isCollectNotEmpty(caList)) {
+				FabricAuthorizedOrg firstOrgConfig = caList.stream().findFirst().get();
+				try {
+					fabricCaClient = HFCAClient.createNewInstance(firstOrgConfig.getCALocation(),
+							firstOrgConfig.getCAProperties());
+					fabricCaClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
+				} catch (MalformedURLException e) {
+					logger.error("intallCaClient", e);
+					throw new InstantiationException("intallCaClient install exception");
+				}
+			}
+		}
+		
+		if (!admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
+           try {
+				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
+				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
+			} catch (EnrollmentException | InvalidArgumentException e) {
+				throw new InstantiationException("intallCaClient install exception");
+			}
+       }
+	}
+	 
+	 private void checkFabricClientInstall() {
 		if ( fabricCaClient==null){
 			intallCaClient();
 		}
 	}
-	
-	private void intallCaClient() {
+	private void intallCaClient()   {
 		
 		if (fabricCaClient==null) {
 			Collection<FabricAuthorizedOrg> caList = orgsConfigMap.getCollections();
@@ -85,6 +124,7 @@ public class CaClientManager {
 					fabricCaClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
 				} catch (MalformedURLException e) {
 					logger.error("intallCaClient", e);
+					throw new ServiceProcessException("intallCaClient install exception");
 				}
 			}
 		}
@@ -92,15 +132,16 @@ public class CaClientManager {
 		if (!admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
             try {
 				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
+				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
 			} catch (EnrollmentException | InvalidArgumentException e) {
-				e.printStackTrace();
+				throw new ServiceProcessException("intallCaClient install exception");
 			}
         }
 	}
 
 	public FabricAuthorizedUser registerUser(String name, String orgInfo, String affliation,String password) {
 		checkFabricClientInstall();
-		FabricAuthorizedUser user = new FabricAuthorizedUser(name, orgInfo, localKeyPrivateStoreService);
+		FabricAuthorizedUser user = new FabricAuthorizedUser(name,orgInfo,Constants.FABRIC_MANAGER_VALID,localKeyPrivateStoreService);
 		// users need to be registered AND enrolled
 		 RegistrationRequest rr;
 		 try {

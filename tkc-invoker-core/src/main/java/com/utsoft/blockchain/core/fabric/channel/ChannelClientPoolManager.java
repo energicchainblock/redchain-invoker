@@ -134,6 +134,17 @@ public class ChannelClientPoolManager {
 			return null;
 	 }
  	
+ 	 
+  	public void start(ChaincodeID chaincodeID,FabricAuthorizedOrg orgconfig) {
+ 		try {
+			channelClientProxy.connectChannel(client, orgconfig.getChannelName(),orgconfig,chaincodeID);
+		} catch (Exception e) {
+			Object[] agrs = {chaincodeID,orgconfig,e};
+			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
+			throw new ServiceProcessException("install channel:"+e); 
+		}
+ 	}
+  	
  	/**
  	 * 链接许可请求
  	 * @param name

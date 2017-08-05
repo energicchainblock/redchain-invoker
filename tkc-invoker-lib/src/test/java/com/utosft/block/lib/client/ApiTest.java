@@ -43,9 +43,26 @@ public class ApiTest {
 	 
 	@Before
 	public void setup() {
+		
 		BaseResponseModel<UserInfoRspModel> userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,password);
-	   if (userPrivateKeyAccess.isSuccess()) {
-		   privateKey = userPrivateKeyAccess.getData().getPrivateKey();
+	    if (userPrivateKeyAccess.isSuccess()) {
+		    privateKey = userPrivateKeyAccess.getData().getPrivateKey();
+	    } else   {
+		     UserInfoRequstModel requestModel = new UserInfoRequstModel();
+			 requestModel.setUserName(username);
+			 requestModel.setPassword(password);
+			 String  created = SdkUtil.generateId();
+			BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.register(created,requestModel);
+			if (baseResponse.getData()!=null) {
+				String publicKey = baseResponse.getData().getPrivateKey();
+				String password =baseResponse.getData().getPassword();
+				System.out.println(password+":"+publicKey);
+			}
+			userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,password);
+			if (!userPrivateKeyAccess.isSuccess()) {
+				fail("user not exists");
+		    }
+			 privateKey = userPrivateKeyAccess.getData().getPrivateKey();
 	   }
 	}
 	 
