@@ -1,6 +1,9 @@
 package com.utsoft.blockchain.core.rpc.provider;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -18,7 +21,9 @@ import com.utsoft.blockchain.api.util.TransactionCmd;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
 import com.utsoft.blockchain.core.service.ICaUserService;
+import com.utsoft.blockchain.core.service.impl.RedisRepository;
 import com.utsoft.blockchain.core.util.CommonUtil;
+import com.utsoft.blockchain.core.util.FormatUtil;
 import com.weibo.api.motan.config.springsupport.annotation.MotanService;
 
 /**
@@ -34,6 +39,13 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	@Autowired
 	private ICaUserService caUserService;
 
+    @Autowired
+	private RedisRepository<String,TransactionVarModel> redisRepository;
+    
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+	 
+	 
 	@Override
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model) {
 
@@ -52,36 +64,44 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,from,to,submitJson,created,sign) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
-	
-		SignaturePlayload signaturePlayload = new SignaturePlayload();
-		signaturePlayload.addPlayload(model.getApplyCategory());
-		signaturePlayload.addPlayload(from);
-		signaturePlayload.addPlayload(to);
-		signaturePlayload.addPlayload(cmd);
-		signaturePlayload.addPlayload(submitJson);
-		signaturePlayload.addPlayload(created);
+		synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
+			TransactionVarModel processOrder = redisRepository.get(userPrefix);
+			if (processOrder==null) {
+				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return submitRspModel;
+			} 
+			redisRepository.set(userPrefix, processOrder,120L,TimeUnit.SECONDS);
+			
+			SignaturePlayload signaturePlayload = new SignaturePlayload();
+			signaturePlayload.addPlayload(model.getApplyCategory());
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(to);
+			signaturePlayload.addPlayload(cmd);
+			signaturePlayload.addPlayload(submitJson);
+			signaturePlayload.addPlayload(created);
+			try {
+				if (verfyPlayload(from, signaturePlayload, sign)) {
 
-		
-		try {
-			if (verfyPlayload(from, signaturePlayload, sign)) {
+					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
+					SubmitRspResultDto result = transactionService.tranfer(applyCategory, from, to, cmd, submitJson, created);
+					if (result == null)
+						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 
-				TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
-				SubmitRspResultDto result = transactionService.tranfer(applyCategory, from, to, cmd, submitJson, created);
-				if (result == null)
-					return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
-
-				BeanUtils.copyProperties(result, resultModel);
-				resultModel.setExternals(model.getExternals());
-				submitRspModel.setData(resultModel);
-			} else {
-				submitRspModel.setCode(Constants.SINGATURE_ERROR);
+					BeanUtils.copyProperties(result, resultModel);
+					resultModel.setExternals(model.getExternals());
+					submitRspModel.setData(resultModel);
+				} else {
+					submitRspModel.setCode(Constants.SINGATURE_ERROR);
+				}
+			} catch (Exception ex) {
+				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = { signaturePlayload, ex };
+				logger.error("tranfer signaturePlayload:{} error:{} ", args);
 			}
-		} catch (Exception ex) {
-			submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
-			Object[] args = { signaturePlayload, ex };
-			logger.error("tranfer signaturePlayload:{} error:{} ", args);
+			return submitRspModel;
 		}
-		return submitRspModel;
 	}
 
 	@Override
@@ -93,27 +113,39 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 	
-		SignaturePlayload signaturePlayload = new SignaturePlayload();
-		signaturePlayload.addPlayload(applyCategory);
-		signaturePlayload.addPlayload(from);
-		signaturePlayload.addPlayload(created);
-		try {
-			if (verfyPlayload(from, signaturePlayload, sign)) {
+		synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisPrefix(from,created);
+			boolean exists = stringRedisTemplate.hasKey(userPrefix);
+			if (exists) {
+				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return queryModel;
+			} 
+			SignaturePlayload signaturePlayload = new SignaturePlayload();
+			signaturePlayload.addPlayload(applyCategory);
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(created);
 
-				TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY,
-						created);
-				if (result == null)
-					return queryModel.setCode(Constants.SEVER_INNER_ERROR);
-				queryModel.setData(result);
-			} else {
-				queryModel.setCode(Constants.SINGATURE_ERROR);
+			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
+			try {
+				if (verfyPlayload(from, signaturePlayload, sign)) {
+
+					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY,
+							created);
+					if (result == null)
+						return queryModel.setCode(Constants.SEVER_INNER_ERROR);
+					queryModel.setData(result);
+				} else {
+					queryModel.setCode(Constants.SINGATURE_ERROR);
+				}
+			} catch (Exception ex) {
+				queryModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = { signaturePlayload, ex };
+				logger.error("select account  signaturePlayload:{} error :{}", args);
 			}
-		} catch (Exception ex) {
-			queryModel.setCode(Constants.SEVER_INNER_ERROR);
-			Object[] args = { signaturePlayload, ex };
-			logger.error("select account  signaturePlayload:{} error :{}", args);
+			return queryModel;
 		}
-		return queryModel;
+		
 	}
 
 	@Override
@@ -124,32 +156,43 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,from,created,txId,sign) ){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
-		SignaturePlayload signaturePlayload = new SignaturePlayload();
-		signaturePlayload.addPlayload(applyCategory);
-		signaturePlayload.addPlayload(from);
-		signaturePlayload.addPlayload(txId);
-		signaturePlayload.addPlayload(created);
-		try {
-			if (verfyPlayload(from, signaturePlayload, sign)) {
+		synchronized(created) {
+			String userPrefix = FormatUtil.redisPrefix(from,created);
+			boolean exists = stringRedisTemplate.hasKey(created);
+			if (exists) {
+				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return queryModel;
+			} 
+			SignaturePlayload signaturePlayload = new SignaturePlayload();
+			signaturePlayload.addPlayload(applyCategory);
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(txId);
+			signaturePlayload.addPlayload(created);
+			
+			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
+			
+			try {
+				if (verfyPlayload(from, signaturePlayload, sign)) {
 
-				TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository
-						.queryTransactionBlockByID(applyCategory, from);
+					TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository
+							.queryTransactionBlockByID(applyCategory, from);
 
-				if (tkcTransactionBlockInfoDto == null)
-					return queryModel.setCode(Constants.SEVER_INNER_ERROR);
+					if (tkcTransactionBlockInfoDto == null)
+						return queryModel.setCode(Constants.SEVER_INNER_ERROR);
 
-				TkcTransactionBlockInfoVo toBean = new TkcTransactionBlockInfoVo();
-				BeanUtils.copyProperties(tkcTransactionBlockInfoDto, toBean);
-				queryModel.setData(toBean);
+					TkcTransactionBlockInfoVo toBean = new TkcTransactionBlockInfoVo();
+					BeanUtils.copyProperties(tkcTransactionBlockInfoDto, toBean);
+					queryModel.setData(toBean);
 
-			} else
-				queryModel.setCode(Constants.SINGATURE_ERROR);
-		} catch (Exception ex) {
-			queryModel.setCode(Constants.SEVER_INNER_ERROR);
-			Object[] args = { signaturePlayload, ex };
-			logger.error("get block index signaturePlayload:{} error :{}", args);
+				} else
+					queryModel.setCode(Constants.SINGATURE_ERROR);
+			} catch (Exception ex) {
+				queryModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = { signaturePlayload, ex };
+				logger.error("get block index signaturePlayload:{} error :{}", args);
+			}
+			return queryModel;
 		}
-		return queryModel;
 	}
 
 	/**

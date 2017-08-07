@@ -30,6 +30,8 @@ public class ImportPrcClientConfig {
 		RegistryConfig config = new RegistryConfig();
 		config.setId("registry");
 		config.setRegProtocol("zookeeper");
+		config.setRegistrySessionTimeout(60*1000);
+		config.setConnectTimeout(30*1000);
 		String zookeeper_address = zookeeperProperties.getServers();
 		config.setAddress(zookeeper_address);
 		return config;

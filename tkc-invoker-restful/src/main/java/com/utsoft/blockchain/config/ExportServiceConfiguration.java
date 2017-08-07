@@ -1,8 +1,6 @@
 package com.utsoft.blockchain.config;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.AnnotationBean;
 import com.weibo.api.motan.config.springsupport.BasicServiceConfigBean;
@@ -37,6 +35,8 @@ public class ExportServiceConfiguration  {
 	     
 		 RegistryConfigBean config = new RegistryConfigBean();
 	     String  zookeeper_address = IGlobals.getProperty("zookeeper.address");
+	     config.setRegistrySessionTimeout(60*1000);
+	     config.setConnectTimeout(30*1000);
 	     config.setRegProtocol("zookeeper");
 	     config.setName("rpc_zookeeper");
 	     config.setAddress(zookeeper_address);
@@ -59,5 +59,4 @@ public class ExportServiceConfiguration  {
 	     config.setApplication(application);
 	     return config;
 	 }
-	 
 }

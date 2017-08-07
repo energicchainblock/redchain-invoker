@@ -18,4 +18,22 @@ public class FormatUtil {
 	  public static String formater(String format, Object... args) {
 	      return format(format, args);
 	  }
+	  
+	  /**
+	   * 格式化redis prefix 
+	   * @param prefix
+	   * @param key
+	   * @return
+	   */
+	  public static String redis_cache_prefix(String prefix,String ... key){  
+		  return prefix+"tkc-#$@"+key;
+	  }
+	  
+	  public static String redisPrefix(String prefix,String ... key) {
+		 return  redis_cache_prefix(prefix,key);
+	  }
+	  
+	  public static String redisTransferPrefix(String ... key) {
+		 return redis_cache_prefix(Constants.TKC_TRANSFER_MOVE,key);
+	  }  
 }

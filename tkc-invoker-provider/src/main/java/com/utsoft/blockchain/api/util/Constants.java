@@ -28,6 +28,11 @@ public class Constants {
 	  * 签名错误
 	  */
 	 public final static int SINGATURE_ERROR = 402;
+	 
+	 /**
+	  * 并发处理错误，重复提交订单
+	  */
+	 public final static int CONCURRENT_PROCESS_ERROR = 403;
 
 	 public final static int METHOD_NOT_ALLOW = 405;
 	 public final static int MEDIA_NOT_SUPPORT = 415;

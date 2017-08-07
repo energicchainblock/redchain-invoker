@@ -9,7 +9,7 @@ spring:
       discovery: 
         enabled: true
         service-id: CONFIG
-      profile: test
+      profile: ${spring.profiles.active}
   profiles: 
     active: test 
 

@@ -13,6 +13,14 @@ spring:
     cache-seconds: -1
     encoding: UTF-8
     fallback-to-system-locale: true
+  redis: 
+    pool: 
+      max-idle: 8
+      min-idle: 1
+      max-active: 16
+      max-wait: -1
+    timeout: 3000
+      
 #mybatis
 mybatis:
   type-aliases-package: com.utsoft.blockchain.core.dao.model
