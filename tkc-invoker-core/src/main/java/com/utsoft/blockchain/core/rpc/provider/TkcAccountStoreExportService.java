@@ -38,9 +38,8 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 		    return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		synchronized (created) {
-		 
 			try {
-			
+				
 			 String userPrefix = FormatUtil.redisPrefix(requestModel.getUserName(),created);
 			 UserInfoRequstModel redisObject = redisRepository.get(userPrefix);
 			 if (redisObject==null) {
@@ -59,6 +58,7 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 			     rspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 			} catch (Exception ex) {
 				rspModel.setCode(Constants.SEVER_INNER_ERROR);
+				rspModel.setMessage(ex.getMessage());
 				Object[] args = {requestModel,ex};
 				logger.error("erros:{} :{}",args );
 		   }
@@ -82,6 +82,7 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 			rspModel.setCode(Constants.SEVER_INNER_ERROR);
 			Object[] args = {username,ex};
 			logger.error("erros:{} :{}",args );
+			rspModel.setMessage(ex.getMessage());
 		 }
 		return rspModel;
 	}

@@ -137,7 +137,7 @@ public class FabricAuthorizedUser implements User,Serializable {
      * @return {@code true} if enrolled; otherwise {@code false}.
      */
     public boolean isEnrolled() {
-        return this.enrollment != null || status == Constants.FABRIC_MANAGER_INVALID;
+        return status == Constants.FABRIC_MANAGER_VALID && this.enrollment != null;
     }
 
     /**
@@ -215,10 +215,13 @@ public class FabricAuthorizedUser implements User,Serializable {
         this.mspId = mspID;
         saveState();
     }
+    
+    public String getOrganization() {
+		return organization;
+	}
 	public String toString() {
 		return "users [name=" + name + ", roles=" + roles + ", account=" + account + ", affiliation=" + affiliation
 				+ ", organization=" + organization + ", enrollmentSecret=" + enrollmentSecret + ", enrollment="
 				+ enrollment + ", keyValStoreName=" + keyValStoreName + ", mspId=" + mspId + "]";
 	}
-
 }

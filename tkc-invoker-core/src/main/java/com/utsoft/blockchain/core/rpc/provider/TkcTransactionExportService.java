@@ -125,16 +125,16 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(applyCategory);
 			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(created);
-
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
+			
 			try {
-				if (verfyPlayload(from, signaturePlayload, sign)) {
+				if (verfyPlayload(from,signaturePlayload, sign)) {
 
 					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY,
 							created);
 					if (result == null)
-						return queryModel.setCode(Constants.SEVER_INNER_ERROR);
-					queryModel.setData(result);
+						return queryModel.setCode(Constants.ITEM_NOT_FIND);
+					queryModel.setData(result);	
 				} else {
 					queryModel.setCode(Constants.SINGATURE_ERROR);
 				}
@@ -168,9 +168,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(txId);
 			signaturePlayload.addPlayload(created);
-			
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
-			
 			try {
 				if (verfyPlayload(from, signaturePlayload, sign)) {
 
@@ -183,7 +181,6 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					TkcTransactionBlockInfoVo toBean = new TkcTransactionBlockInfoVo();
 					BeanUtils.copyProperties(tkcTransactionBlockInfoDto, toBean);
 					queryModel.setData(toBean);
-
 				} else
 					queryModel.setCode(Constants.SINGATURE_ERROR);
 			} catch (Exception ex) {
@@ -204,7 +201,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	 * @return
 	 */
 	private boolean verfyPlayload(String from, SignaturePlayload signaturePlayload, String sourceSign) {
-		FabricAuthorizedUser fabricuser = caUserService.getFabricUser("admin");
+		FabricAuthorizedUser fabricuser = caUserService.getFabricUser(from);
 		byte[] plainText = signaturePlayload.originalPacket();
 		byte[] signature = SdkUtil.tofromHexStrig(sourceSign);
 		byte[] certificate = fabricuser.getEnrollment().getCert().getBytes();

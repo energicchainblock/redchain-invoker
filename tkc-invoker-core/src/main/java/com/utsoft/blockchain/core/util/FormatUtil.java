@@ -25,8 +25,14 @@ public class FormatUtil {
 	   * @param key
 	   * @return
 	   */
-	  public static String redis_cache_prefix(String prefix,String ... key){  
-		  return prefix+"tkc-#$@"+key;
+	  public static String redis_cache_prefix(String prefix,String ... keys) {  
+		  StringBuilder sb = new StringBuilder ();
+		  sb.append(prefix).append("tkc-#$");
+		  if (keys!=null)
+		    for (String key: keys) {
+			  sb.append("@").append(key);
+		    }
+		  return sb.toString();
 	  }
 	  
 	  public static String redisPrefix(String prefix,String ... key) {

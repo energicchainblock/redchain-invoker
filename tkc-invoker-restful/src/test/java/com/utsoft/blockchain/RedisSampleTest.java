@@ -31,13 +31,11 @@ public class RedisSampleTest {
     public void test() throws Exception {
        
     	  stringRedisTemplate.opsForValue().set("key1", "111");
-    	  String result = stringRedisTemplate.opsForValue().get("key2");
+    	  String result = stringRedisTemplate.opsForValue().get("key1");
           assertEquals("111",result );
           
           redisTemplate.opsForValue().set("key2","222");
           String  test2 = redisTemplate.opsForValue().get("key2");
-          assertEquals("222",test2 );
-          
-          
+          assertEquals("222",test2 );    
 	 }
 }

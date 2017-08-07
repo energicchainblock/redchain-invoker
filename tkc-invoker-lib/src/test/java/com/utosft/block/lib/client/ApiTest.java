@@ -35,7 +35,7 @@ public class ApiTest {
 	
 	 private String privateKey;
 	 
-	 @Value("${username}")
+	 @Value("${username1}")
 	 private String username ;
 	 
 	 @Value("${username}")

@@ -97,7 +97,7 @@ public class CaClientManager {
 			}
 		}
 		
-		if (!admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
+		if (fabricCaClient!=null && !admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
            try {
 				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
 				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
@@ -129,7 +129,7 @@ public class CaClientManager {
 			}
 		}
 		
-		if (!admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
+		if (fabricCaClient!=null && !admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
             try {
 				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
 				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
@@ -154,8 +154,9 @@ public class CaClientManager {
 					return user;
 				}
 			} catch (Exception e) {
-				logger.error("registerUser", e);
+				logger.error("registerUser{} error:{}", user,e);
 				user = null;
+				throw new ServiceProcessException("registerUser fail exception"+e.getMessage());
 			}
 		 return user;
 	}
