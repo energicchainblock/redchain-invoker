@@ -27,7 +27,7 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public SubmitRspResultDto tranfer(String applyCode,String account_from, String account_to, TransactionCmd cmd, String submitJson,String created) throws ServiceProcessException {
+	public SubmitRspResultDto tranfer(String applyCode,String account_from, String account_to, TransactionCmd cmd, String submitJson) throws ServiceProcessException {
 		
 		isCheckConnecting(applyCode);
 	    ChaincodeID chaincodeID = getChainCode(applyCode);
@@ -43,7 +43,7 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public TkcQueryDetailRspVo select(String applyCode,String account_to, TransactionCmd cmd, String created) throws ServiceProcessException {
+	public TkcQueryDetailRspVo select(String applyCode,String account_to, TransactionCmd cmd) throws ServiceProcessException {
 		 
 		 isCheckConnecting(applyCode);
 		 ChaincodeID chaincodeID = getChainCode(applyCode);
@@ -64,7 +64,7 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson, String created)
+	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson)
 			throws ServiceProcessException {
 		 
 		isCheckConnecting(applyCode);
@@ -85,6 +85,25 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 		}
 		throw new ServiceProcessException(chaincodeID+" channel not connecting");
 	}
+	
+	/**
+	 * 充值
+	 */
+	@Override
+	public SubmitRspResultDto recharge(String applyCode, String to, TransactionCmd cmd, String submitJson)
+			throws ServiceProcessException {
+		isCheckConnecting(applyCode);
+	    ChaincodeID chaincodeID = getChainCode(applyCode);
+		if (chaincodeManager.checkChannelActive(chaincodeID)) {
+			ReqtOrderDto  order = new ReqtOrderDto();
+			order.setToAccount(to);
+			order.setCmd(cmd.name());
+			order.setJson(submitJson);
+			return chaincodeManager.submitRequest(chaincodeID, order);
+		} 
+		throw new ServiceProcessException(chaincodeID+":channel not connecting");
+	}
+	
 	
 	/**
 	 * 链码检查和 channel 重连工作

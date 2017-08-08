@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -11,6 +12,7 @@ import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoDto;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
+import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TransactionVarModel;
 import com.utsoft.blockchain.api.proivder.ITkcTransactionExportService;
 import com.utsoft.blockchain.api.security.CryptionConfig;
@@ -40,17 +42,15 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	private ICaUserService caUserService;
 
     @Autowired
-	private RedisRepository<String,TransactionVarModel> redisRepository;
+	private RedisRepository<String,Object> redisRepository;
     
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-	 
-	 
+	
 	@Override
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign) {
 
 		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
-		
 		String applyCategory = model.getApplyCategory();
 		String from = model.getFrom();
 		String to = model.getTo();
@@ -66,7 +66,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
-			TransactionVarModel processOrder = redisRepository.get(userPrefix);
+			TransactionVarModel processOrder = (TransactionVarModel) redisRepository.get(userPrefix);
 			if (processOrder!=null) {
 				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return submitRspModel;
@@ -84,7 +84,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				if (verfyPlayload(from, signaturePlayload, sign)) {
 
 					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
-					SubmitRspResultDto result = transactionService.tranfer(applyCategory, from, to, cmd, submitJson, created);
+					SubmitRspResultDto result = transactionService.tranfer(applyCategory, from, to, cmd, submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 
@@ -129,8 +129,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			try {
 				if (verfyPlayload(from,signaturePlayload, sign)) {
 
-					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY,
-							created);
+					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY);
 					if (result == null)
 						return queryModel.setCode(Constants.ITEM_NOT_FIND);
 					queryModel.setData(result);	
@@ -190,6 +189,61 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		}
 	}
 
+	
+	@Override
+	public BaseResponseModel<TkcSubmitRspVo> recharge(TransactionBaseModel model, String sign) {
+		
+		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
+		String applyCategory = model.getApplyCategory();
+		String to = model.getTo();
+		String submitJson = model.getSubmitJson();
+		TransactionCmd cmd = model.getCmd();
+		String created = model.getCreated();
+		/**
+		 * 输入参数检查
+		 */
+		if (CommonUtil.isEmpty(applyCategory,to,submitJson,created,sign) ){
+		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisRechargePrefix(to,created);
+			TransactionVarModel processOrder = (TransactionVarModel) redisRepository.get(userPrefix);
+			if (processOrder!=null) {
+				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return submitRspModel;
+			} 
+			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
+			
+			SignaturePlayload signaturePlayload = new SignaturePlayload();
+			signaturePlayload.addPlayload(model.getApplyCategory());
+			signaturePlayload.addPlayload(to);
+			signaturePlayload.addPlayload(cmd);
+			signaturePlayload.addPlayload(submitJson);
+			signaturePlayload.addPlayload(created);
+			try {
+				if (verfyPlayload(to, signaturePlayload, sign)) {
+
+					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
+					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,cmd, submitJson);
+					if (result == null)
+						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+
+					BeanUtils.copyProperties(result, resultModel);
+					resultModel.setExternals(model.getExternals());
+					submitRspModel.setData(resultModel);
+				} else {
+					submitRspModel.setCode(Constants.SINGATURE_ERROR);
+				}
+			} catch (Exception ex) {
+				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = { signaturePlayload, ex };
+				logger.error("tranfer signaturePlayload:{} error:{} ", args);
+			}
+			return submitRspModel;
+		}
+	}
+	
 	/**
 	 * 签名验证
 	 * 

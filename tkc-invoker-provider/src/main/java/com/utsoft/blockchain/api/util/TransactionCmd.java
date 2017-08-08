@@ -7,7 +7,8 @@ package com.utsoft.blockchain.api.util;
  */
 public enum TransactionCmd {
 
-	MOVE,
+	MOVE, //交易
+	RECHARGE, //充值
 	QUERY,
 	QUERYBLOCK;
 }

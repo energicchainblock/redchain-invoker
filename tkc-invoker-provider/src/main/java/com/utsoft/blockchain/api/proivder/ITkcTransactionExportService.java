@@ -4,8 +4,8 @@ import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
+import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TransactionVarModel;
-
 /**
  * tkc 区块链交易，查询 对外服务器rpc 接口
  * <ul>
@@ -29,6 +29,14 @@ public interface ITkcTransactionExportService {
      */
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign);
 	
+	/**
+	 * 充值交易
+	 * @param model
+	 * @param sign md5签名结果:sign=md5(applyCategory=1&to=2&cmd=4&submitJson=5&created=xxx)
+	 * @return 返回提交结果
+	 * @throws ServiceProcessException
+	 */
+	public BaseResponseModel<TkcSubmitRspVo> recharge(TransactionBaseModel model,String sign);
 	/**
 	 * 查询个人账号余额
 	 * @param applyCategory 业务代码

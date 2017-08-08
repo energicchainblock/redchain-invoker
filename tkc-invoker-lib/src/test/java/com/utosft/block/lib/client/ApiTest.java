@@ -33,7 +33,7 @@ import com.utsoft.blockchain.lib.ServiceClientApplication;
 public class ApiTest {
 
 	
-	@Value("${applyCategory}")
+	@Value("${apply.category}")
 	private String applyCategory;
 	 
 	@Autowired
@@ -44,13 +44,13 @@ public class ApiTest {
 	
 	 private String privateKey;
 	 
-	 @Value("${username}")
+	 @Value("${user.username}")
 	 private String username;
 	 
-	 @Value("${password}")
+	 @Value("${user.password}")
 	 private String password ;
 	 
-	 @Value("${toUser}")
+	 @Value("${user.toUser}")
 	 private String toUser;
 	 
 	 private static String txId ="53726fda86a9f4a3f1c7a4580f8f168829ef64a4e405c7fb7a2fe28c3704e8bb";
@@ -149,14 +149,14 @@ public class ApiTest {
 	public void testMoveAToB() {
 		
 		String to = toUser;
-		String submitJson ="100";
+		String submitJson ="10";
 		String created = SdkUtil.generateId();
 		
 		TransactionVarModel model = new TransactionVarModel(applyCategory);
 		model.setCreated(created);
 		model.setFrom(username);
 		model.setTo(to);
-		model.setSubmitJson("100");
+		model.setSubmitJson(submitJson);
 		
 		FamilySecCrypto familyCrypto = FamilySecCrypto.Factory.getCryptoSuite();
 		SignaturePlayload signaturePlayload = new SignaturePlayload(familyCrypto);
@@ -184,8 +184,7 @@ public class ApiTest {
 		 if (baseResponse.isSuccess()) {
 			 txId = baseResponse.getData().getTxId();
 			 System.out.println(JSON.toJSON(baseResponse.getData()));
-		 }
-		 
+		 } 
 	}
 	
 	/**
@@ -216,7 +215,6 @@ public class ApiTest {
 			fail("not sign success ");
 			return ;
 		}
-		 
 	   BaseResponseModel<TkcTransactionBlockInfoVo> baseResponse = tkcTransactionExportService.listStockChanges(applyCategory,from, txId, created, sign);
 	   assertEquals(baseResponse.getCode(),200);
 	   if (baseResponse.isSuccess()) {

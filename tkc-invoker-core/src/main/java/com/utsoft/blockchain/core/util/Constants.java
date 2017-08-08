@@ -22,4 +22,8 @@ public class Constants {
 	 public static final String TKC_PREFIX ="TKCBC";
 	 
 	 public static final  String TKC_TRANSFER_MOVE = "TKC_TRANSFER_MOVE";
+	 /**
+	  * 充值
+	  */
+	 public static final  String TKC_RECHAHRGE_MOVE = "TKC_RECHAHRGE_MOVE";
 }

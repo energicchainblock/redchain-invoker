@@ -8,8 +8,8 @@ import com.utsoft.blockchain.api.AbstractController;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
+import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TransactionVarModel;
-import com.utsoft.blockchain.api.util.TransactionCmd;
 import com.utsoft.blockchain.core.rpc.provider.TkcTransactionExportService;
 import io.swagger.annotations.Api;
 /**
@@ -31,7 +31,7 @@ public class TransactionController extends AbstractController {
 	 * @param applyCode 交易信息代码
 	 * @param from 交易发起者
 	 * @param created 10位提交时间戳
-	 * @param sign  md5签名结果:sign=md5(applyCode=1&from=1&created=xxx)
+	 * @param sign  md5签名结果:sign=md5(applyCode=xxx&from=xxx&created=xxx)
 	 * @return
 	 */
 	@RequestMapping(value = "/get_account_detail", method = RequestMethod.GET)
@@ -47,17 +47,36 @@ public class TransactionController extends AbstractController {
 	 * @param to   目标账号
 	 * @param submitJson 内容
 	 * @param created
-	 * @param sign  md5签名结果:sign=md5(account_from=1&created=xxx&account_to=xxx)
+	 * @param sign  md5签名结果:sign=md5(applyCode=xxx&from=xxx&to=xxx&submitJson=xxx&created=xxx)
 	 * @return SubmitRspVo
 	 */
 	@RequestMapping(value = "/tranfer", method = RequestMethod.POST)
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(@RequestParam(required=true) String applyCode,String from,String to,String submitJson,String created,String sign) {
 	
-		TransactionVarModel model = new TransactionVarModel(applyCode,TransactionCmd.MOVE);
+		TransactionVarModel model = new TransactionVarModel(applyCode);
 		model.setFrom(from);
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
 		model.setCreated(created);
 		return transactionService.tranfer(model,sign);
+	}
+	
+	/**
+	 * 充值交易
+	 * @param applyCode 交易信息代码
+	 * @param to   目标账号
+	 * @param submitJson 内容
+	 * @param created
+	 * @param sign  md5签名结果:sign=md5(applyCode=xxxto=xxx&submitJson=xxx&created=xxx)
+	 * @return SubmitRspVo
+	 */
+	@RequestMapping(value = "/recharge", method = RequestMethod.POST)
+	public BaseResponseModel<TkcSubmitRspVo> recharge(@RequestParam(required=true) String applyCode,String to,String submitJson,String created,String sign) {
+	
+		TransactionBaseModel model = new TransactionBaseModel(applyCode);
+		model.setTo(to);
+		model.setSubmitJson(submitJson);
+		model.setCreated(created);
+		return transactionService.recharge(model, sign);
 	}
 }

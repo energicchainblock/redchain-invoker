@@ -23,22 +23,31 @@ public interface ITransactionService {
 	 * @param from  转出账户
 	 * @param to  转入账户
 	 * @param submitJson 提交内容
-	 * @param created
 	 * @return submit result 
 	 * @throws ServiceProcessException
 	 */
-	public SubmitRspResultDto tranfer(String applyCode,String from,String to,TransactionCmd cmd, String submitJson,String created) throws ServiceProcessException;
+	public SubmitRspResultDto tranfer(String applyCode,String from,String to,TransactionCmd cmd, String submitJson) throws ServiceProcessException;
 	  
+	/**
+	 * 充值
+	 * @param applyCode  交易代码
+	 * @param to 目标账户
+	 * @param cmd 交易命令
+	 * @param submitJson 提交内容
+	 * @return submit result
+	 * @throws ServiceProcessException
+	 */
+	public SubmitRspResultDto recharge(String applyCode,String to,TransactionCmd cmd, String submitJson) throws ServiceProcessException;
+	
 	
 	/**
 	 * 查询个人账户账户记录
 	 * @param applyCode 交易代码
 	 * @param from 来源账号
 	 * @param cmd
-	 * @param created
 	 * @return
 	 */
-	TkcQueryDetailRspVo select(String applyCode,String from,TransactionCmd cmd,String created) throws ServiceProcessException;
+	TkcQueryDetailRspVo select(String applyCode,String from,TransactionCmd cmd) throws ServiceProcessException;
 
 	/**
 	 * 带条件查询个人信息
@@ -46,10 +55,9 @@ public interface ITransactionService {
 	 * @param account_to
 	 * @param cmd
 	 * @param submitJson
-	 * @param created
 	 * @return
 	 * @throws ServiceProcessException
 	 */
-	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson, String created)
+	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson)
 			throws ServiceProcessException;
 }

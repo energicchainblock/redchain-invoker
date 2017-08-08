@@ -177,14 +177,18 @@ public class ChannelClientProxy {
 		Collection<ProposalResponse> successful = new LinkedList<>();
 		Collection<ProposalResponse> failed = new LinkedList<>();
 
+		String[] submit;
+		if (order.getFromAccount()!=null) {
+			submit = new String[] { order.getCmd(),order.getFromAccount(), order.getToAccount(), order.getJson() };
+		} else {
+			submit = new String[] { order.getCmd(), order.getToAccount(), order.getJson() };
+		}
 		int proposalWaitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
 		TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
 		transactionProposalRequest.setChaincodeID(chaincodeID);
 		transactionProposalRequest.setFcn("invoke");
 		transactionProposalRequest.setProposalWaitTime(proposalWaitTime);
-		transactionProposalRequest.setArgs(
-				new String[] { order.getCmd(), order.getFromAccount(), order.getToAccount(), order.getJson() });
-
+		transactionProposalRequest.setArgs(submit);
 		/*
 		 * Map<String, byte[]> tm2 = new HashMap<>();
 		 * tm2.put("HyperLedgerFabric",
