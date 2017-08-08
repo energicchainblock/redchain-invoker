@@ -1,6 +1,5 @@
 package com.utsoft.blockchain.lib.config;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +43,7 @@ public class ImportPrcClientConfig {
 		protocol.setName("motan");
 		protocol.setDefault(true);
 		protocol.setName("motan");
+		protocol.setRequestTimeout(60*1000);
 		protocol.setMaxContentLength(1048576);
 		return protocol;
 	}
@@ -54,6 +54,7 @@ public class ImportPrcClientConfig {
 		BasicRefererInterfaceConfig config = new BasicRefererInterfaceConfig();
 		config.setGroup("blockchainTransaction");
 		config.setModule("motan-demo-rpc");
+		config.setRequestTimeout(60*1000);
 		config.setApplication("blockchanin");
 		config.setRetries(2);
 		config.setThrowException(true);
@@ -69,7 +70,7 @@ public class ImportPrcClientConfig {
 		motanDemoServiceReferer.setGroup("blockchainTransaction");
 		motanDemoServiceReferer.setVersion("1.0");
 		motanDemoServiceReferer.setId("tkcTransactionExportService");
-		motanDemoServiceReferer.setRequestTimeout(300);
+		motanDemoServiceReferer.setRequestTimeout(60*1000);
 		motanDemoServiceReferer.setRegistry(registry);
 		motanDemoServiceReferer.setBasicReferer(basicReferer);
 		motanDemoServiceReferer.setProtocol(prod);

@@ -38,16 +38,16 @@ public class TransactionVarModel implements Serializable {
 	 * created 10位提交时间戳
 	 */
 	private String created;
-	/**
-	 *  md5签名结果:sign=md5(applyCategory=1&from=2&to=3&cmd=4&submitJson=5&created=xxx)
-	 */
-	private String sign;
 	
 	/**
 	 * 发起方携带私有数据，交完完成后，原封不懂得返回
 	 */
 	private Map<String,Object> externals = new HashMap<>();
 	
+	
+	public TransactionVarModel(String applyCategory) {
+		this.applyCategory = applyCategory; 
+	}
 	
 	/**
 	 * 交易义务代码分类和业务代码
@@ -94,13 +94,6 @@ public class TransactionVarModel implements Serializable {
 	public void setCreated(String created) {
 		this.created = created;
 	}
-	public String getSign() {
-		return sign;
-	}
-	public void setSign(String sign) {
-		this.sign = sign;
-	}
-	
 	public Map<String, Object> getExternals() {
 		return externals;
 	}

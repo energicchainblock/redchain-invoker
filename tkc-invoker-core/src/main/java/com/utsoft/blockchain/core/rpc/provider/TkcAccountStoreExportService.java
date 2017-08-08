@@ -31,16 +31,16 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 	private RedisRepository<String,UserInfoRequstModel> redisRepository;
 	 
      @Override
-	public BaseResponseModel<UserInfoRspModel> register(String created,UserInfoRequstModel requestModel) {
+	public BaseResponseModel<UserInfoRspModel> register(UserInfoRequstModel requestModel) {
 		
 		BaseResponseModel<UserInfoRspModel>  rspModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(requestModel.getUserName(),requestModel.getPassword()) ){
+		if (CommonUtil.isEmpty(requestModel.getUserName(),requestModel.getCreated(),requestModel.getPassword()) ){
 		    return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
-		synchronized (created) {
+		synchronized (requestModel.getCreated()) {
 			try {
 				
-			 String userPrefix = FormatUtil.redisPrefix(requestModel.getUserName(),created);
+			 String userPrefix = FormatUtil.redisPrefix(requestModel.getUserName(),requestModel.getCreated());
 			 UserInfoRequstModel redisObject = redisRepository.get(userPrefix);
 			 if (redisObject==null) {
 				 redisRepository.set(userPrefix,requestModel,120L,TimeUnit.SECONDS);

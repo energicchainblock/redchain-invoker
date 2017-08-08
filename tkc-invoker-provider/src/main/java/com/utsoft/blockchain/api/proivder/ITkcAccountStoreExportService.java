@@ -13,11 +13,10 @@ public interface ITkcAccountStoreExportService {
 	
 	/**
 	 * 用户请求注册信息
-	 * @param created 请求时间序列
 	 * @param requestModel
 	 * @return
 	 */
-	public BaseResponseModel<UserInfoRspModel> register(String created,UserInfoRequstModel requestModel);
+	public BaseResponseModel<UserInfoRspModel> register(UserInfoRequstModel requestModel);
 	
 	/**
 	 * 返回用户关键信息，后期需求调整，可能 todo

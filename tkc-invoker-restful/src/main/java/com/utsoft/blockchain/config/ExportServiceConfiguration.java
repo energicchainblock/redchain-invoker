@@ -26,6 +26,7 @@ public class ExportServiceConfiguration  {
 	     ProtocolConfigBean config = new ProtocolConfigBean();
 	     config.setDefault(true);
 	     config.setName("motan");
+	     config.setRequestTimeout(60*1000);
 	     config.setMaxContentLength(1048576);
 	     return config;
 	 }

@@ -9,11 +9,9 @@ import java.io.Serializable;
 public class UserInfoRequstModel  implements Serializable {
 
 	private static final long serialVersionUID = -5220563748176568920L;
-
 	private String userName;
-	
 	private String password;
-	
+	private String 	created;
 	/**
 	 * 属于哪个组织
 	 */
@@ -38,6 +36,14 @@ public class UserInfoRequstModel  implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public String getCreated() {
+		return created;
+	}
+
+	public void setCreated(String created) {
+		this.created = created;
 	}
 
 //	public String getPartOforg() {

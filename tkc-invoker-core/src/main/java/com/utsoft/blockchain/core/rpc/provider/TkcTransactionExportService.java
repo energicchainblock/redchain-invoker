@@ -47,7 +47,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	 
 	 
 	@Override
-	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model) {
+	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign) {
 
 		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
 		
@@ -57,7 +57,6 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		String submitJson = model.getSubmitJson();
 		TransactionCmd cmd = model.getCmd();
 		String created = model.getCreated();
-		String sign = model.getSign();
 		/**
 		 * 输入参数检查
 		 */
@@ -68,11 +67,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			
 			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
 			TransactionVarModel processOrder = redisRepository.get(userPrefix);
-			if (processOrder==null) {
+			if (processOrder!=null) {
 				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return submitRspModel;
 			} 
-			redisRepository.set(userPrefix, processOrder,120L,TimeUnit.SECONDS);
+			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
 			
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(model.getApplyCategory());
@@ -172,8 +171,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			try {
 				if (verfyPlayload(from, signaturePlayload, sign)) {
 
-					TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository
-							.queryTransactionBlockByID(applyCategory, from);
+					TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);
 
 					if (tkcTransactionBlockInfoDto == null)
 						return queryModel.setCode(Constants.SEVER_INNER_ERROR);

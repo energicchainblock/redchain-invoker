@@ -22,11 +22,12 @@ public interface ITkcTransactionExportService {
 	
     /**
      * 转账交易
-     * @param model
+     * @param model 交易模型
+     * @param sign   md5签名结果:sign=md5(applyCategory=1&from=2&to=3&cmd=4&submitJson=5&created=xxx)
      * @return 返回提交结果
      * @throws ServiceProcessException
      */
-	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model);
+	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign);
 	
 	/**
 	 * 查询个人账号余额

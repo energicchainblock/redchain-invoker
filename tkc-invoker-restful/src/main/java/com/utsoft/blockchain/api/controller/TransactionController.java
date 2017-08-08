@@ -58,7 +58,6 @@ public class TransactionController extends AbstractController {
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
 		model.setCreated(created);
-		model.setSign(sign);
-		return transactionService.tranfer(model);
+		return transactionService.tranfer(model,sign);
 	}
 }
