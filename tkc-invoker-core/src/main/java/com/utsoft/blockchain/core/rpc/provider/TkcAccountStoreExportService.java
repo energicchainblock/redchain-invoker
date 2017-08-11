@@ -67,14 +67,14 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 	}
 
 	@Override
-	public BaseResponseModel<UserInfoRspModel> getIndividualAccout(String username,String password) {
+	public BaseResponseModel<UserInfoRspModel> getIndividualAccout(String username,String token) {
 		
 		BaseResponseModel<UserInfoRspModel>  rspModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(username,password) ){
+		if (CommonUtil.isEmpty(username,token) ){
 			return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		try {
-		    UserInfoRspModel result = caUserService.getUserInfo(username, password);
+		    UserInfoRspModel result = caUserService.getUserInfo(username, token);
 			 if (result == null) {
 				rspModel.setCode(Constants.ITEM_NOT_FIND);
 			} else rspModel.setData(result);

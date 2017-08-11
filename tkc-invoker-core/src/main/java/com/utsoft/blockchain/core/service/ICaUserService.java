@@ -26,11 +26,11 @@ public interface ICaUserService {
 	/**
 	 * 用户通过密码获取公钥
 	 * @param userName
-	 * @param password
+	 * @param token
 	 * @throws ServiceProcessException
 	 * @return
 	 */
-	public UserInfoRspModel getUserInfo (String userName,String password) throws ServiceProcessException;
+	public UserInfoRspModel getUserInfo (String userName,String token) throws ServiceProcessException;
 		
 	/**
 	 * 获取fabric ca 用户认证

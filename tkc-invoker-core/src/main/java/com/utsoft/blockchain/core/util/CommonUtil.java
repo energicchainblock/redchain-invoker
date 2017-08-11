@@ -1,16 +1,20 @@
 package com.utsoft.blockchain.core.util;
-
 import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Properties;
-
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hyperledger.fabric.sdk.helper.Utils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
+import com.utsoft.blockchain.api.util.SdkUtil;
 
 /**
  * 简单的工具
@@ -21,6 +25,8 @@ import org.springframework.util.ResourceUtils;
  */
 public class CommonUtil {
 
+	 private static final String Algorithm = "Blowfish"; //定义加密算法,可用 DES,DESede,Blowfish  
+	  
 	private CommonUtil() {
 	}
 
@@ -177,6 +183,73 @@ public class CommonUtil {
        ret = ret.substring(0, Math.min(ret.length(), maxLogStringLength)) + (ret.length() > maxLogStringLength ? "..." : "");
 
        return ret;
-
    }
+  
+	 private static byte[] encryptMode(byte[] keybyte,byte[] src){  
+	       try {  
+	          //生成密钥  
+	          SecretKey deskey = new SecretKeySpec(keybyte, Algorithm);  
+	          Cipher c1 = Cipher.getInstance(Algorithm);  
+	          c1.init(Cipher.ENCRYPT_MODE, deskey);  
+	          return c1.doFinal(src);
+	      } catch (java.security.NoSuchAlgorithmException e1) {  
+	           e1.printStackTrace();  
+	      }catch(javax.crypto.NoSuchPaddingException e2){  
+	          e2.printStackTrace();  
+	      }catch(java.lang.Exception e3){  
+	          e3.printStackTrace();  
+	      }  
+	     return null;  
+	  }  
+    
+	 private static byte[] decryptMode(byte[] keybyte,byte[] src){  
+      try {  
+          SecretKey deskey = new SecretKeySpec(keybyte, Algorithm);  
+          Cipher c1 = Cipher.getInstance(Algorithm);  
+          c1.init(Cipher.DECRYPT_MODE, deskey);  
+          return c1.doFinal(src);  
+      } catch (java.security.NoSuchAlgorithmException e1) {  
+          e1.printStackTrace();  
+      }catch(javax.crypto.NoSuchPaddingException e2){  
+          e2.printStackTrace();  
+      }catch(java.lang.Exception e3){  
+          e3.printStackTrace();  
+      }  
+       return null;          
+    } 
+  
+     public static String encryptText(String key,String data) {
+    	 byte[] keybyte = key.getBytes();
+    	 byte[] src = data.getBytes();
+    	 return SdkUtil.toHexString(encryptMode(keybyte,src));
+     }
+     
+     public static String decrypText(String key,String data) {
+    	 byte[] afterContent = SdkUtil.tofromHexStrig(data);
+    	 byte[] keybyte = key.getBytes();
+    	 return new String(decryptMode(keybyte,afterContent));
+     }
+   
+    
+     public static File getFilepath(String path)  {
+    	 File cf =null;
+		 try {
+			cf = ResourceUtils.getFile("classpath:"+path);
+		  }  catch (IOException e ) {
+			  Resource resource = new ClassPathResource(path);
+		     try {
+				cf= resource.getFile();
+			    } catch (IOException e1) {
+			 }
+		  } 
+		  if (cf==null || !cf.exists())  {
+			 // path = CommonUtil.class.getResource("/").getFile()+path;
+			  System.out.println("................."+System.getProperty("user.dir")+File.separator+path);
+			  cf = new File(System.getProperty("user.dir")+File.separator+path);
+		  }
+		 if (!cf.exists()) {
+             throw new RuntimeException("loading is missing  file " + cf.getAbsolutePath());
+         }
+          return cf;
+     }
 }

@@ -17,7 +17,7 @@ import com.utsoft.blockchain.core.service.ITransactionService;
  * @date 2017年7月18日
  * @version 1.0.0
  */
-@Service
+@Service("transactionService")
 public class TransactionServiceImpl extends AbstractTkcBasicService implements ITransactionService {
 
 	@PostConstruct

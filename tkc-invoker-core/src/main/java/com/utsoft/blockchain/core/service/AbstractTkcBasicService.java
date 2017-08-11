@@ -124,16 +124,8 @@ public abstract class AbstractTkcBasicService {
 	                final String peerRootPath = IGlobals.getProperty("fabric.peer_root_path");
 	                if(IGlobals.getBooleanProperty("ca.runningFabricCATLS", false)) {
 	                	
-	                	 String cert = "classpath:"+peerRootPath+"/DNAME/ca/ca.DNAME-cert.pem".replaceAll("DNAME", chainOrgpo.getDomainName());
-	                     File cf =null;
-						 try {
-							 cf = ResourceUtils.getFile(cert);
-						  }  catch (FileNotFoundException e) {
-							e.printStackTrace();
-						  }  
-	                      if (!cf.exists() || !cf.isFile()) {
-	                         throw new RuntimeException("TEST is missing cert file " + cf.getAbsolutePath());
-	                     }
+	                	 String cert = peerRootPath+"/DNAME/ca/ca.DNAME-cert.pem".replaceAll("DNAME", chainOrgpo.getDomainName());
+	                	 File cf = CommonUtil.getFilepath(cert);
 	                     Properties properties = new Properties();
 	                     properties.setProperty("pemFile", cf.getAbsolutePath());
 	                   //testing environment only NOT FOR PRODUCTION!
@@ -143,21 +135,23 @@ public abstract class AbstractTkcBasicService {
 	                
 	                
 	                StringBuilder sb = new StringBuilder();
-	                sb.append("classpath:").append(peerRootPath);
+	                sb.append(peerRootPath);
 	                sb.append(chainOrgpo.getDomainName()).append("/");
 	                sb.append(FormatUtil.formater("/users/Admin@%s/msp/keystore", chainOrgpo.getDomainName()));
 	                try {
 	                     
-	                	File privateKey = CommonUtil.findFileSk(ResourceUtils.getFile(sb.toString()));
+	                	 File findFile = CommonUtil.getFilepath(sb.toString());
+	                	 File privateKey = CommonUtil.findFileSk(findFile);
 	                	/**
 	                	 * 获取公约
 	                	 */
 	                    sb.delete(0, sb.length()); 
-	                    sb.append("classpath:").append(peerRootPath);
+	                    sb.append(peerRootPath);
 		                sb.append(chainOrgpo.getDomainName()).append("/");
 		                sb.append(FormatUtil.formater("/users/Admin@%s/msp/signcerts/Admin@%s-cert.pem", chainOrgpo.getDomainName(),chainOrgpo.getDomainName()));
 	                   
-		                File certPublicKey = ResourceUtils.getFile(sb.toString());
+		           	    File certPublicKey = CommonUtil.getFilepath(sb.toString());
+		               
 	                    FabricAuthorizedUser peerOrgAdmin = localKeyPrivateStoreService.getMember(chainOrgpo.getOrgname() + "Admin", chainOrgpo.getOrgname(),chainOrgpo.getMspId(),
 	                		privateKey,certPublicKey);
 	                     //A special user that can create channels, join peers and install chaincode
@@ -167,7 +161,7 @@ public abstract class AbstractTkcBasicService {
 	                      * 注册配置信息
 	                      */
 	                     chaincodeManager.registerChannelConfig(chaincodeID, fabricAuthorizedOrg);
-					     chaincodeManager.start(chaincodeID,fabricAuthorizedOrg);
+					    // chaincodeManager.start(chaincodeID,fabricAuthorizedOrg);
 				    } catch (Exception ex) {
 					   SystemExceptionHandler.getInstance().handlerException(ex);
 				  } 

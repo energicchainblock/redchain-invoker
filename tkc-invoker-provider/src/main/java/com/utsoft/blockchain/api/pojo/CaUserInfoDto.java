@@ -10,14 +10,13 @@ public class CaUserInfoDto implements Serializable{
 
 	private static final long serialVersionUID = -1294664761824972857L;
 	
-	private String password;
+	private String token;
 	private String privateKey;
-
-	public String getPassword() {
-		return password;
+	public String getToken() {
+		return token;
 	}
-	public void setPassword(String password) {
-		this.password = password;
+	public void setToken(String token) {
+		this.token = token;
 	}
 	public String getPrivateKey() {
 		return privateKey;

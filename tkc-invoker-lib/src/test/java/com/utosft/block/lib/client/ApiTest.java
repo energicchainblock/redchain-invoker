@@ -52,12 +52,15 @@ public class ApiTest {
 	 
 	 @Value("${user.toUser}")
 	 private String toUser;
+
+	 @Value("${user.token}")
+	 private String token ; 
 	 
 	 private static String txId ="53726fda86a9f4a3f1c7a4580f8f168829ef64a4e405c7fb7a2fe28c3704e8bb";
 	@Before
 	public void setup() {
 		
-		BaseResponseModel<UserInfoRspModel> userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,password);
+		BaseResponseModel<UserInfoRspModel> userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,token);
 	    if (userPrivateKeyAccess.isSuccess()) {
 		    privateKey = userPrivateKeyAccess.getData().getPrivateKey();
 	    } else   {
@@ -71,10 +74,10 @@ public class ApiTest {
 			BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.register(requestModel);
 			if (baseResponse.getData()!=null) {
 				String publicKey = baseResponse.getData().getPrivateKey();
-				String password =baseResponse.getData().getPassword();
+				token =baseResponse.getData().getToken();
 				System.out.println(password+":"+publicKey);
 			}
-			userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,password);
+			userPrivateKeyAccess = tkcAccountStoreExportService.getIndividualAccout(username,token);
 			if (!userPrivateKeyAccess.isSuccess()) {
 				fail("user not exists");
 		    }
@@ -123,20 +126,20 @@ public class ApiTest {
 		
 		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.register(requestModel);
 		if (baseResponse.getData()!=null) {
-			String publicKey = baseResponse.getData().getPrivateKey();
-			String password =baseResponse.getData().getPassword();
-			System.out.println(password+":"+publicKey);
+			String  privateKey = baseResponse.getData().getPrivateKey();
+			 token = baseResponse.getData().getToken();
+			System.out.println(token+":"+privateKey);
 		}
 	}
 	
 	@Test
 	public void testGetPublicKey() {
 		
-		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.getIndividualAccout(username,password);
+		BaseResponseModel<UserInfoRspModel> baseResponse = tkcAccountStoreExportService.getIndividualAccout(username,token);
 		if (baseResponse.getData()!=null){
 			String publicKey = baseResponse.getData().getPrivateKey();
-			String password = baseResponse.getData().getPassword();	
-			System.out.println(password+":"+publicKey);
+			String token1 = baseResponse.getData().getToken();
+			System.out.println(token1+":"+publicKey);
 		}
 		assertEquals(baseResponse.getCode(),"200");
 	}	

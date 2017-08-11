@@ -21,8 +21,8 @@ public interface ITkcAccountStoreExportService {
 	/**
 	 * 返回用户关键信息，后期需求调整，可能 todo
 	 * @param username
-	 * @param password
+	 * @param token
 	 * @return 返回用户关键信息
 	 */
-	public  BaseResponseModel<UserInfoRspModel> getIndividualAccout(String username,String password);
+	public  BaseResponseModel<UserInfoRspModel> getIndividualAccout(String username,String token);
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
@@ -30,6 +31,7 @@ import tk.mybatis.mapper.entity.Example;
  * @version 1.0.0
  */
 @Service
+@DependsOn({"transactionService"})
 public class CaUserServiceImpl implements ICaUserService {
 
 	private CaClientManager caClientManager = CaClientManager.getIntance();
@@ -58,10 +60,14 @@ public class CaUserServiceImpl implements ICaUserService {
 				FabricCaUserPo fabricCaUserPo = userlist.get(0);
 				FabricAuthorizedUser adminUser = new FabricAuthorizedUser(fabricCaUserPo.getUserName(),
 						fabricCaUserPo.getOrganization(), fabricCaUserPo.getStatus(), localKeyPrivateStoreService);
-				adminUser.setAccount(fabricCaUserPo.getAccount());
-				adminUser.setAffiliation(fabricCaUserPo.getAffiliation());
-				adminUser.setEnrollmentSecret(fabricCaUserPo.getEnrollmentSecret());
-				adminUser.setMspId(fabricCaUserPo.getMspId());
+				 adminUser.setAccount(fabricCaUserPo.getAccount());
+				 adminUser.setAffiliation(fabricCaUserPo.getAffiliation());
+				 /**
+				  * 解密，服务器通信
+				  */
+				 String key = IGlobals.getProperty("ca.encryption.key", "QWE123zxcw");
+				 adminUser.setEnrollmentSecret(CommonUtil.decrypText(key, fabricCaUserPo.getEnrollmentSecret()));
+				 adminUser.setMspId(fabricCaUserPo.getMspId());
 				if (caClientManager.adminInstall(adminUser)) {
 					fabricCaUserMapper.updateFabricUserStatus(adminUser.getName());
 				}
@@ -93,7 +99,14 @@ public class CaUserServiceImpl implements ICaUserService {
 					FabricCaUserPo fabricCaUserPo = new FabricCaUserPo();
 					fabricCaUserPo.setUserName(userName);
 					fabricCaUserPo.setAccount(fabricAuthorizedUser.getAccount());
-					fabricCaUserPo.setEnrollmentSecret(fabricAuthorizedUser.getEnrollmentSecret());
+			        
+					/**
+					 * 加密保护数据
+					 */
+					String key = IGlobals.getProperty("ca.encryption.key", "QWE123zxcw");
+					String sourceText = CommonUtil.encryptText(key, fabricAuthorizedUser.getEnrollmentSecret());
+					
+					fabricCaUserPo.setEnrollmentSecret(sourceText);
 					fabricCaUserPo.setAffiliation(fabricAuthorizedUser.getAffiliation());
 					fabricCaUserPo.setGmtCreate(new Date());
 					fabricCaUserPo.setOrganization(fabricAuthorizedUser.getOrganization());
@@ -110,9 +123,8 @@ public class CaUserServiceImpl implements ICaUserService {
 					} catch (CryptionException e) {
 						throw new ServiceProcessException("user private key is not convert");
 					}
-
 					userInfo.setPrivateKey(privateKey);
-					userInfo.setPassword(fabricAuthorizedUser.getEnrollmentSecret());
+					userInfo.setToken(fabricCaUserPo.getEnrollmentSecret());
 					return userInfo;
 				}
 			}
@@ -131,13 +143,13 @@ public class CaUserServiceImpl implements ICaUserService {
 			}
 
 			userInfo.setPrivateKey(privateKey);
-			userInfo.setPassword(user.getEnrollmentSecret());
+			userInfo.setToken(user.getEnrollmentSecret());
 			return userInfo;
 		}
 	}
 
 	@Override
-	public UserInfoRspModel getUserInfo(String userName, String password) throws ServiceProcessException {
+	public UserInfoRspModel getUserInfo(String userName, String token) throws ServiceProcessException {
 
 		UserInfoRspModel caUserInfoDto = null;
 		Example example = new Example(FabricCaUserPo.class);
@@ -146,7 +158,7 @@ public class CaUserServiceImpl implements ICaUserService {
 		if (CommonUtil.isCollectNotEmpty(userlist)) {
 
 			Optional<FabricCaUserPo> fabricOpational = userlist.stream()
-					.filter((s) -> password.equalsIgnoreCase(s.getEnrollmentSecret())).findFirst();
+					.filter((s) -> token.equalsIgnoreCase(s.getEnrollmentSecret())).findFirst();
 			if (fabricOpational.isPresent()) {
 
 				FabricCaUserPo userPo = fabricOpational.get();
@@ -162,11 +174,11 @@ public class CaUserServiceImpl implements ICaUserService {
 					throw new ServiceProcessException("user private key is not convert");
 				}
 				caUserInfoDto = new UserInfoRspModel();
-				caUserInfoDto.setPassword(password);
+				caUserInfoDto.setToken(token);
 				caUserInfoDto.setPrivateKey(privateKey);
 			}
-		}
-		return caUserInfoDto;
+		 }
+		 return caUserInfoDto;
 	}
 
 	@Override

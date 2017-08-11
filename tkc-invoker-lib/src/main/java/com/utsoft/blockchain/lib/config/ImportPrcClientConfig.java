@@ -88,7 +88,7 @@ public class ImportPrcClientConfig {
 		motanDemoServiceReferer.setGroup("blockchainTransaction");
 		motanDemoServiceReferer.setVersion("1.0");
 		motanDemoServiceReferer.setId("tkcAccountStoreExportService");
-		motanDemoServiceReferer.setRequestTimeout(300);
+		motanDemoServiceReferer.setRequestTimeout(60*1000);
 		motanDemoServiceReferer.setRegistry(registry);
 		motanDemoServiceReferer.setBasicReferer(basicReferer);
 		motanDemoServiceReferer.setProtocol(prod);

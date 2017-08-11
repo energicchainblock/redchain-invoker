@@ -101,11 +101,83 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
-   
-    <build>
-		 <finalName>axis-chain-restful</finalName>
+   <profiles>  
+         <profile>  
+            <id>test</id> 
+            <properties>              
+                <build.profile.id>test</build.profile.id>
+            </properties> 
+             <activation>
+              <activeByDefault>true</activeByDefault>
+            </activation>
+             <build>  
+                <plugins>  
+                    <plugin>  
+                    <groupId>org.apache.maven.plugins</groupId>  
+                    <artifactId>maven-resources-plugin</artifactId>  
+                    <version>2.6</version>  
+                    <executions>  
+                        <execution>  
+                            <id>copy-resources</id>  
+                            <phase>validate</phase>  
+                            <goals>  
+                                <goal>copy-resources</goal>  
+                            </goals>  
+                            <configuration>  
+                                <outputDirectory>${project.build.outputDirectory}/</outputDirectory>   
+                                <resources>  
+                                    <resource>  
+                                        <directory>${basedir}/src/repository/test/</directory>  
+                                        <filtering>false</filtering>  
+                                    </resource>  
+                                </resources>  
+                            </configuration>  
+                            <inherited></inherited>  
+                        </execution>  
+                     </executions>  
+                    </plugin>           
+                </plugins>  
+            </build>  
+        </profile>
+         <profile>  
+            <id>prod</id> 
+            <properties>              
+                <build.profile.id>prod</build.profile.id>
+            </properties>  
+             <build>  
+                <plugins>  
+                    <plugin>  
+                    <groupId>org.apache.maven.plugins</groupId>  
+                    <artifactId>maven-resources-plugin</artifactId>  
+                    <version>2.6</version>  
+                    <executions>  
+                        <execution>  
+                            <id>copy-resources</id>  
+                            <phase>validate</phase>  
+                            <goals>  
+                                <goal>copy-resources</goal>  
+                            </goals>  
+                            <configuration>  
+                                <outputDirectory>${project.build.outputDirectory}/</outputDirectory>   
+                                <resources>  
+                                    <resource>  
+                                        <directory>${project.basedir}/src/repository/prod/</directory>  
+                                        <filtering>false</filtering>  
+                                    </resource>  
+                                </resources>  
+                            </configuration>  
+                            <inherited></inherited>  
+                        </execution>  
+                     </executions>  
+                    </plugin>           
+                </plugins>  
+            </build>  
+        </profile>    
+     </profiles>  
+     <build>
+		 <finalName>chain-restful</finalName>
 		 <plugins>
-		  <plugin>
+		    <plugin>
 		     <groupId>org.apache.maven.plugins</groupId>
 		     <artifactId>maven-source-plugin</artifactId>
 		     <version>3.0.1</version>
@@ -116,8 +188,18 @@
 		                <goal>jar-no-fork</goal>
 		            </goals>
 		        </execution>
-		    </executions>
-		   </plugin>
+		     </executions>
+		     </plugin>
+		     <plugin> 
+                <groupId>org.apache.maven.plugins</groupId> 
+                <artifactId>maven-jar-plugin</artifactId> 
+                <version>2.6</version> 
+                <configuration> 
+                    <excludes> 
+                        <exclude>**/channel/**</exclude> 
+                    </excludes> 
+                </configuration> 
+            </plugin> 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -126,9 +208,31 @@
 		          <goals>
 		            <goal>repackage</goal>
 		          </goals>
-		        </execution>
+		          <configuration>
+		              <mainClass>com.utsoft.blockchain.TkcInvokerApplicationServer</mainClass>
+		          </configuration>
+		         </execution>
                 </executions>
 			</plugin>
+			 <plugin>  
+                <artifactId>maven-assembly-plugin</artifactId>  
+                <configuration>  
+                    <!-- not append assembly id in release file name -->  
+                    <appendAssemblyId>false</appendAssemblyId>  
+                    <descriptors>  
+                        <descriptor>src/build/assembly.xml</descriptor>  
+                    </descriptors>  
+                </configuration>  
+                <executions>  
+                    <execution>  
+                        <id>make-assembly</id>  
+                        <phase>package</phase>  
+                        <goals>  
+                            <goal>single</goal>  
+                        </goals>  
+                    </execution>  
+                </executions>  
+            </plugin>   
 		</plugins>
 	</build>
 </project>
