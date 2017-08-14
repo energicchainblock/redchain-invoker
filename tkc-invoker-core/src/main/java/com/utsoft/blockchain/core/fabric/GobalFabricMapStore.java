@@ -35,6 +35,15 @@ public class GobalFabricMapStore {
 		return  chaincodeorgMap.get(chaincodeId);
 	}
 	
+	public FabricAuthorizedOrg getOrgByMatch(ChaincodeID chaincodeId) {
+		for (ChaincodeID orgNode : chaincodeorgMap.keySet()) {
+			if (orgNode.getName().equals(chaincodeId.getName()) && orgNode.getVersion().equals(chaincodeId.getVersion())) {
+				return chaincodeorgMap.get(orgNode);
+			}
+		}
+		return null;
+	}
+	
 	public void replaceChainOrgConfig(ChaincodeID chaincodeId,FabricAuthorizedOrg orgConfig ){
 		chaincodeorgMap.replace(chaincodeId, orgConfig);
 	}

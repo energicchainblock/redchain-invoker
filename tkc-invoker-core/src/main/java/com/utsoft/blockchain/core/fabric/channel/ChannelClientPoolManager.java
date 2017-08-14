@@ -1,11 +1,12 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
-
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.codec.binary.Hex;
 import org.hyperledger.fabric.protos.ledger.rwset.kvrwset.KvRwset;
 import org.hyperledger.fabric.sdk.BlockInfo;
@@ -21,7 +22,6 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
@@ -112,7 +112,7 @@ public class ChannelClientPoolManager {
 	 */
  	 public SubmitRspResultDto submitRequest(ChaincodeID chaincodeID,ReqtOrderDto order) {
  		   Channel channel = getChannel(chaincodeID);
-	       int invokeWaitTime =  IGlobals.getIntProperty(Constants.INVOKEWAITTIME, 100000);
+	       int invokeWaitTime =  IGlobals.getIntProperty(Constants.INVOKEWAITTIME, 10000);
 			try {
 				return  channelClientProxy.submitRequest(client,channel, chaincodeID, order)
 				   .thenApply(transactionEvent -> {
@@ -124,14 +124,16 @@ public class ChannelClientPoolManager {
 					  
 					  return result;
 				   }).exceptionally(e -> {
-					
-					return null;
+					  
+					  Object[] agrs = {chaincodeID,order,e};
+				      logger.error("submitRequest chaincode:{}  order{} and errors:{}",agrs);
+					 return null;
 				  }).get(invokeWaitTime, TimeUnit.MILLISECONDS);
 			} catch (Exception ex) {
 				Object[] agrs = {order,ex};
 				logger.error("submitRequest :request:{} and errors:{}",agrs);
+				throw new ServiceProcessException("submitRequest request"+ order); 
 			}
-			return null;
 	 }
  	
  	 
@@ -300,8 +302,68 @@ public class ChannelClientPoolManager {
 	      try {
 			return channel.queryTransactionByID(txtId);
 		  } catch (InvalidArgumentException | ProposalException e) {
-			e.printStackTrace();
+			  throw new ServiceProcessException("queryBasicInfo byID:"+txtId+"with"+chaincodeID.getName());
 		 }
-	    return null;
+	}
+	
+	/**
+	 * 安装链码及执行程序
+	 * @param chaincodeID
+	 * @param installPath
+	 */
+	public void installChaincodeInOrganization(ChaincodeID chaincodeID,File installPath) {
+		Channel channel = getChannel(chaincodeID);
+		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgByMatch(chaincodeID);
+		if (orgconfig ==null)
+		   throw new ServiceProcessException("install channel or fabricAuthorizedOrg not extis "+chaincodeID);
+		channelClientProxy.install(client, channel, orgconfig, chaincodeID, installPath);
+	}
+	
+	/**
+	 * 实例化链码及程序
+	 * @param chaincodeID
+	 * @param dorsementpolicyFile
+	 * @param objects
+	 * @return
+	 */
+	public SubmitRspResultDto instantiateChaincodeInOrganization(ChaincodeID chaincodeID,File dorsementpolicyFile,List<String> objects) {
+		int invokeWaitTime =  IGlobals.getIntProperty(Constants.INVOKEWAITTIME, 10000);
+		Channel channel = getChannel(chaincodeID);
+		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgByMatch(chaincodeID);
+		try {
+			return channelClientProxy.instantiate(client, channel, dorsementpolicyFile, orgconfig, chaincodeID, objects)
+			.thenApply(transactionEvent -> {
+				
+				    SubmitRspResultDto result = new SubmitRspResultDto();
+				    result.setStatus(transactionEvent.isValid());
+				    String testTxID = transactionEvent.getTransactionID(); 
+					result.setTxId(testTxID);
+				  
+				  return result;
+				  
+			 }).exceptionally(e -> {
+				 Object[] agrs = {chaincodeID,orgconfig,e};
+				 logger.error("instantiate chaincode:{}  orgconfig;{} and errors:{}",agrs);
+				 return null;
+			  }).get(invokeWaitTime, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+		  throw new ServiceProcessException("instantiate chaincode {"+chaincodeID+"} and Organization {" + orgconfig + "} objects={"+objects+"} ", e);
+		}
+	}
+	
+	  /**
+	   * 初始化chanel
+	   * @param chaincodeID
+	   * @param txPath
+	   * @return
+	   */
+	public boolean initNewChannl(ChaincodeID chaincodeID,File txPath) {
+		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgByMatch(chaincodeID);
+		if (orgconfig==null)
+			 throw new ServiceProcessException("init NewChannle or fabricAuthorizedOrg not extis "+chaincodeID);
+		 
+		  Channel channel = channelClientProxy.initializeNewChannel(client, orgconfig, txPath);
+		  if (channel==null) return false;
+		  return channel.isInitialized();
 	}
 }

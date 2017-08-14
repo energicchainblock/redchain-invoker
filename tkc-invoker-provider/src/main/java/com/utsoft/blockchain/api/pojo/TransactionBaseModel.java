@@ -2,7 +2,6 @@ package com.utsoft.blockchain.api.pojo;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import com.utsoft.blockchain.api.util.TransactionCmd;
 /**
  * 交易基本类型
  * @author hunterfox
@@ -20,19 +19,14 @@ public class TransactionBaseModel implements Serializable {
 	/**
 	 * 指令
 	 */
-	protected TransactionCmd cmd = TransactionCmd.RECHARGE ;
+	//protected TransactionCmd cmd = TransactionCmd.RECHARGE ;
+	
+	protected String serviceCode;
 
 	/**
 	 * to 转入账户
 	 */
 	private String to;
-	
-	public String getTo() {
-		return to;
-	}
-	public void setTo(String to) {
-		this.to = to;
-	}
 	
 	/**
 	 * 提交内容
@@ -49,8 +43,9 @@ public class TransactionBaseModel implements Serializable {
 	private Map<String,Object> externals = new HashMap<>();
 	
 	
-	public TransactionBaseModel(String applyCategory) {
+	public TransactionBaseModel(String applyCategory,String serviceCode) {
 		this.applyCategory = applyCategory; 
+		this.serviceCode = serviceCode;
 	}
 	
 	/**
@@ -58,9 +53,24 @@ public class TransactionBaseModel implements Serializable {
 	 * @param applyCategory
 	 * @param cmd
 	 */
-	public TransactionBaseModel(String applyCategory,TransactionCmd cmd) {
+	/*public TransactionBaseModel(String applyCategory,TransactionCmd cmd) {
 		this.applyCategory = applyCategory; 
-		this.cmd = cmd;
+		///this.cmd = cmd;
+	}*/
+	
+	public String getTo() {
+		return to;
+	}
+	public void setTo(String to) {
+		this.to = to;
+	}
+	
+	public String getServiceCode() {
+		return serviceCode;
+	}
+	
+	public void setServiceCode(String serviceCode) {
+		this.serviceCode = serviceCode;
 	}
 	
 	public String getApplyCategory() {
@@ -69,12 +79,12 @@ public class TransactionBaseModel implements Serializable {
 	public void setApplyCategory(String applyCategory) {
 		this.applyCategory = applyCategory;
 	}
-	public TransactionCmd getCmd() {
+	/*public TransactionCmd getCmd() {
 		return cmd;
 	}
 	public void setCmd(TransactionCmd cmd) {
 		this.cmd = cmd;
-	}
+	}*/
 	
 	public String getSubmitJson() {
 		return submitJson;

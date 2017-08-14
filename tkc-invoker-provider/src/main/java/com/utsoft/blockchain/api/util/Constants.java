@@ -13,6 +13,10 @@ public class Constants {
 
 	 public final static int OK = 200;
 	 public final static int ITEM_NOT_FIND = 404;
+	 /**
+	  * 对象已经存在
+	  */
+	 public final static int ITEM_EXITS = 405;
 	 
 	 public final static int SEVER_INNER_ERROR = 500;
 	 /**
@@ -48,7 +52,12 @@ public class Constants {
 	 public static final int EVIT_TTL = 2*30;
 	 public static final int DEFAULT_ = 2*30;
 	
-	  public static final String DEFAULT_CHARSET = CharEncoding.UTF_8;
+	 public static final String DEFAULT_CHARSET = CharEncoding.UTF_8;
+	 
+	 public static final String RECHARGE = "recharge";
+	 public static final String MOVE = "move";
+	 public static final String QUERY = "query";
+	 
 	 /**
 	  * 时间区域
 	  */

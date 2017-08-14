@@ -18,6 +18,7 @@ public class FabricAuthorizedOrg {
 
     final String name;
     final String mspid;
+   
     HFCAClient caClient;
 
     Map<String, User> userMap = new HashMap<>();
@@ -31,10 +32,10 @@ public class FabricAuthorizedOrg {
 
     private FabricAuthorizedUser peerAdmin;
 
-
     private String domainName;
+    private String txPath;
     
-    private String channelName;
+	private String channelName;
     
 	public FabricAuthorizedOrg(String name, String mspid,String channelName) {
         this.name = name;
@@ -176,5 +177,13 @@ public class FabricAuthorizedOrg {
 
 	public void setChannelName(String channelName) {
 		this.channelName = channelName;
+	}
+	
+	public String getTxPath() {
+		return txPath;
+	}
+
+	public void setTxPath(String txPath) {
+		this.txPath = txPath;
 	}
 }

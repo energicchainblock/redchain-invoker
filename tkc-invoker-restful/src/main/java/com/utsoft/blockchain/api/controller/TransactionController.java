@@ -10,6 +10,7 @@ import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TransactionVarModel;
+import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.core.rpc.provider.TkcTransactionExportService;
 import io.swagger.annotations.Api;
 /**
@@ -53,7 +54,7 @@ public class TransactionController extends AbstractController {
 	@RequestMapping(value = "/tranfer", method = RequestMethod.POST)
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(@RequestParam(required=true) String applyCode,String from,String to,String submitJson,String created,String sign) {
 	
-		TransactionVarModel model = new TransactionVarModel(applyCode);
+		TransactionVarModel model = new TransactionVarModel(applyCode,Constants.MOVE);
 		model.setFrom(from);
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
@@ -73,7 +74,7 @@ public class TransactionController extends AbstractController {
 	@RequestMapping(value = "/recharge", method = RequestMethod.POST)
 	public BaseResponseModel<TkcSubmitRspVo> recharge(@RequestParam(required=true) String applyCode,String to,String submitJson,String created,String sign) {
 	
-		TransactionBaseModel model = new TransactionBaseModel(applyCode);
+		TransactionBaseModel model = new TransactionBaseModel(applyCode,Constants.RECHARGE);
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
 		model.setCreated(created);

@@ -1,13 +1,18 @@
 package com.utsoft.blockchain.core.rpc.provider;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
+import com.utsoft.blockchain.api.pojo.ServiceApplyCodeReqMode;
 import com.utsoft.blockchain.api.pojo.UserInfoRequstModel;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
 import com.utsoft.blockchain.api.proivder.ITkcAccountStoreExportService;
 import com.utsoft.blockchain.api.util.Constants;
+import com.utsoft.blockchain.core.dao.mapper.ChaincodeAccessCodeMapper;
+import com.utsoft.blockchain.core.dao.model.ChaincodeAccessCodePo;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
 import com.utsoft.blockchain.core.service.ICaUserService;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
@@ -15,6 +20,8 @@ import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.annotation.MotanService;
+
+import tk.mybatis.mapper.entity.Example;
 /**
  * 注册登陆及获公钥
  * @author hunterfox
@@ -30,6 +37,9 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
      @Autowired
 	private RedisRepository<String,UserInfoRequstModel> redisRepository;
 	 
+    @Autowired
+    private ChaincodeAccessCodeMapper chaincodeAccessCodeMapper;
+     
      @Override
 	public BaseResponseModel<UserInfoRspModel> register(UserInfoRequstModel requestModel) {
 		
@@ -78,6 +88,34 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 			 if (result == null) {
 				rspModel.setCode(Constants.ITEM_NOT_FIND);
 			} else rspModel.setData(result);
+		} catch (Exception ex) {
+			rspModel.setCode(Constants.SEVER_INNER_ERROR);
+			Object[] args = {username,ex};
+			logger.error("erros:{} :{}",args );
+			rspModel.setMessage(ex.getMessage());
+		 }
+		return rspModel;
+	}
+
+	@Override
+	public BaseResponseModel<Integer> applyService(String username, ServiceApplyCodeReqMode service) {
+		
+		BaseResponseModel<Integer>  rspModel = BaseResponseModel.build();
+		if (CommonUtil.isEmpty(username,service.getApplyCode(),service.getCallbackUrl()) ){
+			return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		Example example = new Example(ChaincodeAccessCodePo.class);
+		example.createCriteria().andEqualTo("applyCode",service.getApplyCode());
+		List<ChaincodeAccessCodePo> list = chaincodeAccessCodeMapper.selectByExample(example);
+		if (CommonUtil.isCollectNotEmpty(list)) {
+			return rspModel.setCode(Constants.ITEM_EXITS);
+		}
+		try {
+			ChaincodeAccessCodePo chaincodeAccessCodePo = new ChaincodeAccessCodePo();
+			chaincodeAccessCodePo.setApplyCode(service.getApplyCode());
+			chaincodeAccessCodePo.setUrlAddress(service.getCallbackUrl());
+			chaincodeAccessCodePo.setGmtCreate(new Date());
+			chaincodeAccessCodeMapper.insert(chaincodeAccessCodePo);
 		} catch (Exception ex) {
 			rspModel.setCode(Constants.SEVER_INNER_ERROR);
 			Object[] args = {username,ex};

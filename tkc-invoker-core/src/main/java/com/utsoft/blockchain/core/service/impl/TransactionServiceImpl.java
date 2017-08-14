@@ -8,7 +8,6 @@ import com.utsoft.blockchain.api.pojo.ReqtQueryOrderDto;
 import com.utsoft.blockchain.api.pojo.RspQueryResultDto;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
-import com.utsoft.blockchain.api.util.TransactionCmd;
 import com.utsoft.blockchain.core.service.AbstractTkcBasicService;
 import com.utsoft.blockchain.core.service.ITransactionService;
 /**
@@ -27,13 +26,13 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public SubmitRspResultDto tranfer(String applyCode,String account_from, String account_to, TransactionCmd cmd, String submitJson) throws ServiceProcessException {
+	public SubmitRspResultDto tranfer(String applyCode,String account_from, String account_to, String cmd, String submitJson) throws ServiceProcessException {
 		
 		isCheckConnecting(applyCode);
 	    ChaincodeID chaincodeID = getChainCode(applyCode);
 		if (chaincodeManager.checkChannelActive(chaincodeID)) {
 			ReqtOrderDto order = new ReqtOrderDto();
-			order.setCmd(cmd.name());
+			order.setCmd(cmd);
 			order.setFromAccount(account_from);
 			order.setToAccount(account_to);
 			order.setJson(submitJson);
@@ -43,14 +42,14 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public TkcQueryDetailRspVo select(String applyCode,String account_to, TransactionCmd cmd) throws ServiceProcessException {
+	public TkcQueryDetailRspVo select(String applyCode,String account_to, String cmd) throws ServiceProcessException {
 		 
 		 isCheckConnecting(applyCode);
 		 ChaincodeID chaincodeID = getChainCode(applyCode);
 		 TkcQueryDetailRspVo orderdetail = null;
 		 if (chaincodeManager.checkChannelActive(chaincodeID)) {
 			ReqtQueryOrderDto queryPojo = new ReqtQueryOrderDto();
-			queryPojo.setCmd(cmd.name());
+			queryPojo.setCmd(cmd);
 			queryPojo.setToAccount(account_to);
 			RspQueryResultDto resultDto = chaincodeManager.query(chaincodeID, queryPojo);
 			if (resultDto!=null) {
@@ -64,7 +63,7 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	}
 
 	@Override
-	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson)
+	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, String cmd, String submitJson)
 			throws ServiceProcessException {
 		 
 		isCheckConnecting(applyCode);
@@ -72,7 +71,7 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 		TkcQueryDetailRspVo orderdetail = null;
 		if (chaincodeManager.checkChannelActive(chaincodeID)) {
 			ReqtQueryOrderDto queryPojo = new ReqtQueryOrderDto();
-			queryPojo.setCmd(cmd.name());
+			queryPojo.setCmd(cmd);
 			queryPojo.setToAccount(account_to);
 			queryPojo.setJson(submitJson);
 			RspQueryResultDto result =  chaincodeManager.query(chaincodeID, queryPojo);
@@ -90,14 +89,14 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 	 * 充值
 	 */
 	@Override
-	public SubmitRspResultDto recharge(String applyCode, String to, TransactionCmd cmd, String submitJson)
+	public SubmitRspResultDto recharge(String applyCode, String to, String cmd, String submitJson)
 			throws ServiceProcessException {
 		isCheckConnecting(applyCode);
 	    ChaincodeID chaincodeID = getChainCode(applyCode);
 		if (chaincodeManager.checkChannelActive(chaincodeID)) {
 			ReqtOrderDto  order = new ReqtOrderDto();
 			order.setToAccount(to);
-			order.setCmd(cmd.name());
+			order.setCmd(cmd);
 			order.setJson(submitJson);
 			return chaincodeManager.submitRequest(chaincodeID, order);
 		} 

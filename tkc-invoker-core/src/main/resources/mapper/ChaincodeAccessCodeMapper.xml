@@ -8,6 +8,7 @@
        <result column="chainId" jdbcType="INTEGER" property="chainId" />
        <result column="status" jdbcType="INTEGER" property="status" />
        <result column="remark" jdbcType="VARCHAR" property="remark" />
+       <result column="url_address" jdbcType="VARCHAR" property="urlAddress" />
        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
     </resultMap>
 </mapper>

@@ -1,7 +1,6 @@
 package com.utsoft.blockchain.core.util;
 import static java.lang.String.format;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -15,7 +14,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import com.utsoft.blockchain.api.util.SdkUtil;
-
 /**
  * 简单的工具
  * 
@@ -154,8 +152,8 @@ public class CommonUtil {
 			               name, "tls/server.crt").toString();
         File cert =null;
 		try {
-			cert = ResourceUtils.getFile("classpath:"+fullpath);
-		} catch (FileNotFoundException e) {
+			cert = getFilepath(fullpath);
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
         if (cert==null || !cert.exists()) {

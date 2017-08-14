@@ -155,7 +155,7 @@ public class ApiTest {
 		String submitJson ="10";
 		String created = SdkUtil.generateId();
 		
-		TransactionVarModel model = new TransactionVarModel(applyCategory);
+		TransactionVarModel model = new TransactionVarModel(applyCategory,"move");
 		model.setCreated(created);
 		model.setFrom(username);
 		model.setTo(to);
@@ -171,7 +171,7 @@ public class ApiTest {
 		signaturePlayload.addPlayload(applyCategory);
 		signaturePlayload.addPlayload(from);
 		signaturePlayload.addPlayload(to);
-		signaturePlayload.addPlayload(model.getCmd());
+		signaturePlayload.addPlayload("move");
 		signaturePlayload.addPlayload(submitJson);
 		signaturePlayload.addPlayload(created);
 		String sign;

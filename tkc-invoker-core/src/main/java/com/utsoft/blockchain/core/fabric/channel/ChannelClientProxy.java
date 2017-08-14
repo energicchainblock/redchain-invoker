@@ -1,29 +1,45 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+
 import org.hyperledger.fabric.protos.peer.Query.ChaincodeInfo;
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
+import org.hyperledger.fabric.sdk.ChaincodeEndorsementPolicy;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.ChaincodeResponse.Status;
 import org.hyperledger.fabric.sdk.Channel;
+import org.hyperledger.fabric.sdk.ChannelConfiguration;
 import org.hyperledger.fabric.sdk.EventHub;
 import org.hyperledger.fabric.sdk.HFClient;
+import org.hyperledger.fabric.sdk.InstallProposalRequest;
+import org.hyperledger.fabric.sdk.InstantiateProposalRequest;
+import org.hyperledger.fabric.sdk.Orderer;
 import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.QueryByChaincodeRequest;
 import org.hyperledger.fabric.sdk.SDKUtils;
 import org.hyperledger.fabric.sdk.TransactionProposalRequest;
+import org.hyperledger.fabric.sdk.exception.ChaincodeEndorsementPolicyParseException;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.ReqtOrderDto;
 import com.utsoft.blockchain.api.pojo.ReqtQueryOrderDto;
 import com.utsoft.blockchain.api.pojo.RspQueryResultDto;
@@ -42,16 +58,18 @@ import com.utsoft.blockchain.core.util.IGlobals;
 public class ChannelClientProxy {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+	
+	
 	public Channel connectChannel(HFClient client, String name, FabricAuthorizedOrg orgconfig, ChaincodeID chaincodeID)
 			throws Exception {
 
 		client.setUserContext(orgconfig.getPeerAdmin());
-		Channel newChannel = client.newChannel(name);
 
+		Channel newChannel = client.newChannel(name);
 		for (String orderName : orgconfig.getOrdererNames()) {
-			newChannel.addOrderer(client.newOrderer(orderName, orgconfig.getOrdererLocation(orderName),
-					CommonUtil.getOrdererProperties(orderName)));
+			Orderer orders = client.newOrderer(orderName, orgconfig.getOrdererLocation(orderName),
+					CommonUtil.getOrdererProperties(orderName));
+			newChannel.addOrderer(orders);
 		}
 
 		for (String peerName : orgconfig.getPeerNames()) {
@@ -64,17 +82,14 @@ public class ChannelClientProxy {
 			if (!channels.contains(name)) {
 				throw new AssertionError(format("Peer %s does not appear to belong to channel %s", peerName, name));
 			}
-
 			newChannel.addPeer(peer);
 			orgconfig.addPeer(peer);
 		}
-
 		for (String eventHubName : orgconfig.getEventHubNames()) {
 			EventHub eventHub = client.newEventHub(eventHubName, orgconfig.getEventHubLocation(eventHubName),
 					CommonUtil.getEventHubProperties(eventHubName));
 			newChannel.addEventHub(eventHub);
 		}
-
 		int waitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
 		newChannel.setTransactionWaitTime(waitTime);
 		newChannel.initialize();
@@ -181,7 +196,7 @@ public class ChannelClientProxy {
 		if (order.getFromAccount()!=null) {
 			submit = new String[] { order.getCmd(),order.getFromAccount(), order.getToAccount(), order.getJson() };
 		} else {
-			submit = new String[] { order.getCmd(), order.getToAccount(), order.getJson() };
+			submit = new String[] { order.getCmd(), order.getToAccount(),"", order.getJson() };
 		}
 		int proposalWaitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
 		TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
@@ -269,10 +284,11 @@ public class ChannelClientProxy {
 		List<String> objects = new ArrayList<String>();
 		objects.add(reqtQueryOrderDto.getCmd().toLowerCase());
 
+		objects.add("");
 		if (reqtQueryOrderDto.getToAccount() != null) {
 			objects.add(reqtQueryOrderDto.getToAccount());
 		}
-
+		
 		if (reqtQueryOrderDto.getJson() != null) {
 			objects.add(reqtQueryOrderDto.getJson());
 		}
@@ -310,5 +326,226 @@ public class ChannelClientProxy {
 			}
 		}
 		return CommonUtil.isCollectNotEmpty(results) ? results.get(0) : null;
+	}
+	
+	/**
+	 * 初始化channel
+	 * @param client
+	 * @param orgconfig
+	 * @param txPath
+	 * @return
+	 */
+    public Channel initializeNewChannel(HFClient client,FabricAuthorizedOrg orgconfig,File txPath) {
+			
+		 try {
+			  client.setUserContext(orgconfig.getPeerAdmin());
+			  Collection<Orderer> orderers = new LinkedList<>();
+			  for (String orderName : orgconfig.getOrdererNames()) {
+				  Orderer orders = client.newOrderer(orderName, orgconfig.getOrdererLocation(orderName),
+							CommonUtil.getOrdererProperties(orderName));
+					orderers.add(orders);
+				}
+			
+			   Orderer singleOrder = orderers.iterator().next();
+		       orderers.remove(singleOrder);
+			   ChannelConfiguration channelConfiguration = new ChannelConfiguration(txPath);
+			   Channel  newChannel = client.newChannel(orgconfig.getChannelName(),singleOrder,channelConfiguration,client.getChannelConfigurationSignature(channelConfiguration, orgconfig.getPeerAdmin())); 
+
+		        for (String peerName : orgconfig.getPeerNames()) {
+		            String peerLocation = orgconfig.getPeerLocation(peerName);
+
+		            Properties peerProperties = CommonUtil.getPeerProperties(peerName);
+		            if (peerProperties == null) {
+		                peerProperties = new Properties();
+		            }
+	
+		            peerProperties.put("grpc.NettyChannelBuilderOption.maxInboundMessageSize", 9000000);
+		            Peer peer = client.newPeer(peerName, peerLocation, peerProperties);
+		            newChannel.joinPeer(peer);
+		            logger.info(format("Peer %s joined channel %s", peerName, orgconfig));
+		            orgconfig.addPeer(peer);
+		        }
+		       
+		        //add remaining orderers if any.
+		        for (Orderer orderer : orderers) { 
+		            newChannel.addOrderer(orderer);
+		        }
+		        for (String eventHubName : orgconfig.getEventHubNames()) {
+		            final Properties eventHubProperties = CommonUtil.getEventHubProperties(eventHubName);
+		            eventHubProperties.put("grpc.NettyChannelBuilderOption.keepAliveTime", new Object[] {5L, TimeUnit.MINUTES});
+		            eventHubProperties.put("grpc.NettyChannelBuilderOption.keepAliveTimeout", new Object[] {8L, TimeUnit.SECONDS});
+		            EventHub eventHub = client.newEventHub(eventHubName, orgconfig.getEventHubLocation(eventHubName),
+		                    eventHubProperties);
+		            newChannel.addEventHub(eventHub);
+		        }
+		       return newChannel.initialize();
+		  } catch (Exception e)  {
+			  throw new AssertionError(format("install all peer fail:",orgconfig,txPath));
+		  }
+	}
+	 
+	 
+	/**
+	 * install  chaincode in channel
+	 * @param client
+	 * @param channel
+	 * @param orgconfig
+	 * @param chaincodeID
+	 * @param installPath
+	 */
+	public void install(HFClient client, Channel channel, FabricAuthorizedOrg orgconfig,ChaincodeID chaincodeID,File installPath) {
+		     
+		      if (channel==null) {
+		       try {
+		    		  channel = initEmptyChannel(client,orgconfig.getChannelName(),orgconfig,chaincodeID);
+				 } catch (Exception e) {
+					 throw new ServiceProcessException("install channel "+e);
+				 } 
+		      }
+		    try {
+			 client.setUserContext(orgconfig.getPeerAdmin());
+			 InstallProposalRequest installProposalRequest = client.newInstallProposalRequest();
+             installProposalRequest.setChaincodeID(chaincodeID);
+             installProposalRequest.setChaincodeVersion(chaincodeID.getVersion());
+             installProposalRequest.setChaincodeSourceLocation(installPath);
+            
+             Collection<ProposalResponse> responses;
+             
+             int numInstallProposal = 0;
+         
+             Collection<ProposalResponse> successful = new LinkedList<>();
+             Collection<ProposalResponse> failed = new LinkedList<>();
+             
+             Set<Peer> peersFromOrg = orgconfig.getPeers();
+             numInstallProposal = numInstallProposal + peersFromOrg.size();
+             responses = client.sendInstallProposal(installProposalRequest, peersFromOrg);
+
+             for (ProposalResponse response : responses) {
+                 if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                	 logger.info(FormatUtil.formater("Successful install proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName()));
+                     successful.add(response);
+                 } else {
+                     failed.add(response);
+                 }
+             }
+             SDKUtils.getProposalConsistencySets(responses);
+             logger.info(FormatUtil.formater("Received %d install proposal responses. Successful+verified: %d . Failed: %d", numInstallProposal, successful.size(), failed.size()));
+
+             if (failed.size() > 0) {
+                 ProposalResponse first = failed.iterator().next();
+                 logger.error("Not enough endorsers for install :" + successful.size() + ".  " + first.getMessage());
+             }
+             
+		 } catch (InvalidArgumentException | ProposalException e) {
+			 throw new AssertionError(format("install all peer fail:",orgconfig,chaincodeID,installPath));
+		}
+	}
+	
+	/**
+	 * instantiate chaincode in channel
+	 * @param client
+	 * @param channel
+	 * @param chaincodeendorsementpolicy
+	 * @param orgconfig
+	 * @param chaincodeID
+	 * @param objects
+	 * @return 
+	 */
+	public CompletableFuture<TransactionEvent> instantiate(HFClient client, Channel channel,File chaincodeendorsementpolicy ,FabricAuthorizedOrg orgconfig,ChaincodeID chaincodeID,List<String> objects) {
+		
+		    if (channel==null) {
+		       try {
+		    		  channel = initEmptyChannel(client,orgconfig.getChannelName(),orgconfig,chaincodeID);
+				 } catch (Exception e) {
+					 throw new ServiceProcessException("install channel "+e);
+				 } 
+		   } 
+		 
+		  String[] inits = new String[objects.size()];
+		  objects.toArray(inits);
+	 	
+		  Collection<ProposalResponse> successful = new LinkedList<>();
+          Collection<ProposalResponse> failed = new LinkedList<>();
+          Collection<ProposalResponse> responses;
+          
+		  int proposalWaitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+	      InstantiateProposalRequest instantiateProposalRequest = client.newInstantiationProposalRequest();
+          instantiateProposalRequest.setProposalWaitTime(proposalWaitTime);
+          instantiateProposalRequest.setChaincodeID(chaincodeID);
+          instantiateProposalRequest.setFcn("init");
+          instantiateProposalRequest.setArgs(inits);
+          Map<String, byte[]> tm = new HashMap<>();
+          tm.put("HyperLedgerFabric", "InstantiateProposalRequest:JavaSDK".getBytes(UTF_8));
+          tm.put("method", "InstantiateProposalRequest".getBytes(UTF_8));
+          tm.put("NetworkID", "tkcblockchaintest_byfn".getBytes(UTF_8));
+          try {
+			instantiateProposalRequest.setTransientMap(tm);
+		
+          
+          ChaincodeEndorsementPolicy chaincodeEndorsementPolicy = new ChaincodeEndorsementPolicy();
+          chaincodeEndorsementPolicy.fromYamlFile(chaincodeendorsementpolicy);
+          instantiateProposalRequest.setChaincodeEndorsementPolicy(chaincodeEndorsementPolicy);
+
+          logger.info("Sending instantiateProposalRequest to all peers with arguments: a and b set to  and %s respectively");
+          successful.clear();
+          failed.clear();
+          
+          responses = channel.sendInstantiationProposal(instantiateProposalRequest,channel.getPeers());
+          for (ProposalResponse response : responses) {
+              if (response.isVerified() && response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                  successful.add(response);
+                  logger.info(FormatUtil.formater("Succesful instantiate proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName()));
+              } else {
+                  failed.add(response);
+              }
+          }
+           logger.info(FormatUtil.formater("Received %d instantiate proposal responses. Successful+verified: %d . Failed: %d", responses.size(), successful.size(), failed.size()));
+            if (failed.size() > 0) {
+              ProposalResponse first = failed.iterator().next();
+              logger.error("Not enough endorsers for instantiate :" + successful.size() + "endorser failed with " + first.getMessage() + ". Was verified:" + first.isVerified());
+            } 
+         } catch (InvalidArgumentException | ChaincodeEndorsementPolicyParseException | IOException | ProposalException e) {
+        	  Object[] errorObjects  = {chaincodeendorsementpolicy,orgconfig,chaincodeID,objects,e};
+        	  logger.error("instantiate fail {}-{}-{} {}-{} :error{}",errorObjects);
+  		 }
+          Collection<Orderer> orderers = channel.getOrderers();
+          return channel.sendTransaction(successful, orderers);
+	}
+	
+	
+	private Channel initEmptyChannel(HFClient client, String name, FabricAuthorizedOrg orgconfig, ChaincodeID chaincodeID)
+			throws Exception {
+
+		client.setUserContext(orgconfig.getPeerAdmin());
+
+		Channel newChannel = client.newChannel(name);
+		for (String orderName : orgconfig.getOrdererNames()) {
+			Orderer orders = client.newOrderer(orderName, orgconfig.getOrdererLocation(orderName),
+					CommonUtil.getOrdererProperties(orderName));
+			newChannel.addOrderer(orders);
+		}
+
+		for (String peerName : orgconfig.getPeerNames()) {
+			String peerLocation = orgconfig.getPeerLocation(peerName);
+			Peer peer = client.newPeer(peerName, peerLocation, CommonUtil.getPeerProperties(peerName));
+
+			// Query the actual peer for which channels it belongs to and check
+			// it belongs to this channel
+			Set<String> channels = client.queryChannels(peer);
+			if (!channels.contains(name)) {
+				throw new AssertionError(format("Peer %s does not appear to belong to channel %s", peerName, name));
+			}
+			newChannel.addPeer(peer);
+			orgconfig.addPeer(peer);
+		}
+		for (String eventHubName : orgconfig.getEventHubNames()) {
+			EventHub eventHub = client.newEventHub(eventHubName, orgconfig.getEventHubLocation(eventHubName),
+					CommonUtil.getEventHubProperties(eventHubName));
+			newChannel.addEventHub(eventHub);
+		}
+		int waitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+		newChannel.setTransactionWaitTime(waitTime);
+		newChannel.initialize();
+		return newChannel;
 	}
 }

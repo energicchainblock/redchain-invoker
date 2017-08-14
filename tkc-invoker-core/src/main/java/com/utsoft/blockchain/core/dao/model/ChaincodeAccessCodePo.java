@@ -43,6 +43,10 @@ public class ChaincodeAccessCodePo implements Serializable {
 	 * 评论
 	 */
 	private  String remark;
+	
+	@Column(name = "url_address")
+	private String urlAddress;
+	
 	/**
 	 * 时间
 	 */
@@ -96,5 +100,13 @@ public class ChaincodeAccessCodePo implements Serializable {
 
 	public void setGmtCreate(Date gmtCreate) {
 		this.gmtCreate = gmtCreate;
+	}
+	
+	public String getUrlAddress() {
+		return urlAddress;
+	}
+
+	public void setUrlAddress(String urlAddress) {
+		this.urlAddress = urlAddress;
 	}
 }

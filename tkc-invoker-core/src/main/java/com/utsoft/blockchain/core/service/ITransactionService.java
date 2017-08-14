@@ -2,7 +2,6 @@ package com.utsoft.blockchain.core.service;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
-import com.utsoft.blockchain.api.util.TransactionCmd;
 /**
  * 交易相关和查询
  * @author hunterfox
@@ -26,7 +25,7 @@ public interface ITransactionService {
 	 * @return submit result 
 	 * @throws ServiceProcessException
 	 */
-	public SubmitRspResultDto tranfer(String applyCode,String from,String to,TransactionCmd cmd, String submitJson) throws ServiceProcessException;
+	public SubmitRspResultDto tranfer(String applyCode,String from,String to,String cmd, String submitJson) throws ServiceProcessException;
 	  
 	/**
 	 * 充值
@@ -37,7 +36,7 @@ public interface ITransactionService {
 	 * @return submit result
 	 * @throws ServiceProcessException
 	 */
-	public SubmitRspResultDto recharge(String applyCode,String to,TransactionCmd cmd, String submitJson) throws ServiceProcessException;
+	public SubmitRspResultDto recharge(String applyCode,String to,String cmd, String submitJson) throws ServiceProcessException;
 	
 	
 	/**
@@ -47,7 +46,7 @@ public interface ITransactionService {
 	 * @param cmd
 	 * @return
 	 */
-	TkcQueryDetailRspVo select(String applyCode,String from,TransactionCmd cmd) throws ServiceProcessException;
+	TkcQueryDetailRspVo select(String applyCode,String from,String cmd) throws ServiceProcessException;
 
 	/**
 	 * 带条件查询个人信息
@@ -58,6 +57,6 @@ public interface ITransactionService {
 	 * @return
 	 * @throws ServiceProcessException
 	 */
-	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, TransactionCmd cmd, String submitJson)
+	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, String cmd, String submitJson)
 			throws ServiceProcessException;
 }

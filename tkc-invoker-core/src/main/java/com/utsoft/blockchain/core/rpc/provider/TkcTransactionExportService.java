@@ -1,10 +1,8 @@
 package com.utsoft.blockchain.core.rpc.provider;
 import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -19,7 +17,6 @@ import com.utsoft.blockchain.api.security.CryptionConfig;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.api.util.SdkUtil;
 import com.utsoft.blockchain.api.util.SignaturePlayload;
-import com.utsoft.blockchain.api.util.TransactionCmd;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
 import com.utsoft.blockchain.core.service.ICaUserService;
@@ -55,7 +52,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		String from = model.getFrom();
 		String to = model.getTo();
 		String submitJson = model.getSubmitJson();
-		TransactionCmd cmd = model.getCmd();
+		String cmd = model.getServiceCode();
 		String created = model.getCreated();
 		/**
 		 * 输入参数检查
@@ -129,7 +126,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			try {
 				if (verfyPlayload(from,signaturePlayload, sign)) {
 
-					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from, TransactionCmd.QUERY);
+					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,Constants.QUERY);
 					if (result == null)
 						return queryModel.setCode(Constants.ITEM_NOT_FIND);
 					queryModel.setData(result);	
@@ -197,7 +194,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		String applyCategory = model.getApplyCategory();
 		String to = model.getTo();
 		String submitJson = model.getSubmitJson();
-		TransactionCmd cmd = model.getCmd();
+		String cmd = model.getServiceCode();
 		String created = model.getCreated();
 		/**
 		 * 输入参数检查

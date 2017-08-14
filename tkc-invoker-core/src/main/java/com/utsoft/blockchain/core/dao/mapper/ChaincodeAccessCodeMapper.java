@@ -1,6 +1,5 @@
 package com.utsoft.blockchain.core.dao.mapper;
 import org.springframework.stereotype.Repository;
-
 import com.utsoft.blockchain.core.dao.MySqlBaseMapper;
 import com.utsoft.blockchain.core.dao.model.ChaincodeAccessCodePo;
 /**

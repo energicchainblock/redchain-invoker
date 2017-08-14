@@ -1,7 +1,5 @@
 package com.utsoft.blockchain.api.pojo;
 
-import com.utsoft.blockchain.api.util.TransactionCmd;
-
 /**
  * 交易业务分类和指令
  * @author hunterfox
@@ -12,10 +10,9 @@ public class TransactionVarModel extends TransactionBaseModel {
 
 	private static final long serialVersionUID = -1679807399924446074L;
 	
-	public TransactionVarModel(String applyCategory) {
-		super(applyCategory,TransactionCmd.MOVE);
+	public TransactionVarModel(String applyCategory, String serviceCode) {
+		super(applyCategory, serviceCode);
 	}
-	
 	/**
 	 * from 转出账户
 	 */

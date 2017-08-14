@@ -172,7 +172,41 @@
                     </plugin>           
                 </plugins>  
             </build>  
-        </profile>    
+        </profile> 
+         <profile>  
+            <id>rc</id> 
+            <properties>              
+                <build.profile.id>rc</build.profile.id>
+            </properties>  
+             <build>  
+                <plugins>  
+                    <plugin>  
+                    <groupId>org.apache.maven.plugins</groupId>  
+                    <artifactId>maven-resources-plugin</artifactId>  
+                    <version>2.6</version>  
+                    <executions>  
+                        <execution>  
+                            <id>copy-resources</id>  
+                            <phase>validate</phase>  
+                            <goals>  
+                                <goal>copy-resources</goal>  
+                            </goals>  
+                            <configuration>  
+                                <outputDirectory>${project.build.outputDirectory}/</outputDirectory>   
+                                <resources>  
+                                    <resource>  
+                                        <directory>${project.basedir}/src/repository/rc/</directory>  
+                                        <filtering>false</filtering>  
+                                    </resource>  
+                                </resources>  
+                            </configuration>  
+                            <inherited></inherited>  
+                        </execution>  
+                     </executions>  
+                    </plugin>           
+                </plugins>  
+            </build>  
+        </profile>       
      </profiles>  
      <build>
 		 <finalName>chain-restful</finalName>
