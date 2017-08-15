@@ -1,10 +1,5 @@
 package com.utsoft.blockchain.core.rpc.provider;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.ServiceApplyCodeReqMode;
 import com.utsoft.blockchain.api.pojo.UserInfoRequstModel;
@@ -20,8 +15,11 @@ import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.annotation.MotanService;
-
 import tk.mybatis.mapper.entity.Example;
+import java.util.concurrent.TimeUnit;
+import java.util.Date;
+import java.util.List;
+
 /**
  * 注册登陆及获公钥
  * @author hunterfox
@@ -103,6 +101,9 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 		BaseResponseModel<Integer>  rspModel = BaseResponseModel.build();
 		if (CommonUtil.isEmpty(username,service.getApplyCode(),service.getCallbackUrl()) ){
 			return rspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		if(CommonUtil.IsUrl(service.getCallbackUrl())) {
+			return rspModel.setCode(Constants.BAD_REQUEST);	
 		}
 		Example example = new Example(ChaincodeAccessCodePo.class);
 		example.createCriteria().andEqualTo("applyCode",service.getApplyCode());

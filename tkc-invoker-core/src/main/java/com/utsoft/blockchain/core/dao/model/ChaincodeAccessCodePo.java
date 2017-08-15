@@ -48,6 +48,20 @@ public class ChaincodeAccessCodePo implements Serializable {
 	private String urlAddress;
 	
 	/**
+	 * 支持http 方法
+	 */
+	 @Column(name = "support_method",nullable=false)
+	 private String supportMethod;
+	 
+	  public String getSupportMethod() {
+		 return supportMethod;
+	  }
+
+	  public void setSupportMethod(String supportMethod) {
+	    this.supportMethod = supportMethod;
+	   }
+	
+	/**
 	 * 时间
 	 */
 	@Temporal(TemporalType.TIMESTAMP)

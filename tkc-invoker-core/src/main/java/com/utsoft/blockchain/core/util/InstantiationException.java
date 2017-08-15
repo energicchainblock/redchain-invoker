@@ -8,8 +8,7 @@ import com.utsoft.blockchain.api.exception.ServiceProcessException;
 public class InstantiationException extends ServiceProcessException {
 
 	private static final long serialVersionUID = -7906120123110847469L;
-	
-	public InstantiationException(String message) {
-		super(message);
+	public InstantiationException(int errorCode, String message) {
+		super(errorCode, message);
 	}
 }

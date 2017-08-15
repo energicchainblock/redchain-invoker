@@ -1,6 +1,7 @@
 package com.utsoft.blockchain.core.dao.model;
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,30 +16,45 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "t_chain_transaction")
-public class TransactionResultPo  implements Serializable {
+public class TransactionResultPo implements Serializable {
 	
 	private static final long serialVersionUID = 7877754150521126742L;
 
 	 @Id
-	 @Column(name = "submitId",unique=true,length=64,nullable=false)
-	 private String submitId;
-	 
 	 @Column(name = "txId",unique=true,length=64,nullable=false)
 	 private String txId;
 	 
-	 @Column(name = "apply_code",unique=true,length=64,nullable=false)
+	 /**
+	  * 用户账号
+	  */
+	 @Column(name = "toAccount")
+	 private String to;
+	 
+	 @Column(name = "submitId")
+	 private String submitId;
+	 
+	 @Column(name = "apply_code")
 	 private String applyCode;
 	 
 	 @Column(name = "result_status")
 	 private byte resultStatus;
-	 /**
-	  * 用户账号
-	  */
-	 private String to;
 	 
+	 @Column(name = "block_status")
+	 private byte blockStatus;
+
 	 /**
-	  * 0 回调结果成功
+	  * 回调次数
 	  */
+	 @Column(name = "counter")
+	 private byte counter;
+	  
+	 /**
+	  * 2:没有回调地址
+	  * -1 失败
+	  * 200  回调结果成功
+	  * 0  没有开启
+	  */
+	 @Column(name = "tstatus")
 	 private int status;
 	 
 	 @Temporal(TemporalType.TIMESTAMP)
@@ -109,5 +125,19 @@ public class TransactionResultPo  implements Serializable {
 	}
 	public void setGmtCreate(Date gmtCreate) {
 		this.gmtCreate = gmtCreate;
+	}
+
+	public byte getCounter() {
+		return counter;
+	}
+	public void setCounter(byte counter) {
+		this.counter = counter;
+	}
+	public byte getBlockStatus() {
+		return blockStatus;
+	}
+
+	public void setBlockStatus(byte blockStatus) {
+		this.blockStatus = blockStatus;
 	}
 }

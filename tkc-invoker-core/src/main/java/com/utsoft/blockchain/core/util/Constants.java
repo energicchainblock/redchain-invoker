@@ -15,6 +15,7 @@ public class Constants {
 	 
 	 public static final int FABRIC_MANAGER_INVALID = 1;
 	 public static final int FABRIC_MANAGER_VALID = 0;
+	 public static final String NOT_DEBUG_MODE = "fabric_debug_mode";
 	 /**
 	  * 默认过期时间
 	  */

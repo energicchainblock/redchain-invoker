@@ -292,7 +292,7 @@ public class ChannelClientPoolManager {
 				}
 			}
 		} catch (InvalidProtocolBufferException | InvalidArgumentException | ProposalException e) {
-			throw new ServiceProcessException("query block is error testTxID {" + testTxID + "} e:{} ", e);
+			throw new ServiceProcessException(com.utsoft.blockchain.api.util.Constants.SEVER_INNER_ERROR,"query block is error testTxID {" + testTxID + "} e:{} ", e);
 		}
 		return dto;
 	}
@@ -347,7 +347,7 @@ public class ChannelClientPoolManager {
 				 return null;
 			  }).get(invokeWaitTime, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-		  throw new ServiceProcessException("instantiate chaincode {"+chaincodeID+"} and Organization {" + orgconfig + "} objects={"+objects+"} ", e);
+		  throw new ServiceProcessException(com.utsoft.blockchain.api.util.Constants.EXECUTE_PROCESS_ERROR,"instantiate chaincode {"+chaincodeID+"} and Organization {" + orgconfig + "} objects={"+objects+"} ", e);
 		}
 	}
 	

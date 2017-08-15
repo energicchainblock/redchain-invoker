@@ -45,7 +45,7 @@ public interface ITkcTransactionExportService {
 	 * @param sign 交易签名 sign=md5(applyCategory=1&from=2&created=xxx)
 	 * @return 
 	 */
-	BaseResponseModel<TkcQueryDetailRspVo> getTransactionDetail(String applyCategory,String from,String created,String sign);
+	BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String from,String created,String sign);
 	
 	/**
 	 * 根据交易 txId 查询 block info

@@ -12,6 +12,7 @@ import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
 import com.utsoft.blockchain.api.security.FamilySecCrypto;
+import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.core.dao.mapper.FabricCaUserMapper;
 import com.utsoft.blockchain.core.dao.model.FabricCaUserPo;
 import com.utsoft.blockchain.core.fabric.ca.CaClientManager;
@@ -115,20 +116,20 @@ public class CaUserServiceImpl implements ICaUserService {
 					fabricCaUserMapper.insert(fabricCaUserPo);
 					
 					if (fabricAuthorizedUser.getEnrollment() == null) {
-						throw new ServiceProcessException("user not enroll");
+						throw new ServiceProcessException(Constants.EXECUTE_FAIL_ERROR,"user not enroll");
 					}
 					String privateKey;
 					try {
 						privateKey = familySecCrypto.convertPrivatelicKey(fabricAuthorizedUser.getEnrollment().getKey());
 					} catch (CryptionException e) {
-						throw new ServiceProcessException("user private key is not convert");
+						throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 					}
 					userInfo.setPrivateKey(privateKey);
 					userInfo.setToken(fabricCaUserPo.getEnrollmentSecret());
 					return userInfo;
 				}
 			}
-			throw new ServiceProcessException("apply register fabric user fail");
+			throw new ServiceProcessException(Constants.EXECUTE_FAIL_ERROR,"apply register fabric user fail");
 		} else {
 
 			FabricCaUserPo fabricCaUserPo = userlist.get(0);
@@ -139,7 +140,7 @@ public class CaUserServiceImpl implements ICaUserService {
 				privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
 
 			} catch (CryptionException e) {
-				throw new ServiceProcessException("user private key is not convert");
+				throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 			}
 
 			userInfo.setPrivateKey(privateKey);
@@ -165,13 +166,13 @@ public class CaUserServiceImpl implements ICaUserService {
 				FabricAuthorizedUser user = new FabricAuthorizedUser(userPo.getUserName(), userPo.getOrganization(),
 						localKeyPrivateStoreService);
 				if (user.getEnrollment() == null) {
-					throw new ServiceProcessException("user not enroll");
+					throw new ServiceProcessException(Constants.EXECUTE_FAIL_ERROR,"user not enroll");
 				}
 				String privateKey;
 				try {
 					privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
 				} catch (CryptionException e) {
-					throw new ServiceProcessException("user private key is not convert");
+					throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 				}
 				caUserInfoDto = new UserInfoRspModel();
 				caUserInfoDto.setToken(token);

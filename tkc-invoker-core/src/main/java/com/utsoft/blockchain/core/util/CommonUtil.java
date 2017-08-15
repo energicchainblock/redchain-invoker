@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,7 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import com.utsoft.blockchain.api.util.SdkUtil;
 /**
- * 简单的工具
+ * 简单工具
  * 
  * @author <a href="flyskyhunter@gmail.com">王波</a>
  * @date 2017年7月27日
@@ -54,6 +56,22 @@ public class CommonUtil {
 		return obj != null;
 	}
 
+	public static boolean isEmail(String str) {
+		 String regex = "^([\\w-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
+		 return match(regex, str);
+      }
+	
+	 public static boolean IsUrl(String str) {
+		String regex = "http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?";
+	     return match(regex, str);
+     }
+	
+	 private static boolean match(String regex, String str) {
+		 Pattern pattern = Pattern.compile(regex);
+		 Matcher matcher = pattern.matcher(str);
+		 return matcher.matches();
+	 }
+	 
 	/**
 	 * 集合是否为空
 	 * 

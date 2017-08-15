@@ -28,6 +28,9 @@ public class TkcTransactionBlockInfoDto  implements Serializable{
 	 */
 	private String chainCurrentHash;
 	
+	/**
+	 * 数据hash
+	 */
 	private String datahash;
 	
 	private Integer txValCodeNumber;

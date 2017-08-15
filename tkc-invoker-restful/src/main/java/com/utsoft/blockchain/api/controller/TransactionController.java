@@ -38,7 +38,7 @@ public class TransactionController extends AbstractController {
 	@RequestMapping(value = "/get_account_detail", method = RequestMethod.GET)
 	public BaseResponseModel<TkcQueryDetailRspVo> getOrderByTrade(@RequestParam(required=true) String applyCode,
 			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
-		 return transactionService.getTransactionDetail(applyCode, from, created, sign);
+		 return transactionService.getAccountDetail(applyCode, from, created, sign);
 	}
 	
 	/**

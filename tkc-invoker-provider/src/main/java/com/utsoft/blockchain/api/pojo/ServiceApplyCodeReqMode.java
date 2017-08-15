@@ -1,5 +1,7 @@
 package com.utsoft.blockchain.api.pojo;
 import java.io.Serializable;
+
+import com.utsoft.blockchain.api.util.HttpMethod;
 /**
  * 业务申请注册对象
  * @author hunterfox
@@ -18,6 +20,19 @@ public class ServiceApplyCodeReqMode implements Serializable {
 	 * 地址
 	 */
 	private String callbackUrl;
+	
+	/**
+	 * 支持http 只支持 post | get 
+	 * 目前支持post 回调
+	 */
+	private HttpMethod supportMethod;
+	
+	public HttpMethod getSupportMethod() {
+		return supportMethod;
+	}
+	public void setSupportMethod(HttpMethod supportMethod) {
+		this.supportMethod = supportMethod;
+	}
 	public String getApplyCode() {
 		return applyCode;
 	}

@@ -27,10 +27,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
-
-import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
-
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;

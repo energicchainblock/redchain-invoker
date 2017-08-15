@@ -56,7 +56,7 @@ public class ApiTest {
 	 @Value("${user.token}")
 	 private String token ; 
 	 
-	 private static String txId ="53726fda86a9f4a3f1c7a4580f8f168829ef64a4e405c7fb7a2fe28c3704e8bb";
+	 private static String txId ="37f2a0dfeac0ab06e5bdf7db58e2821e6160fe56c486a456f678c4b63486c9ef";
 	@Before
 	public void setup() {
 		
@@ -110,7 +110,7 @@ public class ApiTest {
 			return ;
 		}
 		
-		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getTransactionDetail(applyCategory, from, created, sign);
+		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCategory, from, created, sign);
 		System.out.println(JSON.toJSON(baseResponse.getData()));
 		assertEquals(baseResponse.getCode(),"200");
 	}

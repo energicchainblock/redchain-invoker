@@ -12,20 +12,32 @@ import org.apache.commons.codec.CharEncoding;
 public class Constants {
 
 	 public final static int OK = 200;
+	 /**
+	  * 实体无法找到
+	  */
 	 public final static int ITEM_NOT_FIND = 404;
 	 /**
-	  * 对象已经存在
+	  * 实体已经存在
 	  */
 	 public final static int ITEM_EXITS = 405;
-	 
+	 /**
+	  * 服务器内部处理错误
+	  */
 	 public final static int SEVER_INNER_ERROR = 500;
 	 /**
 	  * 流程处理错误
 	  */
 	 public final static int  EXECUTE_PROCESS_ERROR = 501;
+	 /**
+	  * 执行失败
+	  */
+	 public final static int  EXECUTE_FAIL_ERROR = 502;
+	 /**
+	  * 错误请求
+	  */
 	 public final static int BAD_REQUEST = 400;
 	 /**
-	  * 参数错误
+	  * 参数错误,不能为空
 	  */
 	 public final static int PARAMETER_ERROR_NULl = 401;
 	 /**

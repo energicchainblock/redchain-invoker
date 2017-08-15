@@ -43,7 +43,7 @@ public class ExchangedController {
 	public TkcQueryDetailRspVo getOrderByTrade(@RequestParam(required=true) String applyCode,
 			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
 	
-		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getTransactionDetail(applyCode,from,created,sign);
+		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCode,from,created,sign);
 		return baseResponse.getData();
 	}
 	

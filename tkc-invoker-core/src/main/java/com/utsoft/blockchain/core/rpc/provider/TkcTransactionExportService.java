@@ -1,8 +1,11 @@
 package com.utsoft.blockchain.core.rpc.provider;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -17,9 +20,11 @@ import com.utsoft.blockchain.api.security.CryptionConfig;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.api.util.SdkUtil;
 import com.utsoft.blockchain.api.util.SignaturePlayload;
+import com.utsoft.blockchain.core.dao.model.TransactionResultPo;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
 import com.utsoft.blockchain.core.service.ICaUserService;
+import com.utsoft.blockchain.core.service.deamon.ASynTransactionTask;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
@@ -43,6 +48,9 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
     
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    
+	@Autowired
+	private ASynTransactionTask aSynTransactionTask;
 	
 	@Override
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign) {
@@ -88,6 +96,30 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					BeanUtils.copyProperties(result, resultModel);
 					resultModel.setExternals(model.getExternals());
 					submitRspModel.setData(resultModel);
+					
+					/**
+					 * 记录 to 通知回调
+					 */
+					TransactionResultPo transactionResult =new TransactionResultPo();
+					transactionResult.setTo(to);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setGmtCreate(new Date());
+					aSynTransactionTask.notify(transactionResult);
+					/**
+					 * 记录b 通知回调
+					 */
+					transactionResult =new TransactionResultPo();
+					transactionResult.setTo(from);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setGmtCreate(new Date());
+					aSynTransactionTask.notify(transactionResult);
+					
 				} else {
 					submitRspModel.setCode(Constants.SINGATURE_ERROR);
 				}
@@ -101,7 +133,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	}
 
 	@Override
-	public BaseResponseModel<TkcQueryDetailRspVo> getTransactionDetail(String applyCategory, String from,
+	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory, String from,
 			String created, String sign) {
 
 		BaseResponseModel<TkcQueryDetailRspVo> queryModel = BaseResponseModel.build();
@@ -226,6 +258,18 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 
+					/**
+					 * 记录 to 通知回调
+					 */
+					TransactionResultPo transactionResult =new TransactionResultPo();
+					transactionResult.setTo(to);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setGmtCreate(new Date());
+					aSynTransactionTask.notify(transactionResult);
+					
 					BeanUtils.copyProperties(result, resultModel);
 					resultModel.setExternals(model.getExternals());
 					submitRspModel.setData(resultModel);

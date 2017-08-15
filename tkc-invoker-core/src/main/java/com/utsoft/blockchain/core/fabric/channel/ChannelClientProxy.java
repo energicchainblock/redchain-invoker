@@ -284,7 +284,10 @@ public class ChannelClientProxy {
 		List<String> objects = new ArrayList<String>();
 		objects.add(reqtQueryOrderDto.getCmd().toLowerCase());
 
-		objects.add("");
+		 if(IGlobals.getBooleanProperty(Constants.NOT_DEBUG_MODE,false)){
+			objects.add(""); 
+		 }
+		
 		if (reqtQueryOrderDto.getToAccount() != null) {
 			objects.add(reqtQueryOrderDto.getToAccount());
 		}

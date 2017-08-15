@@ -6,10 +6,19 @@
        <id column="submitId" jdbcType="VARCHAR" property="submitId" />
        <result column="txId" jdbcType="VARCHAR" property="txId" />
        <result column="apply_code" jdbcType="VARCHAR" property="applyCode" />
-       <result column="result_status" jdbcType="INTEGER" property="resultStatus" />
-        <result column="status" jdbcType="INTEGER" property="status" />
-       <result column="to" jdbcType="VARCHAR" property="to" />
+       <result column="result_status" jdbcType="TINYINT" property="resultStatus" />
+       <result column="tstatus" jdbcType="TINYINT" property="status" />
+        <result column="counter" jdbcType="TINYINT" property="counter" />
+       <result column="block_status" jdbcType="TINYINT" property="blockStatus" />
+       <result column="toAccount" jdbcType="VARCHAR" property="to" />
        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
        <result column="callback_time" jdbcType="TIMESTAMP" property="callbackTime" />
     </resultMap>
+   
+     <update id="updateMoveCallBackHisotryResult" parameterType="com.utsoft.blockchain.core.dao.model.TransactionResultPo">
+   
+        insert into t_chain_transaction_his(txId,toAccount,submitId,apply_code,counter,block_status,result_status,tstatus,callback_time,gmt_create)values(#{txId,jdbcType=VARCHAR},#{to,jdbcType=VARCHAR},
+        #{submitId,jdbcType=VARCHAR},#{applyCode,jdbcType=VARCHAR},#{counter,jdbcType=TINYINT},#{blockStatus,jdbcType=TINYINT},#{resultStatus,jdbcType=TINYINT},#{resultStatus},#{callbackTime,jdbcType=TIMESTAMP},#{gmtCreate,jdbcType=TIMESTAMP});
+        delete from t_chain_transaction where txId=#{txId} and toAccount=#{to};
+    </update>
 </mapper>

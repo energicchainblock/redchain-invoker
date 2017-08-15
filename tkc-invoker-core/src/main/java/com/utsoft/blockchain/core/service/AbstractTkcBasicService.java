@@ -1,13 +1,10 @@
 package com.utsoft.blockchain.core.service;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ResourceUtils;
-
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeAccessCodeMapper;
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeMapper;
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeOrgConfigMapper;
@@ -21,7 +18,6 @@ import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.utsoft.blockchain.core.util.SystemExceptionHandler;
-
 import tk.mybatis.mapper.entity.Example;
 /**
  * 把与交易无关代码抽象到父类
