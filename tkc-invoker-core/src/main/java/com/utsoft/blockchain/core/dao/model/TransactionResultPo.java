@@ -41,8 +41,15 @@ public class TransactionResultPo implements Serializable {
 	 
 	 @Column(name = "block_status")
 	 private byte blockStatus;
-
+	 
 	 /**
+	  *  0:表示转出
+	  *  1:表示转进
+	  */
+	 @Column(name = "forward")
+	 private byte forward;
+
+	/**
 	  * 回调次数
 	  */
 	 @Column(name = "counter")
@@ -139,5 +146,13 @@ public class TransactionResultPo implements Serializable {
 
 	public void setBlockStatus(byte blockStatus) {
 		this.blockStatus = blockStatus;
+	}
+	
+	public byte getForward() {
+		return forward;
+	}
+
+	public void setForward(byte forward) {
+		this.forward = forward;
 	}
 }

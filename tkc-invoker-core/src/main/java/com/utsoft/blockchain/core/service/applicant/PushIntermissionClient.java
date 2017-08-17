@@ -34,14 +34,15 @@ public class PushIntermissionClient {
 	 */
     public boolean sendPushmsg(String callbackUrl ,TransactionResultPo transactionResult) throws ServiceProcessException {
 	  
-   
-			Map<String, Object> request = new HashMap<>();
-			request.put("reqId", transactionResult.getSubmitId());
-			request.put("txId", transactionResult.getTxId());
-			request.put("txTime", transactionResult.getTxId());
-			request.put("status", transactionResult.getStatus());
+			Map<String, Object> params = new HashMap<>();
+			params.put("reqId", transactionResult.getSubmitId());
+			params.put("txId", transactionResult.getTxId());
+			params.put("txTime", transactionResult.getCallbackTime()!=null?transactionResult.getCallbackTime().getTime():0L);
+			params.put("status", transactionResult.getStatus());
+			params.put("user", transactionResult.getTo());
+			params.put("forward", transactionResult.getForward());
 			try {
-				ResponseEntity<TransactionCallRsp> rsp = template.postForEntity(callbackUrl, request,
+				ResponseEntity<TransactionCallRsp> rsp = template.postForEntity(callbackUrl,params,
 						TransactionCallRsp.class);
 				if (rsp.getStatusCode() == HttpStatus.OK) {
 
@@ -64,6 +65,7 @@ public class PushIntermissionClient {
 				transactionResultMapper.updateCallBackResult(transactionResult);
 				return false;
 			} catch (Exception ex) {
+			
 				transactionResult.setResultStatus((byte) -1);
 				transactionResult.setStatus(-1);
 				transactionResult.setCallbackTime(new Date());

@@ -45,7 +45,7 @@ import com.utsoft.blockchain.api.pojo.ReqtQueryOrderDto;
 import com.utsoft.blockchain.api.pojo.RspQueryResultDto;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.util.CommonUtil;
-import com.utsoft.blockchain.core.util.Constants;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 
@@ -90,7 +90,7 @@ public class ChannelClientProxy {
 					CommonUtil.getEventHubProperties(eventHubName));
 			newChannel.addEventHub(eventHub);
 		}
-		int waitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+		int waitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 120000);
 		newChannel.setTransactionWaitTime(waitTime);
 		newChannel.initialize();
 
@@ -194,11 +194,11 @@ public class ChannelClientProxy {
 
 		String[] submit;
 		if (order.getFromAccount()!=null) {
-			submit = new String[] { order.getCmd(),order.getFromAccount(), order.getToAccount(), order.getJson() };
+			submit = new String[] {"move", order.getCmd(), order.getToAccount(),order.getFromAccount(), order.getJson() };
 		} else {
-			submit = new String[] { order.getCmd(), order.getToAccount(),"", order.getJson() };
+			submit = new String[] { "move",order.getCmd(), order.getToAccount(),"", order.getJson() };
 		}
-		int proposalWaitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+		int proposalWaitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 120000);
 		TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
 		transactionProposalRequest.setChaincodeID(chaincodeID);
 		transactionProposalRequest.setFcn("invoke");
@@ -283,15 +283,15 @@ public class ChannelClientProxy {
 
 		List<String> objects = new ArrayList<String>();
 		objects.add(reqtQueryOrderDto.getCmd().toLowerCase());
-
-		 if(IGlobals.getBooleanProperty(Constants.NOT_DEBUG_MODE,false)){
-			objects.add(""); 
-		 }
 		
 		if (reqtQueryOrderDto.getToAccount() != null) {
 			objects.add(reqtQueryOrderDto.getToAccount());
 		}
 		
+	    if(IGlobals.getBooleanProperty(LocalConstants.NOT_DEBUG_MODE,true)){
+				objects.add(""); 
+		}
+			
 		if (reqtQueryOrderDto.getJson() != null) {
 			objects.add(reqtQueryOrderDto.getJson());
 		}
@@ -471,7 +471,7 @@ public class ChannelClientProxy {
           Collection<ProposalResponse> failed = new LinkedList<>();
           Collection<ProposalResponse> responses;
           
-		  int proposalWaitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+		  int proposalWaitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 120000);
 	      InstantiateProposalRequest instantiateProposalRequest = client.newInstantiationProposalRequest();
           instantiateProposalRequest.setProposalWaitTime(proposalWaitTime);
           instantiateProposalRequest.setChaincodeID(chaincodeID);
@@ -546,7 +546,7 @@ public class ChannelClientProxy {
 					CommonUtil.getEventHubProperties(eventHubName));
 			newChannel.addEventHub(eventHub);
 		}
-		int waitTime = IGlobals.getIntProperty(Constants.PROPOSALWAITTIME, 120000);
+		int waitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 120000);
 		newChannel.setTransactionWaitTime(waitTime);
 		newChannel.initialize();
 		return newChannel;

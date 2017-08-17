@@ -29,7 +29,7 @@ import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
 import com.utsoft.blockchain.core.util.CommonUtil;
-import com.utsoft.blockchain.core.util.Constants;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import com.utsoft.blockchain.core.util.IGlobals;
 /**
  * @author hunterfox
@@ -69,7 +69,7 @@ public class CaClientManager {
 	 */
 	public boolean adminInstall(FabricAuthorizedUser admin) throws InstantiationException {
 		this.admin =admin;
-		if (this.admin.getStatus()==Constants.FABRIC_MANAGER_INVALID) {
+		if (this.admin.getStatus()==LocalConstants.FABRIC_MANAGER_INVALID) {
 			install();
 			return true;
 		}
@@ -100,7 +100,7 @@ public class CaClientManager {
 		if (fabricCaClient!=null && !admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
            try {
 				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
-				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
+				admin.setStatus(LocalConstants.FABRIC_MANAGER_VALID);
 			} catch (EnrollmentException | InvalidArgumentException e) {
 				throw new InstantiationException("intallCaClient install exception");
 			}
@@ -132,7 +132,7 @@ public class CaClientManager {
 		if (fabricCaClient!=null && !admin.isEnrolled()) { // Preregistered admin only needs to be enrolled with Fabric CA.
             try {
 				admin.setEnrollment(fabricCaClient.enroll(admin.getName(),admin.getEnrollmentSecret()));
-				admin.setStatus(Constants.FABRIC_MANAGER_VALID);
+				admin.setStatus(LocalConstants.FABRIC_MANAGER_VALID);
 			} catch (EnrollmentException | InvalidArgumentException e) {
 				throw new ServiceProcessException("intallCaClient install exception");
 			}
@@ -141,7 +141,7 @@ public class CaClientManager {
 
 	public FabricAuthorizedUser registerUser(String name, String orgInfo, String affliation,String password) {
 		checkFabricClientInstall();
-		FabricAuthorizedUser user = new FabricAuthorizedUser(name,orgInfo,Constants.FABRIC_MANAGER_VALID,localKeyPrivateStoreService);
+		FabricAuthorizedUser user = new FabricAuthorizedUser(name,orgInfo,LocalConstants.FABRIC_MANAGER_VALID,localKeyPrivateStoreService);
 		// users need to be registered AND enrolled
 		 RegistrationRequest rr;
 		 try {

@@ -7,9 +7,10 @@
        <result column="txId" jdbcType="VARCHAR" property="txId" />
        <result column="apply_code" jdbcType="VARCHAR" property="applyCode" />
        <result column="result_status" jdbcType="TINYINT" property="resultStatus" />
-       <result column="tstatus" jdbcType="TINYINT" property="status" />
-        <result column="counter" jdbcType="TINYINT" property="counter" />
+       <result column="tstatus" jdbcType="INTEGER" property="status" />
+       <result column="counter" jdbcType="TINYINT" property="counter" />
        <result column="block_status" jdbcType="TINYINT" property="blockStatus" />
+       <result column="forward" jdbcType="TINYINT" property="forward" />
        <result column="toAccount" jdbcType="VARCHAR" property="to" />
        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
        <result column="callback_time" jdbcType="TIMESTAMP" property="callbackTime" />
@@ -17,8 +18,8 @@
    
      <update id="updateMoveCallBackHisotryResult" parameterType="com.utsoft.blockchain.core.dao.model.TransactionResultPo">
    
-        insert into t_chain_transaction_his(txId,toAccount,submitId,apply_code,counter,block_status,result_status,tstatus,callback_time,gmt_create)values(#{txId,jdbcType=VARCHAR},#{to,jdbcType=VARCHAR},
-        #{submitId,jdbcType=VARCHAR},#{applyCode,jdbcType=VARCHAR},#{counter,jdbcType=TINYINT},#{blockStatus,jdbcType=TINYINT},#{resultStatus,jdbcType=TINYINT},#{resultStatus},#{callbackTime,jdbcType=TIMESTAMP},#{gmtCreate,jdbcType=TIMESTAMP});
+        insert into t_chain_transaction_his(txId,toAccount,submitId,apply_code,counter,block_status,result_status,tstatus,forward,callback_time,gmt_create)values(#{txId,jdbcType=VARCHAR},#{to,jdbcType=VARCHAR},
+        #{submitId,jdbcType=VARCHAR},#{applyCode,jdbcType=VARCHAR},#{counter,jdbcType=TINYINT},#{blockStatus,jdbcType=TINYINT},#{resultStatus,jdbcType=TINYINT},#{resultStatus},#{forward},#{callbackTime,jdbcType=TIMESTAMP},#{gmtCreate,jdbcType=TIMESTAMP});
         delete from t_chain_transaction where txId=#{txId} and toAccount=#{to};
     </update>
 </mapper>

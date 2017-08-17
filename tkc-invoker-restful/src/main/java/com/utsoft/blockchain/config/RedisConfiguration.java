@@ -17,7 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.utsoft.blockchain.core.util.Constants;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import redis.clients.jedis.JedisPoolConfig;
 /**
  * @author hunterfox
@@ -87,7 +87,7 @@ public class RedisConfiguration  extends CachingConfigurerSupport {
 	    public CacheManager cacheManager(RedisTemplate redisTemplate) {
 	        RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
 	       // 设置缓存过期时间
-	        rcm.setDefaultExpiration(Constants.REDIS_EXPIRE_TTL);
+	        rcm.setDefaultExpiration(LocalConstants.REDIS_EXPIRE_TTL);
 	        return rcm;
 	    }
 	    

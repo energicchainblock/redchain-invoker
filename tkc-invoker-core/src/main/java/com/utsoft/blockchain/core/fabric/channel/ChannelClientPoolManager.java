@@ -33,7 +33,7 @@ import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoDto;
 import com.utsoft.blockchain.core.fabric.GobalFabricMapStore;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.util.CommonUtil;
-import com.utsoft.blockchain.core.util.Constants;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import com.utsoft.blockchain.core.util.IGlobals;
 /**
  * 区块链代理及配置manager
@@ -112,7 +112,7 @@ public class ChannelClientPoolManager {
 	 */
  	 public SubmitRspResultDto submitRequest(ChaincodeID chaincodeID,ReqtOrderDto order) {
  		   Channel channel = getChannel(chaincodeID);
-	       int invokeWaitTime =  IGlobals.getIntProperty(Constants.INVOKEWAITTIME, 10000);
+	       int invokeWaitTime =  IGlobals.getIntProperty(LocalConstants.INVOKEWAITTIME, 10000);
 			try {
 				return  channelClientProxy.submitRequest(client,channel, chaincodeID, order)
 				   .thenApply(transactionEvent -> {
@@ -327,7 +327,7 @@ public class ChannelClientPoolManager {
 	 * @return
 	 */
 	public SubmitRspResultDto instantiateChaincodeInOrganization(ChaincodeID chaincodeID,File dorsementpolicyFile,List<String> objects) {
-		int invokeWaitTime =  IGlobals.getIntProperty(Constants.INVOKEWAITTIME, 10000);
+		int invokeWaitTime =  IGlobals.getIntProperty(LocalConstants.INVOKEWAITTIME, 10000);
 		Channel channel = getChannel(chaincodeID);
 		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgByMatch(chaincodeID);
 		try {

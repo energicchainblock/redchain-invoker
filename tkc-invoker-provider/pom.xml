@@ -6,7 +6,7 @@
      <version>0.0.1-SNAPSHOT</version>
    </parent>
    <artifactId>tkc-invoker-provider</artifactId>
-   <name>tkc-invoker-rpc call interface</name>
+   <name>tkc-invoker-provider</name>
    <description>interface provider third party</description>
    <properties>
         <bouncycastle.version>1.55</bouncycastle.version>
@@ -57,7 +57,21 @@
 		            </goals>
 		        </execution>
 		     </executions>
-		     </plugin>
+		  </plugin>
+		     	<!--  <plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			     <executions>
+		         <execution>
+		          <goals>
+		            <goal>repackage</goal>
+		          </goals>
+		          <configuration>
+		             <executable>false</executable>
+		          </configuration>
+		         </execution>
+                </executions>
+			</plugin> --> 
 		 </plugins>
      </build>
 </project>

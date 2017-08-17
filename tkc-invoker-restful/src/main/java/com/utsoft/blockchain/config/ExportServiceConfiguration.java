@@ -51,6 +51,7 @@ public class ExportServiceConfiguration  {
 		 String  application = IGlobals.getProperty("motan.config.application");
 		 
 		 BasicServiceConfigBean config = new BasicServiceConfigBean();
+		// config.setHost("114.55.98.91");
 	     config.setExport("tkcExportServer:8002");
 	     config.setRegistry("registryConfig");
 	     config.setGroup(group);

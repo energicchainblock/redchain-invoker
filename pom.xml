@@ -34,9 +34,9 @@
     </developers>
     
      <modules>
-	   <module>tkc-invoker-restful</module>
-	   <module>tkc-invoker-core</module>
-	   <module>tkc-invoker-provider</module>
+       <module>tkc-invoker-provider</module>
+       <module>tkc-invoker-restful</module>
+	   <module>tkc-invoker-core</module> 
 	   <module>tkc-invoker-lib</module>
     </modules>
     <dependencyManagement>
@@ -160,10 +160,10 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-             <plugin>
+           <!--   <plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+			</plugin> -->
             </plugins>
       </build>
         <distributionManagement>

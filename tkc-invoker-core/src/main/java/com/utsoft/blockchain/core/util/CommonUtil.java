@@ -62,7 +62,7 @@ public class CommonUtil {
       }
 	
 	 public static boolean IsUrl(String str) {
-		String regex = "http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?";
+		 String regex = "^([hH][tT]{2}[pP]:/*|[hH][tT]{2}[pP][sS]:/*|[fF][tT][pP]:/*)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/])+(\\?{0,1}(([A-Za-z0-9-~]+\\={0,1})([A-Za-z0-9-~]*)\\&{0,1})*)$"; //http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?
 	     return match(regex, str);
      }
 	

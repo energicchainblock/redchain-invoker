@@ -107,9 +107,9 @@
             <properties>              
                 <build.profile.id>test</build.profile.id>
             </properties> 
-             <activation>
+            <!--  <activation>
               <activeByDefault>true</activeByDefault>
-            </activation>
+            </activation> -->
              <build>  
                 <plugins>  
                     <plugin>  

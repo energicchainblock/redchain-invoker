@@ -40,10 +40,10 @@ public class FormatUtil {
 	  }
 	  
 	  public static String redisTransferPrefix(String ... key) {
-		 return redis_cache_prefix(Constants.TKC_TRANSFER_MOVE,key);
+		 return redis_cache_prefix(LocalConstants.TKC_TRANSFER_MOVE,key);
 	  }  
 	  
 	  public static String redisRechargePrefix(String ... key) {
-		 return redis_cache_prefix(Constants.TKC_RECHAHRGE_MOVE,key);
+		 return redis_cache_prefix(LocalConstants.TKC_RECHAHRGE_MOVE,key);
 	}  
 }

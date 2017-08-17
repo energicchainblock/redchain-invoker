@@ -28,6 +28,7 @@ import com.utsoft.blockchain.core.service.deamon.ASynTransactionTask;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import com.weibo.api.motan.config.springsupport.annotation.MotanService;
 
 /**
@@ -65,7 +66,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		/**
 		 * 输入参数检查
 		 */
-		if (CommonUtil.isEmpty(applyCategory,from,to,submitJson,created,sign) ){
+		if (CommonUtil.isEmpty(applyCategory,from,cmd,submitJson,created,sign) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		synchronized(created) {
@@ -107,6 +108,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setTxId(result.getTxId());
 					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
 					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
 					aSynTransactionTask.notify(transactionResult);
 					/**
 					 * 记录b 通知回调
@@ -118,6 +120,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setTxId(result.getTxId());
 					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
 					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_OUTCONMING);
 					aSynTransactionTask.notify(transactionResult);
 					
 				} else {
@@ -268,6 +271,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setTxId(result.getTxId());
 					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
 					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
 					aSynTransactionTask.notify(transactionResult);
 					
 					BeanUtils.copyProperties(result, resultModel);

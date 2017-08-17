@@ -156,8 +156,8 @@ public abstract class AbstractTkcBasicService {
 	                     /**
 	                      * 注册配置信息
 	                      */
-	                     chaincodeManager.registerChannelConfig(chaincodeID, fabricAuthorizedOrg);
-					   //  chaincodeManager.start(chaincodeID,fabricAuthorizedOrg);
+	                    chaincodeManager.registerChannelConfig(chaincodeID, fabricAuthorizedOrg);
+					   // chaincodeManager.start(chaincodeID,fabricAuthorizedOrg);
 				    } catch (Exception ex) {
 					   SystemExceptionHandler.getInstance().handlerException(ex);
 				  } 

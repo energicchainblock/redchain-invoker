@@ -10,7 +10,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
-import com.utsoft.blockchain.core.util.Constants;
+import com.utsoft.blockchain.core.util.LocalConstants;
 import io.netty.util.internal.StringUtil;
 /**
  * @author hunterfox
@@ -137,7 +137,7 @@ public class FabricAuthorizedUser implements User,Serializable {
      * @return {@code true} if enrolled; otherwise {@code false}.
      */
     public boolean isEnrolled() {
-        return status == Constants.FABRIC_MANAGER_VALID && this.enrollment != null;
+        return status == LocalConstants.FABRIC_MANAGER_VALID && this.enrollment != null;
     }
 
     /**

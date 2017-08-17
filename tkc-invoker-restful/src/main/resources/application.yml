@@ -39,6 +39,7 @@ fabric:
   invokeWaitTime: 100000
   deployWaitTime: 120000
   proposalWaitTime: 120000
+  not_debug_mode: true
   peer_root_path: channel/crypto-config/peerOrganizations/
   order_root_path: channel/crypto-config/ordererOrganizations/
 #############motan-config###############
