@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.utsoft.blockchain</groupId>
-  <artifactId>tkc-invoker</artifactId>
+  <artifactId>redchain-invoker</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>digital currency trading platform and digital currency trading center</name>
@@ -34,10 +34,10 @@
     </developers>
     
      <modules>
-       <module>tkc-invoker-provider</module>
-       <module>tkc-invoker-restful</module>
-	   <module>tkc-invoker-core</module> 
-	   <module>tkc-invoker-lib</module>
+       <module>redchain-invoker-provider</module>
+       <module>redchain-invoker-restful</module>
+	   <module>redchain-invoker-core</module> 
+	   <module>redchain-invoker-lib</module>
     </modules>
     <dependencyManagement>
 		<dependencies>
@@ -164,9 +164,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin> -->
-            </plugins>
+          </plugins>
       </build>
-        <distributionManagement>
+       <distributionManagement>
 		  <repository>
 				<id>releases</id>
 				<name>Nexus Release Repository</name>

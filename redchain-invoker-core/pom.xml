@@ -2,10 +2,10 @@
    <modelVersion>4.0.0</modelVersion>
    <parent>
     <groupId>com.utsoft.blockchain</groupId>
-    <artifactId>tkc-invoker</artifactId>
+    <artifactId>redchain-invoker</artifactId>
      <version>0.0.1-SNAPSHOT</version>
    </parent>
-   <artifactId>tkc-invoker-core</artifactId>
+   <artifactId>redchain-invoker-core</artifactId>
    <name>basic support</name>
    <description>
      support basic function as fellow:register,enroll ,transaction  and select history
@@ -13,7 +13,7 @@
    <dependencies>
       <dependency>
 			<groupId>com.utsoft.blockchain</groupId>
-			<artifactId>tkc-invoker-provider</artifactId>
+			<artifactId>redchain-invoker-provider</artifactId>
 			<version>${project.version}</version>
 	   </dependency>
       <!--start of log import -->

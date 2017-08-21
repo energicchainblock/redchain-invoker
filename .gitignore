@@ -2,9 +2,9 @@
 *.prefs
 *.classpath
 /target/*
-tkc-invoker-core/target/
-tkc-invoker-lib/target/
-tkc-invoker-provider/target/
-tkc-invoker-restful/target/
-tkc-invoker-restful/.settings/org.eclipse.wst.common.project.facet.core.xml
-tkc-invoker-lib/.factorypath
+redchain-invoker-core/target/
+redchain-invoker-lib/target/
+redchain-invoker-provider/target/
+redchain-invoker-restful/target/
+redchain-invoker-restful/.settings/org.eclipse.wst.common.project.facet.core.xml
+redchain-invoker-lib/.factorypath

@@ -2,11 +2,11 @@
   <modelVersion>4.0.0</modelVersion>
    <parent>
     <groupId>com.utsoft.blockchain</groupId>
-     <artifactId>tkc-invoker</artifactId>
+     <artifactId>redchain-invoker</artifactId>
      <version>0.0.1-SNAPSHOT</version>
    </parent>
-   <artifactId>tkc-invoker-provider</artifactId>
-   <name>tkc-invoker-provider</name>
+   <artifactId>redchain-invoker-provider</artifactId>
+   <name>redchain-invoker-provider</name>
    <description>interface provider third party</description>
    <properties>
         <bouncycastle.version>1.55</bouncycastle.version>
@@ -57,21 +57,7 @@
 		            </goals>
 		        </execution>
 		     </executions>
-		  </plugin>
-		     	<!--  <plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			     <executions>
-		         <execution>
-		          <goals>
-		            <goal>repackage</goal>
-		          </goals>
-		          <configuration>
-		             <executable>false</executable>
-		          </configuration>
-		         </execution>
-                </executions>
-			</plugin> --> 
+		   </plugin>
 		 </plugins>
      </build>
 </project>

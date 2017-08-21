@@ -2,16 +2,16 @@
   <modelVersion>4.0.0</modelVersion>
    <parent>
     <groupId>com.utsoft.blockchain</groupId>
-     <artifactId>tkc-invoker</artifactId>
+     <artifactId>redchain-invoker</artifactId>
      <version>0.0.1-SNAPSHOT</version>
    </parent>
-   <artifactId>tkc-invoker-lib</artifactId>
-   <name>tkc-invoker common library</name>
+   <artifactId>redchain-invoker-lib</artifactId>
+   <name>redchain-invoker common library</name>
    <description>library for other module use</description>
    <dependencies>
    <dependency>
 			<groupId>com.utsoft.blockchain</groupId>
-			<artifactId>tkc-invoker-provider</artifactId>
+			<artifactId>redchain-invoker-provider</artifactId>
 			<version>${project.version}</version>
 	   </dependency>
 	   <dependency>  
