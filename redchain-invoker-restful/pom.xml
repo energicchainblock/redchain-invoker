@@ -241,7 +241,7 @@
 							<goal>repackage</goal>
 						</goals>
 						<configuration>
-							<mainClass>com.utsoft.blockchain.redchainInvokerApplicationServer</mainClass>
+							<mainClass>com.utsoft.blockchain.TkcInvokerApplicationServer</mainClass>
 						</configuration>
 					</execution>
 				</executions>
