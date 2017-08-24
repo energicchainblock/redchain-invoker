@@ -3,12 +3,14 @@ import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.ServiceApplyCodeReqMode;
 import com.utsoft.blockchain.api.pojo.UserInfoRequstModel;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
+import com.weibo.api.motan.transport.async.MotanAsync;
 /**
  * 用户信息及申请信息
  * @author hunterfox
  * @date: 2017年8月1日
  * @version 1.0.0
  */
+@MotanAsync
 public interface ITkcAccountStoreExportService {
 
 	

@@ -30,7 +30,6 @@ import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.LocalConstants;
 import com.weibo.api.motan.config.springsupport.annotation.MotanService;
-
 /**
  * tkc 交易信息实现
  * 

@@ -6,6 +6,7 @@ import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
 import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TransactionVarModel;
+import com.weibo.api.motan.transport.async.MotanAsync;
 /**
  * tkc 区块链交易，查询 对外服务器rpc 接口
  * <ul>
@@ -17,6 +18,7 @@ import com.utsoft.blockchain.api.pojo.TransactionVarModel;
  * @date: 2017年8月1日
  * @version 1.0.0
  */
+@MotanAsync
 public interface ITkcTransactionExportService {
 
 	
@@ -27,6 +29,7 @@ public interface ITkcTransactionExportService {
      * @return 返回提交结果
      * @throws ServiceProcessException
      */
+	
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign);
 	
 	/**

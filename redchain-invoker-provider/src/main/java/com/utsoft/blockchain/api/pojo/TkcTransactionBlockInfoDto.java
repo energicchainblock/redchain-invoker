@@ -29,6 +29,17 @@ public class TkcTransactionBlockInfoDto  implements Serializable{
 	private String chainCurrentHash;
 	
 	/**
+	 * 区块链高度
+	 */
+	private long height;
+	
+	public long getHeight() {
+		return height;
+	}
+	public void setHeight(long height) {
+		this.height = height;
+	}
+	/**
 	 * 数据hash
 	 */
 	private String datahash;

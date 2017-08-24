@@ -1,5 +1,7 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -204,14 +206,15 @@ public class ChannelClientPoolManager {
 			BlockchainInfo channelInfo = channel.queryBlockchainInfo();
 			String chainCurrentHash = Hex.encodeHexString(channelInfo.getCurrentBlockHash());
 			dto.setChainCurrentHash(chainCurrentHash);
-
+			dto.setHeight(channelInfo.getHeight());
+			
 			BlockInfo blockInfo = channel.queryBlockByTransactionID(testTxID);
 			String previousHash = Hex.encodeHexString(blockInfo.getPreviousHash());
 			String datahash = Hex.encodeHexString(blockInfo.getDataHash());
 			long blockNumber = blockInfo.getBlockNumber();
 			dto.setBlockNumber(blockNumber);
 			dto.setPreviousHash(previousHash);
-
+			
 			TransactionInfo txInfo = channel.queryTransactionByID(testTxID);
 			dto.setTxValCodeNumber(txInfo.getValidationCode().getNumber());
 			dto.setDatahash(datahash);
@@ -230,29 +233,58 @@ public class ChannelClientPoolManager {
 				if (envelopeInfo.getType() == TRANSACTION_ENVELOPE) {
 
 					BlockInfo.TransactionEnvelopeInfo transactionEnvelopeInfo = (BlockInfo.TransactionEnvelopeInfo) envelopeInfo;
-
-					List<List<JSONObject>> transactionActionInfoList = new ArrayList<>();
 					envelopeObject.put("transactionActionInfoCount",
 							transactionEnvelopeInfo.getTransactionActionInfoCount());
 					envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
 					envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
 
+					List<JSONObject> transactionActionInfoList = new ArrayList<>();
+					
 					for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo
 							.getTransactionActionInfos()) {
 
+						JSONObject  transactionActionInfoObject = new JSONObject();
+						
+						transactionActionInfoObject.put("responseStatus",transactionActionInfo.getResponseStatus());
+						try {
+							transactionActionInfoObject.put("responseMsg", new String(transactionActionInfo.getResponseMessageBytes(), "UTF-8"));
+						} catch (UnsupportedEncodingException e1) {
+							logger.error(" parser error by encode ",e1);
+						}
+						transactionActionInfoObject.put("endorsementsCount", transactionActionInfo.getEndorsementsCount());
+                          
+						/**
+						 * endorserInfoObjects 
+						 */
+						List<JSONObject> endorserInfoObjects = new ArrayList<>();
+						for (int n = 0; n < transactionActionInfo.getEndorsementsCount(); ++n) {
+                             
+							  BlockInfo.EndorserInfo endorserInfo = transactionActionInfo.getEndorsementInfo(n);
+                              JSONObject endorserInfoObject = new JSONObject();
+                              endorserInfoObject.put("signature", Hex.encodeHexString(endorserInfo.getSignature()));
+                              try {
+								endorserInfoObject.put("endorser", new String(endorserInfo.getEndorser(), "UTF-8"));
+							} catch (UnsupportedEncodingException e) {
+								logger.error(" parser error by encode ",e);
+							}
+                            endorserInfoObjects.add(endorserInfoObject);
+                        }
+						transactionActionInfoObject.put("endorsement", endorserInfoObjects);
+						
 						TxReadWriteSetInfo rwsetInfo = transactionActionInfo.getTxReadWriteSet();
 						if (null != rwsetInfo) {
 
 							List<JSONObject> rwsetInfoObjects = new ArrayList<>();
+							
 							for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : rwsetInfo.getNsRwsetInfos()) {
 
+								JSONObject rwsObject = new JSONObject();
 								final String namespace = nsRwsetInfo.getNaamespace();
 								KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
 
-								JSONObject rwsObject = new JSONObject();
 								List<JSONObject> readObjects = new ArrayList<>();
 								for (KvRwset.KVRead readList : rws.getReadsList()) {
-
+									
 									JSONObject readObject = new JSONObject();
 									readObject.put("read_version_block", readList.getVersion().getBlockNum());
 									readObject.put("readKey", readList.getKey());
@@ -267,25 +299,24 @@ public class ChannelClientPoolManager {
 								List<JSONObject> writerObjects = new ArrayList<>();
 								for (KvRwset.KVWrite writeList : rws.getWritesList()) {
 
-									String valAsString = "";
 									JSONObject writeObject = new JSONObject();
+									String valAsString = "";
 									try {
 										valAsString = CommonUtil.printableString(
 												new String(writeList.getValue().toByteArray(), "UTF-8"));
 										writeObject.put("writevalue", valAsString);
-										writerObjects.add(writeObject);
 									} catch (UnsupportedEncodingException e) {
 										e.printStackTrace();
 									}
 									writeObject.put("writekey", writeList.getKey());
 									writeObject.put("writenamespace", namespace);
-									rwsObject.put("writeLists", writeObject);
+									writerObjects.add(writeObject);
 								}
 								rwsObject.put("writerList", writerObjects);
-
 								rwsetInfoObjects.add(rwsObject);
 							}
-							transactionActionInfoList.add(rwsetInfoObjects);
+							transactionActionInfoObject.put("sourceInfo", rwsetInfoObjects);
+							transactionActionInfoList.add(transactionActionInfoObject);
 						}
 					}
 					envelopeObject.put("list", transactionActionInfoList);
