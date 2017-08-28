@@ -119,12 +119,15 @@ public class CaUserServiceImpl implements ICaUserService {
 						throw new ServiceProcessException(Constants.EXECUTE_FAIL_ERROR,"user not enroll");
 					}
 					String privateKey;
+					String publicKey = null;
 					try {
+						publicKey  = familySecCrypto.convertPublicKey(fabricCaUserPo.getCert());
 						privateKey = familySecCrypto.convertPrivatelicKey(fabricAuthorizedUser.getEnrollment().getKey());
 					} catch (CryptionException e) {
 						throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 					}
 					userInfo.setPrivateKey(privateKey);
+					userInfo.setPublicKey(publicKey);
 					userInfo.setToken(fabricCaUserPo.getEnrollmentSecret());
 					return userInfo;
 				}
@@ -169,12 +172,15 @@ public class CaUserServiceImpl implements ICaUserService {
 					throw new ServiceProcessException(Constants.EXECUTE_FAIL_ERROR,"user not enroll");
 				}
 				String privateKey;
+				String publicKey = null;
 				try {
+					publicKey  = familySecCrypto.convertPublicKey(user.getEnrollment().getCert());
 					privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
 				} catch (CryptionException e) {
 					throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 				}
 				caUserInfoDto = new UserInfoRspModel();
+				caUserInfoDto.setPublicKey(publicKey);
 				caUserInfoDto.setToken(token);
 				caUserInfoDto.setPrivateKey(privateKey);
 			}

@@ -1,8 +1,11 @@
 package com.utsoft.blockchain.api.security;
+import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.interfaces.ECPublicKey;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.WrongfulArgumentException;
+import com.utsoft.blockchain.api.security.bc.RbcAddress;
 /** 
  * 加解密套装
  * @author hunterfox
@@ -64,16 +67,37 @@ public interface FamilySecCrypto {
      * @return the base64 data.
      */
      String convertPrivatelicKey(PrivateKey key) throws CryptionException;
+     
+     /**
+      * get key String according to Public key
+      * @param key
+      * @return the base64 data.
+      */
+     String convertPublicKey(String key) throws CryptionException;
+     
     
      /**
       * from String convert PrivateKey
-      * @param privateKeyStr
+      * @param privateKey
       * @return PrivateKey otherwise null;
       * @throws CryptionException
       */
-     PrivateKey loadPrivateKeyByStr(String privateKeyStr)  throws  CryptionException ;   
+      PrivateKey loadPrivateKeyByStr(String privateKey) throws  CryptionException;   
+      
+      /**
+       * 从证书中获取公钥信息
+       * @param certificate
+       * @return
+       * @throws CryptionException
+       */
+      String loadPublicKeyByCert(byte[] certificate) throws  CryptionException;   
+      
+     /**
+      * default generator KeyFactory
+      * @return KeyFactory
+      */
+      KeyFactory generatorKeyFactory();
      
-
      public  class Factory {
          private Factory() {
 

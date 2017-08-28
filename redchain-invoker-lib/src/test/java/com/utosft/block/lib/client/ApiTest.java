@@ -18,7 +18,7 @@ import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
-import com.utsoft.blockchain.api.pojo.TransactionVarModel;
+import com.utsoft.blockchain.api.pojo.TkcTransferModel;
 import com.utsoft.blockchain.api.pojo.UserInfoRequstModel;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
 import com.utsoft.blockchain.api.proivder.ITkcAccountStoreExportService;
@@ -55,6 +55,9 @@ public class ApiTest {
 
 	 @Value("${user.token}")
 	 private String token ; 
+	 
+	 @Value("${user.publicKey}")
+	 private String publicKey ;
 	 
 	 private static String txId ="37f2a0dfeac0ab06e5bdf7db58e2821e6160fe56c486a456f678c4b63486c9ef";
 	@Before
@@ -95,12 +98,13 @@ public class ApiTest {
 		String from = username;
 		
 		/**
+		 *  sign=md5(applyCategory=1&created=2&from=3&publicKey=4)
 		 * 注意顺序
 		 */
 		signaturePlayload.addPlayload(applyCategory);
 		signaturePlayload.addPlayload(from);
 		signaturePlayload.addPlayload(created);
-		
+		signaturePlayload.addPlayload(publicKey);
 		 String sign;
 		 try {
 			sign = signaturePlayload.doSignature(privateKey);
@@ -110,7 +114,7 @@ public class ApiTest {
 			return ;
 		}
 		
-		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCategory, from, created, sign);
+		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCategory,publicKey, from, created, sign);
 		System.out.println(JSON.toJSON(baseResponse.getData()));
 		assertEquals(baseResponse.getCode(),"200");
 	}
@@ -155,7 +159,8 @@ public class ApiTest {
 		String submitJson ="10";
 		String created = SdkUtil.generateId();
 		
-		TransactionVarModel model = new TransactionVarModel(applyCategory,"move");
+		TkcTransferModel model = new TkcTransferModel(applyCategory,publicKey,"move");
+		model.setPublicKey(publicKey);
 		model.setCreated(created);
 		model.setFrom(username);
 		model.setTo(to);
@@ -165,15 +170,17 @@ public class ApiTest {
 		SignaturePlayload signaturePlayload = new SignaturePlayload(familyCrypto);
 		String from = username;
 		/**
-		 * md5(applyCategory=1&from=2&to=3&cmd=4&submitJson=5&created=xxx)
+		 * sign=md5(applyCategory=1&created=2&from=3&publicKey=4&serviceCode=5&submitJson=6&to=7)
 		 * 注意顺序
 		 */
 		signaturePlayload.addPlayload(applyCategory);
+		signaturePlayload.addPlayload(created);
 		signaturePlayload.addPlayload(from);
-		signaturePlayload.addPlayload(to);
+		signaturePlayload.addPlayload(publicKey);
 		signaturePlayload.addPlayload("move");
 		signaturePlayload.addPlayload(submitJson);
-		signaturePlayload.addPlayload(created);
+		signaturePlayload.addPlayload(to);
+		
 		String sign;
 		 try {
 			sign = signaturePlayload.doSignature(privateKey);
@@ -201,15 +208,15 @@ public class ApiTest {
 	
 		String created = SdkUtil.generateId();
 		String from = username;
-		
+		//sign=md5(applyCategory=1&created=2&from=3&publicKey=4&txId=5)
 		/**
 		 * 注意顺序
 		 */
 		signaturePlayload.addPlayload(applyCategory);
-		signaturePlayload.addPlayload(from);
-		signaturePlayload.addPlayload(txId);
 		signaturePlayload.addPlayload(created);
-		
+		signaturePlayload.addPlayload(from);
+		signaturePlayload.addPlayload(publicKey);
+		signaturePlayload.addPlayload(txId);
 		 String sign;
 		 try {
 			sign = signaturePlayload.doSignature(privateKey);
@@ -218,7 +225,7 @@ public class ApiTest {
 			fail("not sign success ");
 			return ;
 		}
-	   BaseResponseModel<TkcTransactionBlockInfoVo> baseResponse = tkcTransactionExportService.listStockChanges(applyCategory,from, txId, created, sign);
+	   BaseResponseModel<TkcTransactionBlockInfoVo> baseResponse = tkcTransactionExportService.listStockChanges(applyCategory,publicKey,from, txId, created, sign);
 	   assertEquals(baseResponse.getCode(),200);
 	   if (baseResponse.isSuccess()) {
 		   System.out.println(JSON.toJSON(baseResponse.getData()));

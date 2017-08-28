@@ -6,12 +6,12 @@ package com.utsoft.blockchain.api.pojo;
  * @date: 2017年8月1日
  * @version 1.0.0
  */
-public class TransactionVarModel extends TransactionBaseModel {
+public class TkcTransferModel extends TransactionBaseModel {
 
 	private static final long serialVersionUID = -1679807399924446074L;
 	
-	public TransactionVarModel(String applyCategory, String serviceCode) {
-		super(applyCategory, serviceCode);
+	public TkcTransferModel(String publicKey,String applyCategory, String serviceCode) {
+		super(publicKey,applyCategory, serviceCode);
 	}
 	/**
 	 * from 转出账户

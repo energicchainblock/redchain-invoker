@@ -8,7 +8,7 @@ import java.util.Map;
  * @date: 2017年8月8日
  * @version 1.0.0
  */
-public class TransactionBaseModel implements Serializable {
+public class TransactionBaseModel  extends TkcBaseRequest implements Serializable {
 
 	private static final long serialVersionUID = -8846578516164402064L;
 
@@ -19,8 +19,6 @@ public class TransactionBaseModel implements Serializable {
 	/**
 	 * 指令
 	 */
-	//protected TransactionCmd cmd = TransactionCmd.RECHARGE ;
-	
 	protected String serviceCode;
 
 	/**
@@ -42,8 +40,8 @@ public class TransactionBaseModel implements Serializable {
 	 */
 	private Map<String,Object> externals = new HashMap<>();
 	
-	
-	public TransactionBaseModel(String applyCategory,String serviceCode) {
+	public TransactionBaseModel(String publicKey,String applyCategory,String serviceCode) {
+		super(publicKey);
 		this.applyCategory = applyCategory; 
 		this.serviceCode = serviceCode;
 	}
@@ -79,13 +77,7 @@ public class TransactionBaseModel implements Serializable {
 	public void setApplyCategory(String applyCategory) {
 		this.applyCategory = applyCategory;
 	}
-	/*public TransactionCmd getCmd() {
-		return cmd;
-	}
-	public void setCmd(TransactionCmd cmd) {
-		this.cmd = cmd;
-	}*/
-	
+
 	public String getSubmitJson() {
 		return submitJson;
 	}

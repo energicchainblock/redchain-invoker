@@ -9,7 +9,7 @@ import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
-import com.utsoft.blockchain.api.pojo.TransactionVarModel;
+import com.utsoft.blockchain.api.pojo.TkcTransferModel;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.core.rpc.provider.TkcTransactionExportService;
 import io.swagger.annotations.Api;
@@ -36,9 +36,9 @@ public class TransactionController extends AbstractController {
 	 * @return
 	 */
 	@RequestMapping(value = "/get_account_detail", method = RequestMethod.GET)
-	public BaseResponseModel<TkcQueryDetailRspVo> getOrderByTrade(@RequestParam(required=true) String applyCode,
+	public BaseResponseModel<TkcQueryDetailRspVo> getOrderByTrade(@RequestParam(required=true) String applyCode,String publicKey,
 			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
-		 return transactionService.getAccountDetail(applyCode, from, created, sign);
+		 return transactionService.getAccountDetail(applyCode,publicKey,from, created, sign);
 	}
 	
 	/**
@@ -48,13 +48,13 @@ public class TransactionController extends AbstractController {
 	 * @param to   目标账号
 	 * @param submitJson 内容
 	 * @param created
-	 * @param sign  md5签名结果:sign=md5(applyCode=xxx&from=xxx&to=xxx&submitJson=xxx&created=xxx)
+	 * @param sign  md5签名结果:sign=md5(applyCategory=1&created=2&from=3&publicKey=4&serviceCode=5&submitJson=6&to=7)
 	 * @return SubmitRspVo
 	 */
 	@RequestMapping(value = "/tranfer", method = RequestMethod.POST)
-	public BaseResponseModel<TkcSubmitRspVo> tranfer(@RequestParam(required=true) String applyCode,String from,String to,String submitJson,String created,String sign) {
+	public BaseResponseModel<TkcSubmitRspVo> tranfer(@RequestParam(required=true) String applyCode,String publicKey,String serviceCode,String from,String to,String submitJson,String created,String sign) {
 	
-		TransactionVarModel model = new TransactionVarModel(applyCode,Constants.MOVE);
+		TkcTransferModel model = new TkcTransferModel(publicKey,applyCode,serviceCode);
 		model.setFrom(from);
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
@@ -68,13 +68,13 @@ public class TransactionController extends AbstractController {
 	 * @param to   目标账号
 	 * @param submitJson 内容
 	 * @param created
-	 * @param sign  md5签名结果:sign=md5(applyCode=xxxto=xxx&submitJson=xxx&created=xxx)
+	 * @param sign  md5签名结果:sign=md5(applyCategory=1&created=2&publicKey=3&serviceCode=4&submitJson=5&to=6)
 	 * @return SubmitRspVo
 	 */
 	@RequestMapping(value = "/recharge", method = RequestMethod.POST)
-	public BaseResponseModel<TkcSubmitRspVo> recharge(@RequestParam(required=true) String applyCode,String to,String submitJson,String created,String sign) {
+	public BaseResponseModel<TkcSubmitRspVo> recharge(@RequestParam(required=true) String applyCode,String publicKey,String to,String serviceCode,String submitJson,String created,String sign) {
 	
-		TransactionBaseModel model = new TransactionBaseModel(applyCode,Constants.RECHARGE);
+		TransactionBaseModel model = new TransactionBaseModel(publicKey,applyCode,serviceCode);
 		model.setTo(to);
 		model.setSubmitJson(submitJson);
 		model.setCreated(created);

@@ -33,7 +33,7 @@ public class TckRepositoryController extends AbstractController {
 	 * @return
 	 */
 	@RequestMapping(value = "/listStockChanges", method = RequestMethod.GET)
-	public BaseResponseModel<TkcTransactionBlockInfoVo> listStockChanges(@RequestParam(required=true) String applyCode,@RequestParam(required=true) String from,String txId,String created,String sign) {
-		return transactionService.listStockChanges(applyCode, from, txId, created, sign);
+	public BaseResponseModel<TkcTransactionBlockInfoVo> listStockChanges(@RequestParam(required=true) String applyCode,String publicKey,@RequestParam(required=true) String from,String txId,String created,String sign) {
+		return transactionService.listStockChanges(applyCode,publicKey,from,txId,created, sign);
 	}
 }

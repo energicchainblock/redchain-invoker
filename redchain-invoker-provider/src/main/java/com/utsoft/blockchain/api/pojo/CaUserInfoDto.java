@@ -6,12 +6,20 @@ import java.io.Serializable;
  * @date: 2017年8月2日
  * @version 1.0.0
  */
-public class CaUserInfoDto implements Serializable{
+public class CaUserInfoDto  implements Serializable{
 
 	private static final long serialVersionUID = -1294664761824972857L;
-	
 	private String token;
 	private String privateKey;
+    protected String publicKey;
+	
+    public String getPublicKey() {
+		return publicKey;
+	}
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}	
+	
 	public String getToken() {
 		return token;
 	}

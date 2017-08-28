@@ -12,6 +12,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -24,10 +25,13 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+
 import javax.xml.bind.DatatypeConverter;
+
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
@@ -82,6 +86,11 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 		}
 	 }
 	 
+	 @Override
+	 public KeyFactory generatorKeyFactory() {
+		return generator;
+	}  
+	 
 	public boolean verifySignature(byte[] pemcertificate, String signatureAlgorithm, byte[] signature, byte[] plainText)
 			throws CryptionException {
 		// TODO Auto-generated method stub
@@ -99,7 +108,9 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 			BufferedInputStream pem = new BufferedInputStream(new ByteArrayInputStream(pemcertificate));
 			CertificateFactory certFactory = CertificateFactory.getInstance(CERTIFICATE_FORMAT);
 			X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(pem);
-
+			//PublicKey publicKey = certificate.getPublicKey();  
+			//String publicKeyString = SdkUtil.toHexString(publicKey.getEncoded());
+			//System.out.print(publicKeyString);
 			  //isVerified = validateCertificate(certificate);
 			  //if (isVerified) { // only proceed if cert is trusted
 				Signature sig = Signature.getInstance(signatureAlgorithm);
@@ -112,7 +123,7 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 					+ "\r\nCertificate: " + DatatypeConverter.printHexBinary(pemcertificate), e);
 			logger.error(ex.getMessage(), ex);
 			throw ex;
-		} catch (NoSuchAlgorithmException | SignatureException e) {
+		} catch (NoSuchAlgorithmException | SignatureException  e ) {
 			CryptionException ex = new CryptionException(
 					"Cannot verify. Signature algorithm is invalid. Error is: " + e.getMessage(), e);
 			logger.error(ex.getMessage(), ex);
@@ -288,9 +299,14 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 	}
 
 	@Override
+	public String convertPublicKey(String publicKey) throws CryptionException {
+		  return SdkUtil.toHexString(publicKey);
+	}
+	
+	@Override
 	public PrivateKey loadPrivateKeyByStr(String privateKeyStr) throws CryptionException {
 		try {
-		  byte[] sourcePrivateKey  = SdkUtil.tofromHexStrig(privateKeyStr);
+		   byte[] sourcePrivateKey  = SdkUtil.tofromHexStrig(privateKeyStr);
            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(sourcePrivateKey);
            PrivateKey privateKey = generator.generatePrivate(privateKeySpec);
          return privateKey;
@@ -299,7 +315,30 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
       }
 	}
 
-
+	@Override
+	public String loadPublicKeyByCert(byte[] certificates) throws CryptionException {
+		
+		if (certificates == null) {
+			return null;
+		}
+		String publicKeyString = null;
+		try {
+			BufferedInputStream pem = new BufferedInputStream(new ByteArrayInputStream(certificates));
+			CertificateFactory certFactory = CertificateFactory.getInstance(CERTIFICATE_FORMAT);
+			X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(pem);
+			
+			PublicKey publicKey = certificate.getPublicKey();  
+			ECPublicKey ecPublickey = (ECPublicKey)publicKey;
+			 publicKeyString = SdkUtil.toHexString(ecPublickey.getEncoded());
+		    return publicKeyString;
+		} catch (CertificateException e) {
+			CryptionException ex = new CryptionException("Cannot convert publickey. Error is: " + e.getMessage()
+					+ "\r\nCertificate: " + DatatypeConverter.printHexBinary(certificates), e);
+			logger.error(ex.getMessage(), ex);
+			throw ex;
+		} 
+	}
+	
 	@Override
 	public void init() throws CryptionException,WrongfulArgumentException {
 		this.setSecurityLevel(this.securityLevel);
@@ -333,4 +372,11 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
         }
         this.hashAlgorithm = algorithm;
     }
+    
+    boolean checkEC(ECPublicKey key) throws WrongfulArgumentException {  
+        if (key.getParams().getCurve().getField().getFieldSize() != 256) {  
+            throw new WrongfulArgumentException("Curve must be NIST P-256");  
+        }  
+        return true;
+    } 
 }

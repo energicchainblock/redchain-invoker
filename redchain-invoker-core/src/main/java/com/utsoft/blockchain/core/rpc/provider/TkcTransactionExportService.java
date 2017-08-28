@@ -14,7 +14,7 @@ import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoDto;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
 import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
-import com.utsoft.blockchain.api.pojo.TransactionVarModel;
+import com.utsoft.blockchain.api.pojo.TkcTransferModel;
 import com.utsoft.blockchain.api.proivder.ITkcTransactionExportService;
 import com.utsoft.blockchain.api.security.CryptionConfig;
 import com.utsoft.blockchain.api.util.Constants;
@@ -40,9 +40,6 @@ import com.weibo.api.motan.config.springsupport.annotation.MotanService;
 @MotanService(export = "tkcExportServer:8002")
 public class TkcTransactionExportService extends AbstractTkcRpcBasicService implements ITkcTransactionExportService {
 
-	@Autowired
-	private ICaUserService caUserService;
-
     @Autowired
 	private RedisRepository<String,Object> redisRepository;
     
@@ -53,43 +50,46 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	private ASynTransactionTask aSynTransactionTask;
 	
 	@Override
-	public BaseResponseModel<TkcSubmitRspVo> tranfer(TransactionVarModel model,String sign) {
+	public BaseResponseModel<TkcSubmitRspVo> tranfer(TkcTransferModel model,String sign) {
 
 		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
 		String applyCategory = model.getApplyCategory();
 		String from = model.getFrom();
 		String to = model.getTo();
 		String submitJson = model.getSubmitJson();
-		String cmd = model.getServiceCode();
+		String serviceCode = model.getServiceCode();
 		String created = model.getCreated();
+		String publicKey = model.getPublicKey();
 		/**
 		 * 输入参数检查
 		 */
-		if (CommonUtil.isEmpty(applyCategory,from,cmd,submitJson,created,sign) ){
+		if (CommonUtil.isEmpty(applyCategory,from,serviceCode,submitJson,created,sign,publicKey) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
-			TransactionVarModel processOrder = (TransactionVarModel) redisRepository.get(userPrefix);
+			TkcTransferModel processOrder = (TkcTransferModel) redisRepository.get(userPrefix);
 			if (processOrder!=null) {
 				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return submitRspModel;
 			} 
 			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
-			
+			//sign=md5(applyCategory=1&created=2&from=3&publicKey=4&serviceCode=5&submitJson=6&to=7)
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(model.getApplyCategory());
-			signaturePlayload.addPlayload(from);
-			signaturePlayload.addPlayload(to);
-			signaturePlayload.addPlayload(cmd);
-			signaturePlayload.addPlayload(submitJson);
 			signaturePlayload.addPlayload(created);
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(publicKey);
+			signaturePlayload.addPlayload(to);
+			signaturePlayload.addPlayload(serviceCode);
+			signaturePlayload.addPlayload(submitJson);
+			
 			try {
-				if (verfyPlayload(from, signaturePlayload, sign)) {
+				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
-					SubmitRspResultDto result = transactionService.tranfer(applyCategory, from, to, cmd, submitJson);
+					SubmitRspResultDto result = transactionService.tranfer(applyCategory,from,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 
@@ -135,11 +135,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	}
 
 	@Override
-	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory, String from,
+	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String publicKey,String from,
 			String created, String sign) {
 
 		BaseResponseModel<TkcQueryDetailRspVo> queryModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(applyCategory,from,created,sign) ){
+		if (CommonUtil.isEmpty(applyCategory,from,created,sign,publicKey) ){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 	
@@ -151,14 +151,16 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return queryModel;
 			} 
+			//sign=md5(applyCategory=1&created=2&from=3&publicKey=4)
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(applyCategory);
-			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(created);
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(publicKey);
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
 			
 			try {
-				if (verfyPlayload(from,signaturePlayload, sign)) {
+				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,Constants.QUERY);
 					if (result == null)
@@ -178,11 +180,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	}
 
 	@Override
-	public BaseResponseModel<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory, String from, String txId,
+	public BaseResponseModel<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory,String publicKey, String from, String txId,
 			String created, String sign) {
 
 		BaseResponseModel<TkcTransactionBlockInfoVo> queryModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(applyCategory,from,created,txId,sign) ){
+		if (CommonUtil.isEmpty(applyCategory,from,created,txId,sign,publicKey) ){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		synchronized(created) {
@@ -192,14 +194,17 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return queryModel;
 			} 
+			//sign=md5(applyCategory=1&created=2&from=3&publicKey=4&txId=5)
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(applyCategory);
-			signaturePlayload.addPlayload(from);
-			signaturePlayload.addPlayload(txId);
 			signaturePlayload.addPlayload(created);
+			signaturePlayload.addPlayload(from);
+			signaturePlayload.addPlayload(publicKey);
+			signaturePlayload.addPlayload(txId);
+		
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
 			try {
-				if (verfyPlayload(from, signaturePlayload, sign)) {
+				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);
 
@@ -228,35 +233,40 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		String applyCategory = model.getApplyCategory();
 		String to = model.getTo();
 		String submitJson = model.getSubmitJson();
-		String cmd = model.getServiceCode();
+		String serviceCode = model.getServiceCode();
 		String created = model.getCreated();
+		String publicKey = model.getPublicKey();
+		
 		/**
 		 * 输入参数检查
 		 */
-		if (CommonUtil.isEmpty(applyCategory,to,submitJson,created,sign) ){
+		if (CommonUtil.isEmpty(applyCategory,to,submitJson,publicKey,created,sign) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisRechargePrefix(to,created);
-			TransactionVarModel processOrder = (TransactionVarModel) redisRepository.get(userPrefix);
+			TkcTransferModel processOrder = (TkcTransferModel) redisRepository.get(userPrefix);
 			if (processOrder!=null) {
 				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return submitRspModel;
 			} 
 			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
 			
+			//sign=md5(applyCategory=1&created=2&publicKey=3&serviceCode=4&submitJson=5&to=6)
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(model.getApplyCategory());
-			signaturePlayload.addPlayload(to);
-			signaturePlayload.addPlayload(cmd);
-			signaturePlayload.addPlayload(submitJson);
 			signaturePlayload.addPlayload(created);
+			signaturePlayload.addPlayload(publicKey);
+			signaturePlayload.addPlayload(serviceCode);
+			signaturePlayload.addPlayload(submitJson);
+			signaturePlayload.addPlayload(to);
+			
 			try {
-				if (verfyPlayload(to, signaturePlayload, sign)) {
+				if (verfyPlayload(to,publicKey,signaturePlayload, sign)) {
 
 					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
-					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,cmd, submitJson);
+					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 
@@ -296,11 +306,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	 * @param sourceSign
 	 * @return
 	 */
-	private boolean verfyPlayload(String from, SignaturePlayload signaturePlayload, String sourceSign) {
-		FabricAuthorizedUser fabricuser = caUserService.getFabricUser(from);
+	private boolean verfyPlayload(String from,String publicKey,SignaturePlayload signaturePlayload, String sourceSign) {
+		
 		byte[] plainText = signaturePlayload.originalPacket();
 		byte[] signature = SdkUtil.tofromHexStrig(sourceSign);
-		byte[] certificate = fabricuser.getEnrollment().getCert().getBytes();
+		byte[] certificate = SdkUtil.tofromHexStrig(publicKey);
 		CryptionConfig config = CryptionConfig.getConfig();
 		try {
 			return familySecCrypto.verifySignature(certificate, config.getSignatureAlgorithm(), signature, plainText);
