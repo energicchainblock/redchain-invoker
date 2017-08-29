@@ -17,6 +17,7 @@ import java.security.spec.X509EncodedKeySpec;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.security.bc.LazyECPoint;
 import com.utsoft.blockchain.api.security.bc.RbcAddress;
+import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.api.util.SdkUtil;
 /**
  * @author hunterfox
@@ -108,7 +109,7 @@ public class BcECKey {
    }
     
     private RbcAddress toAddress() {
-        return new RbcAddress(1, getPubKeyHash());
+        return new RbcAddress(Constants.BC_ADDRESS_VERSION, getPubKeyHash());
     }
     
     /** Gets the hash160 form of the public key (as seen in addresses). */

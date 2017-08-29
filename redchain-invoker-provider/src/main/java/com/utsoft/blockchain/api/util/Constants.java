@@ -11,6 +11,7 @@ import org.apache.commons.codec.CharEncoding;
  */
 public class Constants {
 
+	 public final static int BC_ADDRESS_VERSION = 1;
 	 public final static int OK = 200;
 	 /**
 	  * 实体无法找到

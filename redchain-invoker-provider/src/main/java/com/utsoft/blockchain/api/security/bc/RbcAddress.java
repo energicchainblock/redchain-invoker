@@ -14,7 +14,7 @@ public class RbcAddress extends VersionedCheckBytes {
 	 * @param encoded
 	 * @throws AddressFormatException
 	 */
-	protected RbcAddress(String encoded) throws BcAddressFormatException {
+	public RbcAddress(String encoded) throws BcAddressFormatException {
 		super(encoded);
 	}
 	
