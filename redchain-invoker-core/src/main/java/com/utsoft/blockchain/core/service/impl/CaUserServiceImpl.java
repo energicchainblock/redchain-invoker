@@ -83,7 +83,6 @@ public class CaUserServiceImpl implements ICaUserService {
 			throws ServiceProcessException {
 
 		UserInfoRspModel userInfo = new UserInfoRspModel();
-
 		Example example = new Example(FabricCaUserPo.class);
 		example.createCriteria().andEqualTo("userName", userName);
 		List<FabricCaUserPo> userlist = fabricCaUserMapper.selectByExample(example);
@@ -138,14 +137,14 @@ public class CaUserServiceImpl implements ICaUserService {
 			FabricCaUserPo fabricCaUserPo = userlist.get(0);
 			FabricAuthorizedUser user = new FabricAuthorizedUser(fabricCaUserPo.getUserName(),
 					fabricCaUserPo.getOrganization(), localKeyPrivateStoreService);
-			String privateKey;
+			String privateKey,publicKey;
 			try {
 				privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
-
+				publicKey  = familySecCrypto.convertPublicKey(fabricCaUserPo.getCert());
 			} catch (CryptionException e) {
 				throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 			}
-
+			userInfo.setPublicKey(publicKey);
 			userInfo.setPrivateKey(privateKey);
 			userInfo.setToken(user.getEnrollmentSecret());
 			return userInfo;

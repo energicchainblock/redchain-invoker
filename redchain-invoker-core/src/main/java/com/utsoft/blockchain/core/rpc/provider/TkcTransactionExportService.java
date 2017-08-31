@@ -309,8 +309,8 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	private boolean verfyPlayload(String from,String publicKey,SignaturePlayload signaturePlayload, String sourceSign) {
 		
 		byte[] plainText = signaturePlayload.originalPacket();
-		byte[] signature = SdkUtil.tofromHexStrig(sourceSign);
-		byte[] certificate = SdkUtil.tofromHexStrig(publicKey);
+		byte[] signature = SdkUtil.decodeHexStrig(sourceSign);
+		byte[] certificate = SdkUtil.decodeHexStrig(publicKey);
 		CryptionConfig config = CryptionConfig.getConfig();
 		try {
 			return familySecCrypto.verifySignature(certificate, config.getSignatureAlgorithm(), signature, plainText);

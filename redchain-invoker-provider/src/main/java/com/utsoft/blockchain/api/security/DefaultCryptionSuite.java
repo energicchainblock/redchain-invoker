@@ -295,18 +295,18 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 
 	@Override
 	public String convertPrivatelicKey(PrivateKey privateKey) throws CryptionException {
-		  return SdkUtil.toHexString(privateKey.getEncoded());
+		  return SdkUtil.encodeHexString(privateKey.getEncoded());
 	}
 
 	@Override
 	public String convertPublicKey(String publicKey) throws CryptionException {
-		  return SdkUtil.toHexString(publicKey);
+		  return SdkUtil.encodeHexString(publicKey);
 	}
 	
 	@Override
 	public PrivateKey loadPrivateKeyByStr(String privateKeyStr) throws CryptionException {
 		try {
-		   byte[] sourcePrivateKey  = SdkUtil.tofromHexStrig(privateKeyStr);
+		   byte[] sourcePrivateKey  = SdkUtil.decodeHexStrig(privateKeyStr);
            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(sourcePrivateKey);
            PrivateKey privateKey = generator.generatePrivate(privateKeySpec);
          return privateKey;
@@ -329,7 +329,7 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 			
 			PublicKey publicKey = certificate.getPublicKey();  
 			ECPublicKey ecPublickey = (ECPublicKey)publicKey;
-			 publicKeyString = SdkUtil.toHexString(ecPublickey.getEncoded());
+			 publicKeyString = SdkUtil.encodeHexString(ecPublickey.getEncoded());
 		    return publicKeyString;
 		} catch (CertificateException e) {
 			CryptionException ex = new CryptionException("Cannot convert publickey. Error is: " + e.getMessage()

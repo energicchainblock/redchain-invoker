@@ -30,6 +30,13 @@ public interface ITkcAccountStoreExportService {
 	public  BaseResponseModel<UserInfoRspModel> getIndividualAccout(String username,String token);
 	
 	/**
+	 * 查询用户是否存在
+	 * @param username
+	 * @return
+	 */
+	public BaseResponseModel<Boolean> isExist(String username);
+	
+	/**
 	 * 服务器申请号码开通
 	 * @param token 申请用户
 	 * @param serviceApplyCodeReqMode 申请内容

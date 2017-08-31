@@ -82,7 +82,7 @@ public class BcECKey {
      * @throws CryptionException
      */
     public RbcAddress loadAddressByPublickey(String publicKey) throws CryptionException {
-    	 byte[] keyBytes = SdkUtil.tofromHexStrig(publicKey);
+    	 byte[] keyBytes = SdkUtil.decodeHexStrig(publicKey);
     	 X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);  
          KeyFactory keyFactory = familySecCrypto.generatorKeyFactory();
          ECPublicKey ecPublicKey;

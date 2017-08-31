@@ -4,6 +4,7 @@ import java.security.PrivateKey;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.security.FamilySecCrypto;
 /**
+ * 非线程安全
  * generate signature
  * @author hunterfox
  * @date: 2017年8月3日
@@ -14,12 +15,21 @@ public class SignaturePlayload {
 	private  static final String spliteSymbol = "&";
 	private StringBuilder sb = new StringBuilder();
 	private FamilySecCrypto crypto;
-	
+	private boolean isTrim = false;
 	public SignaturePlayload() {
 		
 	}
 	public SignaturePlayload(FamilySecCrypto crypto) {
 		this.crypto = crypto;
+	}
+	
+	/**
+	 * 重新初始化，供下一个使用
+	 */
+	public void clean() {
+		isTrim = false;
+		 if(sb.length()>0)
+		 sb.delete(0,sb.length()-1);
 	}
 	
 	/**
@@ -43,8 +53,9 @@ public class SignaturePlayload {
 	 * @return
 	 */
 	public byte[] originalPacket() {
-		if (sb.length()>0) {
+		if (!isTrim && sb.length()>0) {
 		    sb.deleteCharAt(sb.length()-1);	
+		    isTrim = true; 
 		}
 		try {
 			return sb.toString().getBytes(Constants.DEFAULT_CHARSET);
@@ -60,8 +71,9 @@ public class SignaturePlayload {
 	 * @throws CryptionException
 	 */
 	public String doSignature(String key) throws CryptionException {
-		if (sb.length()>0) {
+		if (!isTrim && sb.length()>0) {
 		    sb.deleteCharAt(sb.length()-1);	
+		    isTrim = true;
 		}
 		 PrivateKey privateKey = crypto.loadPrivateKeyByStr(key); 
 		 byte[] encoded;
@@ -71,7 +83,7 @@ public class SignaturePlayload {
 		   } catch (UnsupportedEncodingException e) {
 			throw  new CryptionException("sign key is error:"+e);
 		 }
-		 return SdkUtil.toHexString(encoded);
+		 return SdkUtil.encodeHexString(encoded);
 	}
 	
 	@Override

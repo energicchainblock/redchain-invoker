@@ -237,11 +237,11 @@ public class CommonUtil {
      public static String encryptText(String key,String data) {
     	 byte[] keybyte = key.getBytes();
     	 byte[] src = data.getBytes();
-    	 return SdkUtil.toHexString(encryptMode(keybyte,src));
+    	 return SdkUtil.encodeHexString(encryptMode(keybyte,src));
      }
      
      public static String decrypText(String key,String data) {
-    	 byte[] afterContent = SdkUtil.tofromHexStrig(data);
+    	 byte[] afterContent = SdkUtil.decodeHexStrig(data);
     	 byte[] keybyte = key.getBytes();
     	 return new String(decryptMode(keybyte,afterContent));
      }

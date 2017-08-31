@@ -1,8 +1,8 @@
 package com.utsoft.blockchain.api.util;
-import org.apache.commons.codec.DecoderException;
-import  org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+
 import com.google.common.io.BaseEncoding;
+import com.utsoft.blockchain.api.exception.BcAddressFormatException;
 /**
  * 所有加密的类容
  * @author hunterfox
@@ -29,30 +29,29 @@ public class SdkUtil {
         return String.valueOf(idWorker.nextId());
     }
     
-    public static String toHexString(String source) {
+    public static String encodeHexString(String source) {
        if (source == null) {
             return null;
         }
        byte [] bytes = source.getBytes();
-       return Hex.encodeHexString(bytes);
+       return SuiteBase58.encode(bytes);
     } 
     
-    public static String toHexString(byte[] bytes) {
-        if (bytes == null) {
+    public static String encodeHexString(byte[] bytes) {
+         if (bytes == null) {
              return null;
          }
-        return Hex.encodeHexString(bytes);
+        return SuiteBase58.encode(bytes);
      } 
     
-     public static byte[] tofromHexStrig(String source) {
+     public static byte[] decodeHexStrig(String source) {
     	 if (source == null) {
             return null;
          }
-    	 char [] data = source.toCharArray();
     	 try {
-			return Hex.decodeHex(data);
-		 } catch (DecoderException e) {
-			e.printStackTrace();
+    		 return SuiteBase58.decode(source);
+		  } catch (BcAddressFormatException e) {
+			 e.printStackTrace();
 		}
     	return null;
      } 

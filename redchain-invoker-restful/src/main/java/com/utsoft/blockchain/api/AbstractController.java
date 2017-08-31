@@ -45,7 +45,7 @@ public abstract class AbstractController {
 	protected boolean verfyPlayload(String from, SignaturePlayload signaturePlayload, String sourceSign) {
 		FabricAuthorizedUser fabricuser = caUserService.getFabricUser(from);
 		byte[] plainText = signaturePlayload.originalPacket();
-		byte[] signature = SdkUtil.tofromHexStrig(sourceSign);
+		byte[] signature = SdkUtil.decodeHexStrig(sourceSign);
 		byte[] certificate = fabricuser.getEnrollment().getCert().getBytes();
 		CryptionConfig config = CryptionConfig.getConfig();
 		try {

@@ -125,4 +125,10 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 		 }
 		return rspModel;
 	}
+
+	@Override
+	public BaseResponseModel<Boolean> isExist(String username) {
+		
+		return null;
+	}
 }
