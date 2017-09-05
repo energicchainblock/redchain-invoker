@@ -1,7 +1,5 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

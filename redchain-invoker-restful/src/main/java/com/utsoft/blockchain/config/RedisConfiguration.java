@@ -1,5 +1,7 @@
 package com.utsoft.blockchain.config;
+import java.io.Serializable;
 import java.lang.reflect.Method;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -8,16 +10,12 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.utsoft.blockchain.core.util.LocalConstants;
+
 import redis.clients.jedis.JedisPoolConfig;
 /**
  * @author hunterfox
@@ -92,6 +90,13 @@ public class RedisConfiguration  extends CachingConfigurerSupport {
 	    }
 	    
 	    @Bean
+	    public RedisTemplate<Serializable, Serializable> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+			RedisTemplate<Serializable, Serializable> redisTemplate = new RedisTemplate<Serializable, Serializable>();
+			redisTemplate.setConnectionFactory(redisConnectionFactory);
+			return redisTemplate;
+		}
+	    
+	    /*@Bean
 	    public RedisTemplate<String, String> redisTemplate(JedisConnectionFactory factory) {
 	       
 	    	StringRedisTemplate redisTemplate = new StringRedisTemplate(factory);
@@ -111,5 +116,5 @@ public class RedisConfiguration  extends CachingConfigurerSupport {
 	        
 	        redisTemplate.afterPropertiesSet();
 	        return redisTemplate;
-	    }
+	    }*/
 }

@@ -9,7 +9,7 @@
    <name>redchain-invoker-provider</name>
    <description>interface provider third party</description>
    <properties>
-        <bouncycastle.version>1.57</bouncycastle.version>
+        <bouncycastle.version>1.55</bouncycastle.version>
     </properties>
    <dependencies>
       <dependency>

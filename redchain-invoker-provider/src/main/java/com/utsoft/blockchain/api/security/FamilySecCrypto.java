@@ -2,10 +2,8 @@ package com.utsoft.blockchain.api.security;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.interfaces.ECPublicKey;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.WrongfulArgumentException;
-import com.utsoft.blockchain.api.security.bc.RbcAddress;
 /** 
  * 加解密套装
  * @author hunterfox
@@ -54,6 +52,15 @@ public interface FamilySecCrypto {
     boolean verifySignature(byte[] certificate, String signatureAlgorithm, byte[] signature, byte[] plainText) throws CryptionException;
   
     /**
+     * 公钥验证签名
+     * @param bytes publicKey
+     * @param signatureAlgorithm
+     * @param signature
+     * @param plainText
+     * @return
+     */
+    boolean verifySignatureByPublic(byte[] bytes,String signatureAlgorithm, byte[] signature, byte[] plainText) throws CryptionException;
+    /**
      * Hash the specified text byte data.
      *
      * @param plainText the text to hash
@@ -90,7 +97,15 @@ public interface FamilySecCrypto {
        * @return
        * @throws CryptionException
        */
-      String loadPublicKeyByCert(byte[] certificate) throws  CryptionException;   
+      String loadPublicKeyByCert(byte[] certificate) throws  CryptionException; 
+      
+      /**
+       * 从证书中获取公钥信息
+       * @param certificate
+       * @return
+       * @throws CryptionException
+       */
+      String loadPublicKeyByCert(String certificate) throws  CryptionException;   
       
      /**
       * default generator KeyFactory

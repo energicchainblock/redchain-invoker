@@ -27,7 +27,9 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 
 import javax.xml.bind.DatatypeConverter;
@@ -103,27 +105,41 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 			logger.trace("signature in hex: " + DatatypeConverter.printHexBinary(signature));
 			logger.trace("PEM cert in hex: " + DatatypeConverter.printHexBinary(pemcertificate));
 		}
-
 		try {
 			BufferedInputStream pem = new BufferedInputStream(new ByteArrayInputStream(pemcertificate));
 			CertificateFactory certFactory = CertificateFactory.getInstance(CERTIFICATE_FORMAT);
 			X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(pem);
-			//PublicKey publicKey = certificate.getPublicKey();  
-			//String publicKeyString = SdkUtil.toHexString(publicKey.getEncoded());
-			//System.out.print(publicKeyString);
-			  //isVerified = validateCertificate(certificate);
-			  //if (isVerified) { // only proceed if cert is trusted
-				Signature sig = Signature.getInstance(signatureAlgorithm);
-				sig.initVerify(certificate);
-				sig.update(plainText);
-				isVerified = sig.verify(signature);
-			//}
+			Signature sig = Signature.getInstance(signatureAlgorithm);
+			sig.initVerify(certificate);
+			sig.update(plainText);
+			isVerified = sig.verify(signature);
 		} catch (InvalidKeyException | CertificateException e) {
 			CryptionException ex = new CryptionException("Cannot verify signature. Error is: " + e.getMessage()
 					+ "\r\nCertificate: " + DatatypeConverter.printHexBinary(pemcertificate), e);
 			logger.error(ex.getMessage(), ex);
 			throw ex;
 		} catch (NoSuchAlgorithmException | SignatureException  e ) {
+			CryptionException ex = new CryptionException(
+					"Cannot verify. Signature algorithm is invalid. Error is: " + e.getMessage(), e);
+			logger.error(ex.getMessage(), ex);
+			throw ex;
+		}
+		return isVerified;
+	}
+	
+	@Override
+	public boolean verifySignatureByPublic(byte[] bytes, String signatureAlgorithm, byte[] signature,
+			byte[] plainText) throws CryptionException {
+		boolean isVerified;
+		try {
+			X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(bytes);  
+	        PublicKey publicKey = generator.generatePublic(x509EncodedKeySpec);  
+			
+	        Signature sig = Signature.getInstance(signatureAlgorithm);
+			sig.initVerify(publicKey);
+			sig.update(plainText);
+			isVerified = sig.verify(signature);
+		} catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException | SignatureException  e ) {
 			CryptionException ex = new CryptionException(
 					"Cannot verify. Signature algorithm is invalid. Error is: " + e.getMessage(), e);
 			logger.error(ex.getMessage(), ex);
@@ -340,6 +356,11 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 	}
 	
 	@Override
+	public String loadPublicKeyByCert(String certificate) throws CryptionException {
+		return loadPublicKeyByCert(certificate.getBytes());
+	} 
+	
+	@Override
 	public void init() throws CryptionException,WrongfulArgumentException {
 		this.setSecurityLevel(this.securityLevel);
 	    this.setHashAlgorithm(this.hashAlgorithm);
@@ -378,5 +399,5 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
             throw new WrongfulArgumentException("Curve must be NIST P-256");  
         }  
         return true;
-    } 
+    }
 }

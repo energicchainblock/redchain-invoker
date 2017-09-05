@@ -1,11 +1,11 @@
 package com.utsoft.blockchain.core.rpc.provider;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
+import org.springframework.data.redis.core.RedisTemplate;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -13,17 +13,15 @@ import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoDto;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
-import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TkcTransferModel;
+import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.proivder.ITkcTransactionExportService;
 import com.utsoft.blockchain.api.security.CryptionConfig;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.api.util.SdkUtil;
 import com.utsoft.blockchain.api.util.SignaturePlayload;
 import com.utsoft.blockchain.core.dao.model.TransactionResultPo;
-import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
-import com.utsoft.blockchain.core.service.ICaUserService;
 import com.utsoft.blockchain.core.service.deamon.ASynTransactionTask;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
 import com.utsoft.blockchain.core.util.CommonUtil;
@@ -44,7 +42,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	private RedisRepository<String,Object> redisRepository;
     
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private  RedisTemplate<String, String> stringRedisTemplate;
     
 	@Autowired
 	private ASynTransactionTask aSynTransactionTask;
@@ -66,6 +64,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,from,serviceCode,submitJson,created,sign,publicKey) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
+		
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
@@ -142,7 +141,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,from,created,sign,publicKey) ){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
-	
+		
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisPrefix(from,created);
@@ -184,9 +183,10 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			String created, String sign) {
 
 		BaseResponseModel<TkcTransactionBlockInfoVo> queryModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(applyCategory,from,created,txId,sign,publicKey) ){
+		if (CommonUtil.isEmpty(applyCategory,from,created,txId,sign,publicKey)){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
+		
 		synchronized(created) {
 			String userPrefix = FormatUtil.redisPrefix(from,created);
 			boolean exists = stringRedisTemplate.hasKey(created);
@@ -243,6 +243,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,to,submitJson,publicKey,created,sign) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
+	
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisRechargePrefix(to,created);
@@ -298,6 +299,26 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		}
 	}
 	
+	@Override
+	public List<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory,String... txIds) {
+		
+		List<TkcTransactionBlockInfoVo> dataList = new ArrayList<>();
+		if(CommonUtil.isEmpty(txIds) || CommonUtil.isEmpty(applyCategory)) {
+			return dataList;
+		}
+		for (String txId: txIds) {
+			TkcTransactionBlockInfoVo tkcBlockInfo  = (TkcTransactionBlockInfoVo)redisRepository.get(txId);
+			if (tkcBlockInfo==null) {
+				 tkcBlockInfo = (TkcTransactionBlockInfoVo)tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);	
+				if (tkcBlockInfo!=null)
+				 redisRepository.set(txId, tkcBlockInfo);
+			 }
+			if (tkcBlockInfo!=null)
+		     dataList.add(tkcBlockInfo);
+		}
+		return dataList;
+	}
+	
 	/**
 	 * 签名验证
 	 * 
@@ -313,7 +334,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		byte[] certificate = SdkUtil.decodeHexStrig(publicKey);
 		CryptionConfig config = CryptionConfig.getConfig();
 		try {
-			return familySecCrypto.verifySignature(certificate, config.getSignatureAlgorithm(), signature, plainText);
+			return familySecCrypto.verifySignatureByPublic(certificate, config.getSignatureAlgorithm(), signature, plainText);
 		} catch (CryptionException e) {
 			e.printStackTrace();
 		}

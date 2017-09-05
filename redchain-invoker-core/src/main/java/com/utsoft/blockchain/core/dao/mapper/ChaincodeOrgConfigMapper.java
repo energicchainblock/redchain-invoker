@@ -22,7 +22,7 @@ public interface ChaincodeOrgConfigMapper extends MySqlBaseMapper<ChaincodeOrgCo
 	 * @param chainId
 	 * @return
 	 */
-	@Select("select a.* from t_chaincode_org_config a INNER JOIN t_chaincode_org b on b.mspid = a.mspid where b.chainId= #{chainId}")
+	@Select("select a.* from t_chaincode_org_config a INNER JOIN t_chaincode_org b on b.chain_org_id = a.chain_org_id where b.chainId= #{chainId}")
 	@ResultMap("BaseResultMap")
 	public List<ChaincodeOrgConfigPo> listNodeConfigAddress(Integer chainId);
 }

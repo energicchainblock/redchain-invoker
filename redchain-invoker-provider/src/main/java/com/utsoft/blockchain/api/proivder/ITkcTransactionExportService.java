@@ -1,11 +1,13 @@
 package com.utsoft.blockchain.api.proivder;
+import java.util.List;
+
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.api.pojo.TkcSubmitRspVo;
 import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoVo;
-import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.utsoft.blockchain.api.pojo.TkcTransferModel;
+import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.weibo.api.motan.transport.async.MotanAsync;
 /**
  * tkc 区块链交易，查询 对外服务器rpc 接口
@@ -63,4 +65,11 @@ public interface ITkcTransactionExportService {
 	 */
 	BaseResponseModel<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory,String publicKey,String from,String txId,String created,String sign);
 	  
+	 /**
+	  * 查询任意区块信息
+	  * @param applyCategory 业务代码
+	  * @param txIds
+	  * @return List of data block info 
+	  */
+	List<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory,String ... txIds);
 }

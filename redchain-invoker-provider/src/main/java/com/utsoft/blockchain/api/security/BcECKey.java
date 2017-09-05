@@ -1,6 +1,16 @@
 package com.utsoft.blockchain.api.security;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -8,12 +18,6 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.math.ec.FixedPointUtil;
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.security.bc.LazyECPoint;
 import com.utsoft.blockchain.api.security.bc.RbcAddress;
@@ -95,6 +99,30 @@ public class BcECKey {
          BigInteger y = ecPublicKey.getW().getAffineY();    
          return fromPublicOnly(x,y);
      }
+    
+    /**
+     * 证书认证
+     * @param cert
+     * @return
+     * @throws CryptionException
+     */
+     public RbcAddress loadAddressByCert(String cert) throws CryptionException  {
+    	
+        byte[] keyBytes = SdkUtil.decodeHexStrig(cert);
+    	ECPublicKey ecPublicKey = null;
+        try {
+            BufferedInputStream pem = new BufferedInputStream(new ByteArrayInputStream(keyBytes));
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(pem);
+		   ecPublicKey = (ECPublicKey) (certificate.getPublicKey()); //keyFactory.generatePublic(x509KeySpec);
+		 } catch (Exception e) {
+			 throw new CryptionException("Unable to convert byte[] into publicKey", e);
+		}  
+        BigInteger x = ecPublicKey.getW().getAffineX();  
+        BigInteger y = ecPublicKey.getW().getAffineY();    
+        return fromPublicOnly(x,y);
+    }
+    
     
     public RbcAddress fromPublicOnly(BigInteger x, BigInteger y) {
 	     ECPoint  bpoint = publicKeyFromPoint(x, y);

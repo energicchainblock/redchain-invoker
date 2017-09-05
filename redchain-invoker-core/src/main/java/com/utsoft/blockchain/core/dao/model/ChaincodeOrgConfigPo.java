@@ -1,7 +1,6 @@
 package com.utsoft.blockchain.core.dao.model;
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,7 +20,10 @@ public class ChaincodeOrgConfigPo implements Serializable {
 	private static final long serialVersionUID = -6904149997676221663L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO,generator="JDBC")
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name = "chain_org_id")
+	private int chainorgId;
+	
 	@Column(name = "mspid",nullable=false)
 	private String mspId;
 	

@@ -3,7 +3,8 @@
 <mapper namespace="com.utsoft.blockchain.core.dao.mapper.ChaincodeOrgConfigMapper">
 
     <resultMap id="BaseResultMap" type="com.utsoft.blockchain.core.dao.model.ChaincodeOrgConfigPo">
-       <id column="mspid" jdbcType="BIGINT" property="mspId" />
+       <id column="chain_org_id" jdbcType="BIGINT" property="chainorgId" />
+       <result column="mspid" jdbcType="VARCHAR" property="mspId" />
        <result column="domain_name" jdbcType="VARCHAR" property="domainName" />
        <result column="channel_name" jdbcType="VARCHAR" property="channelName" />
        <result column="ca_locations" jdbcType="VARCHAR" property="caLocations" />

@@ -50,7 +50,11 @@ public class Constants {
 	  * 并发处理错误，重复提交订单
 	  */
 	 public final static int CONCURRENT_PROCESS_ERROR = 403;
-
+	 /**
+	  * 地址解析错误
+	  */
+	 public final static int ADDRESS_PARSER_ERROR = 406;
+	 
 	 public final static int METHOD_NOT_ALLOW = 405;
 	 public final static int MEDIA_NOT_SUPPORT = 415;
 	 public final static String PIC_INTERVAL_SYMBOL ="||";

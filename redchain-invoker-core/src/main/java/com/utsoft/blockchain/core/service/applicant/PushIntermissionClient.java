@@ -46,7 +46,7 @@ public class PushIntermissionClient {
 			params.put("txId", transactionResult.getTxId());
 			params.put("txTime", transactionResult.getCallbackTime()!=null?transactionResult.getCallbackTime().getTime():0L);
 			params.put("status", transactionResult.getStatus());
-			params.put("user", transactionResult.getTo());
+			params.put("address", transactionResult.getTo());
 			params.put("forward", transactionResult.getForward());
 			
 			

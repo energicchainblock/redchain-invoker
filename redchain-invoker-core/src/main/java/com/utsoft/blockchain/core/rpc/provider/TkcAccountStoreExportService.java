@@ -129,6 +129,11 @@ public class TkcAccountStoreExportService extends AbstractTkcRpcBasicService imp
 	@Override
 	public BaseResponseModel<Boolean> isExist(String username) {
 		
-		return null;
+		BaseResponseModel<Boolean>  rspModel = BaseResponseModel.build();
+		if(caUserService.getFabricUser(username)!=null) {
+			rspModel.setData(true);
+		} else 
+		  rspModel.setData(false);
+		return rspModel;
 	}
 }

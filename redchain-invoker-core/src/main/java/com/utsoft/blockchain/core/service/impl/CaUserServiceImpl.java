@@ -4,14 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
+
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
+import com.utsoft.blockchain.api.security.BcECKey;
 import com.utsoft.blockchain.api.security.FamilySecCrypto;
+import com.utsoft.blockchain.api.security.bc.RbcAddress;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.core.dao.mapper.FabricCaUserMapper;
 import com.utsoft.blockchain.core.dao.model.FabricCaUserPo;
@@ -22,6 +27,7 @@ import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.utsoft.blockchain.core.util.SystemExceptionHandler;
+
 import tk.mybatis.mapper.entity.Example;
 
 /**
@@ -120,7 +126,7 @@ public class CaUserServiceImpl implements ICaUserService {
 					String privateKey;
 					String publicKey = null;
 					try {
-						publicKey  = familySecCrypto.convertPublicKey(fabricCaUserPo.getCert());
+						publicKey  = familySecCrypto.loadPublicKeyByCert(fabricCaUserPo.getCert());
 						privateKey = familySecCrypto.convertPrivatelicKey(fabricAuthorizedUser.getEnrollment().getKey());
 					} catch (CryptionException e) {
 						throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
@@ -140,7 +146,7 @@ public class CaUserServiceImpl implements ICaUserService {
 			String privateKey,publicKey;
 			try {
 				privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
-				publicKey  = familySecCrypto.convertPublicKey(fabricCaUserPo.getCert());
+				publicKey  = familySecCrypto.loadPublicKeyByCert(user.getEnrollment().getCert());
 			} catch (CryptionException e) {
 				throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 			}
