@@ -114,7 +114,7 @@ public class ApiTest {
 			return ;
 		}
 		
-		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCategory,publicKey, from, created, sign);
+		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCategory,publicKey,"base",from, created, sign);
 		System.out.println(JSON.toJSON(baseResponse.getData()));
 		assertEquals(baseResponse.getCode(),"200");
 	}

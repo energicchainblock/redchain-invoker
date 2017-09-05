@@ -282,6 +282,7 @@ public class ChannelClientProxy {
 		long consumerTime = System.currentTimeMillis();
 
 		List<String> objects = new ArrayList<String>();
+		objects.add("query");
 		objects.add(reqtQueryOrderDto.getCmd().toLowerCase());
 		
 		if (reqtQueryOrderDto.getToAccount() != null) {

@@ -80,10 +80,9 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(created);
 			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(publicKey);
-			signaturePlayload.addPlayload(to);
 			signaturePlayload.addPlayload(serviceCode);
 			signaturePlayload.addPlayload(submitJson);
-			
+			signaturePlayload.addPlayload(to);
 			try {
 				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
 
@@ -134,11 +133,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	}
 
 	@Override
-	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String publicKey,String from,
+	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String publicKey,String from,String cmd,
 			String created, String sign) {
 
 		BaseResponseModel<TkcQueryDetailRspVo> queryModel = BaseResponseModel.build();
-		if (CommonUtil.isEmpty(applyCategory,from,created,sign,publicKey) ){
+		if (CommonUtil.isEmpty(applyCategory,from,created,sign,publicKey,cmd) ){
 		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
 		
@@ -150,9 +149,10 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
 				return queryModel;
 			} 
-			//sign=md5(applyCategory=1&created=2&from=3&publicKey=4)
+			//sign=md5(applyCategory=1&cmd=2&created=3&from=4&publicKey=5)
 			SignaturePlayload signaturePlayload = new SignaturePlayload();
 			signaturePlayload.addPlayload(applyCategory);
+			signaturePlayload.addPlayload(cmd);
 			signaturePlayload.addPlayload(created);
 			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(publicKey);
@@ -161,7 +161,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			try {
 				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
 
-					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,Constants.QUERY);
+					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,cmd);
 					if (result == null)
 						return queryModel.setCode(Constants.ITEM_NOT_FIND);
 					queryModel.setData(result);	
@@ -174,8 +174,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				logger.error("select account  signaturePlayload:{} error :{}", args);
 			}
 			return queryModel;
-		}
-		
+		}	
 	}
 
 	@Override
@@ -318,6 +317,38 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		}
 		return dataList;
 	}
+	
+	
+	@Override
+	public BaseResponseModel<TkcQueryDetailRspVo> getSystemDetail(String applyCategory, String cmd, String created) {
+		 BaseResponseModel<TkcQueryDetailRspVo> queryModel = BaseResponseModel.build();
+		 if (CommonUtil.isEmpty(applyCategory,created,cmd) ){
+		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		 }
+		  synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisPrefix(created);
+			boolean exists = stringRedisTemplate.hasKey(userPrefix);
+			if (exists) {
+				queryModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return queryModel;
+			 } 
+			try{
+			
+			TkcQueryDetailRspVo result = transactionService.select(applyCategory,cmd);
+			 if (result == null)
+				return queryModel.setCode(Constants.ITEM_NOT_FIND);
+			 queryModel.setData(result);	
+				
+			} catch (Exception ex) {
+				queryModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = {applyCategory , cmd, ex };
+				logger.error("select system applycode:{} cmd {} error :{}", args);
+			}
+		   return queryModel;
+		}
+	}
+	
 	
 	/**
 	 * 签名验证

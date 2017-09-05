@@ -47,11 +47,12 @@ public interface ITkcTransactionExportService {
 	 * @param applyCategory 业务代码
 	 * @param  publicKey 公钥
 	 * @param from 来源账号
+	 * @param cmd 
 	 * @param created   created 10位提交时间戳
-	 * @param sign 按照 ascii升序交易签名 sign=md5(applyCategory=1&created=2&from=3&publicKey=4)
+	 * @param sign 按照 ascii升序交易签名 sign=md5(applyCategory=1&cmd=2&created=3&from=4&publicKey=5)
 	 * @return 
 	 */
-	BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String publicKey,String from,String created,String sign);
+	BaseResponseModel<TkcQueryDetailRspVo> getAccountDetail(String applyCategory,String publicKey,String from,String cmd,String created,String sign);
 	
 	/**
 	 * 根据交易 txId 查询 block info
@@ -72,4 +73,13 @@ public interface ITkcTransactionExportService {
 	  * @return List of data block info 
 	  */
 	List<TkcTransactionBlockInfoVo> listStockChanges(String applyCategory,String ... txIds);
+	
+	/**
+	 * 查询系统详情
+	 * @param applyCategory
+	 * @param cmd
+	 * @param created
+	 * @return
+	 */
+	BaseResponseModel<TkcQueryDetailRspVo> getSystemDetail(String applyCategory,String cmd,String created);
 }

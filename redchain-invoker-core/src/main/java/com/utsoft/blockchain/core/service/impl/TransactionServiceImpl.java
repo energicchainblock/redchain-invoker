@@ -61,6 +61,11 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 		}
 	    throw new ServiceProcessException(chaincodeID+":channel not connecting");
 	}
+	
+	@Override
+	public TkcQueryDetailRspVo select(String applyCode, String cmd) throws ServiceProcessException {
+		return select(applyCode,"",cmd);
+	}
 
 	@Override
 	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, String cmd, String submitJson)
@@ -117,5 +122,5 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 		 if (!chaincodeManager.checkChannelActive(chaincodeID)) {
 			 chaincodeManager.reconnect(chaincodeID);
 		  }
-	}
+    }
 }

@@ -36,14 +36,14 @@ public class ExchangedController {
 	 * @param applyCode
 	 * @param from
 	 * @param created
-	 * @param sign sign=md5(applyCategory=1&created=2&from=3&publicKey=4)
+	 * @param sign sign=md5(applyCategory=1&cmd=2&created=3&from=4&publicKey=5)
 	 * @return
 	 */
 	@RequestMapping(value = "/getAccountInfo", method = RequestMethod.GET)
 	public TkcQueryDetailRspVo getOrderByTrade(@RequestParam(required=true) String applyCode,String publicKey,
-			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
+			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String cmd,String sign) {
 	
-		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCode,publicKey,from,created,sign);
+		BaseResponseModel<TkcQueryDetailRspVo> baseResponse = tkcTransactionExportService.getAccountDetail(applyCode,publicKey,cmd,from,created,sign);
 		return baseResponse.getData();
 	}
 	

@@ -32,13 +32,13 @@ public class TransactionController extends AbstractController {
 	 * @param applyCode 交易信息代码
 	 * @param from 交易发起者
 	 * @param created 10位提交时间戳
-	 * @param sign  md5签名结果:sign=md5(applyCode=xxx&from=xxx&created=xxx)
+	 * @param sign  md5签名结果:sign=md5(applyCode=xxx&cmd=base&from=xxx&created=xxx)
 	 * @return
 	 */
 	@RequestMapping(value = "/get_account_detail", method = RequestMethod.GET)
 	public BaseResponseModel<TkcQueryDetailRspVo> getOrderByTrade(@RequestParam(required=true) String applyCode,String publicKey,
-			@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
-		 return transactionService.getAccountDetail(applyCode,publicKey,from, created, sign);
+			String cmd,@RequestParam(required=true) String from,@RequestParam(defaultValue="1")String created,String sign) {
+		 return transactionService.getAccountDetail(applyCode,publicKey,cmd,from, created, sign);
 	}
 	
 	/**

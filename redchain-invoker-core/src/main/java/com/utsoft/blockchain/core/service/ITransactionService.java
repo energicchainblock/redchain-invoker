@@ -47,6 +47,16 @@ public interface ITransactionService {
 	 * @return
 	 */
 	TkcQueryDetailRspVo select(String applyCode,String from,String cmd) throws ServiceProcessException;
+	
+	/**
+	 * 查询系统详情
+	 * @param applyCode
+	 * @param from
+	 * @param cmd
+	 * @return
+	 * @throws ServiceProcessException
+	 */
+	TkcQueryDetailRspVo select(String applyCode,String cmd) throws ServiceProcessException;
 
 	/**
 	 * 带条件查询个人信息
