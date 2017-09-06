@@ -3,9 +3,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -103,7 +105,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setApplyCode(applyCategory);
 					transactionResult.setSubmitId(created);
 					transactionResult.setTxId(result.getTxId());
-					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setBlockStatus((byte)result.getStatus());
 					transactionResult.setGmtCreate(new Date());
 					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
 					aSynTransactionTask.notify(transactionResult);
@@ -115,7 +117,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setApplyCode(applyCategory);
 					transactionResult.setSubmitId(created);
 					transactionResult.setTxId(result.getTxId());
-					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setBlockStatus((byte)result.getStatus());
 					transactionResult.setGmtCreate(new Date());
 					transactionResult.setForward(LocalConstants.TRANSACTION_OUTCONMING);
 					aSynTransactionTask.notify(transactionResult);
@@ -278,7 +280,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					transactionResult.setApplyCode(applyCategory);
 					transactionResult.setSubmitId(created);
 					transactionResult.setTxId(result.getTxId());
-					transactionResult.setBlockStatus((byte)(result.isStatus()?1:0));
+					transactionResult.setBlockStatus((byte)result.getStatus());
 					transactionResult.setGmtCreate(new Date());
 					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
 					aSynTransactionTask.notify(transactionResult);
@@ -306,14 +308,23 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			return dataList;
 		}
 		for (String txId: txIds) {
-			TkcTransactionBlockInfoVo tkcBlockInfo  = (TkcTransactionBlockInfoVo)redisRepository.get(txId);
-			if (tkcBlockInfo==null) {
-				 tkcBlockInfo = (TkcTransactionBlockInfoVo)tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);	
-				if (tkcBlockInfo!=null)
-				 redisRepository.set(txId, tkcBlockInfo);
+			 TkcTransactionBlockInfoVo tkcBlockVoInfo  = (TkcTransactionBlockInfoVo)redisRepository.get(txId);
+			 if (tkcBlockVoInfo==null) {
+			 try {
+					TkcTransactionBlockInfoDto blockInfo = (TkcTransactionBlockInfoDto)tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);	
+					 if (blockInfo!=null) {
+						tkcBlockVoInfo = new TkcTransactionBlockInfoVo();
+						BeanUtils.copyProperties(blockInfo, tkcBlockVoInfo);
+						redisRepository.set(txId, tkcBlockVoInfo);
+					} 
+				} 
+				catch (Exception ex) {
+					 Object[] args = { applyCategory,txIds, ex };
+					logger.error("not find blockhash by :{} ids:{} error:{} ", args);
+			    }
 			 }
-			if (tkcBlockInfo!=null)
-		     dataList.add(tkcBlockInfo);
+			 if (tkcBlockVoInfo!=null)
+		     dataList.add(tkcBlockVoInfo);
 		}
 		return dataList;
 	}

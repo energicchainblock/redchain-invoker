@@ -19,11 +19,27 @@ public class TkcBcRepositoryImpl extends AbstractTkcBasicService implements ITkc
 	@Override
 	public TkcTransactionBlockInfoDto queryTransactionBlockByID(String applycode, String txtId)
 			throws ServiceProcessException {
+		
 		TkcTransactionBlockInfoDto tblockInfo = null;
 		ChaincodeID chaincodeID = getChainCode(applycode);
 		if (chaincodeManager.checkChannelActive(chaincodeID)) {
-			tblockInfo = new TkcTransactionBlockInfoDto();
-			tblockInfo  = chaincodeManager.querySourceBlockByTransactionID(chaincodeID, txtId);
+			try {
+				tblockInfo  = chaincodeManager.querySourceBlockByTransactionID(chaincodeID, txtId);	
+			} catch(Exception ex) {
+				return queryTransactionBlockByHash(applycode, txtId);
+			}
+		} else
+		   chaincodeManager.reconnect(chaincodeID);
+		 return tblockInfo;
+	}
+	
+	private TkcTransactionBlockInfoDto queryTransactionBlockByHash(String applycode, String hashId)
+			throws ServiceProcessException {
+		
+		TkcTransactionBlockInfoDto tblockInfo = null;
+		ChaincodeID chaincodeID = getChainCode(applycode);
+		if (chaincodeManager.checkChannelActive(chaincodeID)) {
+			tblockInfo  = chaincodeManager.querySourceBlockByHash(chaincodeID, hashId);	
 		} else
 		   chaincodeManager.reconnect(chaincodeID);
 		 return tblockInfo;

@@ -28,6 +28,8 @@ public class TkcTransactionBlockInfoDto  implements Serializable{
 	 */
 	private String chainCurrentHash;
 	
+	private int bytes;
+	
 	/**
 	 * 区块链高度
 	 */
@@ -85,5 +87,12 @@ public class TkcTransactionBlockInfoDto  implements Serializable{
 	}
 	public void setDatahash(String datahash) {
 		this.datahash = datahash;
+	}
+	
+	public int getBytes() {
+		return bytes;
+	}
+	public void setBytes(int bytes) {
+		this.bytes = bytes;
 	}
 }

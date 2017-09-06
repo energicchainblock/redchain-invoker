@@ -16,8 +16,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.Hex;
+import org.hyperledger.fabric.protos.peer.FabricProposal;
+import org.hyperledger.fabric.protos.peer.FabricProposalResponse;
 import org.hyperledger.fabric.protos.peer.Query.ChaincodeInfo;
+import org.hyperledger.fabric.sdk.BlockEvent;
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
+import org.hyperledger.fabric.sdk.BlockListener;
 import org.hyperledger.fabric.sdk.ChaincodeEndorsementPolicy;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.ChaincodeResponse.Status;
@@ -39,15 +44,17 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.protobuf.ByteString;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.ReqtOrderDto;
 import com.utsoft.blockchain.api.pojo.ReqtQueryOrderDto;
 import com.utsoft.blockchain.api.pojo.RspQueryResultDto;
+import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.util.CommonUtil;
-import com.utsoft.blockchain.core.util.LocalConstants;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
+import com.utsoft.blockchain.core.util.LocalConstants;
 
 /**
  * 区块链基本操作逻辑封装
@@ -60,12 +67,27 @@ public class ChannelClientProxy {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	
+	private BlockListener blockListener = new BlockListener(){
+
+		@Override
+		public void received(BlockEvent blockEvent) {
+			 
+			long blockNumber = blockEvent.getBlockNumber();
+			String dataHash = Hex.encodeHexString(blockEvent.getDataHash());
+			String previousHash =   Hex.encodeHexString(blockEvent.getPreviousHash());
+			Object[] args = {blockNumber,dataHash,previousHash};
+			
+			logger.info("blockNumber:{} dataHash: {}  previousHash: {}",args);
+		}
+	};
+	
 	public Channel connectChannel(HFClient client, String name, FabricAuthorizedOrg orgconfig, ChaincodeID chaincodeID)
 			throws Exception {
 
 		client.setUserContext(orgconfig.getPeerAdmin());
 
 		Channel newChannel = client.newChannel(name);
+		newChannel.registerBlockListener(blockListener);
 		for (String orderName : orgconfig.getOrdererNames()) {
 			Orderer orders = client.newOrderer(orderName, orgconfig.getOrdererLocation(orderName),
 					CommonUtil.getOrdererProperties(orderName));
@@ -187,7 +209,7 @@ public class ChannelClientProxy {
 	 * @throws InvalidArgumentException
 	 */
 	public CompletableFuture<TransactionEvent> submitRequest(HFClient client, Channel newChannel,
-			ChaincodeID chaincodeID, ReqtOrderDto order) throws Exception {
+			ChaincodeID chaincodeID, ReqtOrderDto order, SubmitRspResultDto result) throws Exception {
 
 		Collection<ProposalResponse> successful = new LinkedList<>();
 		Collection<ProposalResponse> failed = new LinkedList<>();
@@ -249,6 +271,15 @@ public class ChannelClientProxy {
 					+ firstTransactionProposalResponse.isVerified());
 		}
 
+         FabricProposal.Proposal proposal = null;
+         for (ProposalResponse sdkProposalResponse : successful) {
+           
+             if (proposal == null) {
+                 proposal = sdkProposalResponse.getProposal();
+                 result.setTxId(sdkProposalResponse.getTransactionID());
+             }
+         }
+         
 		/*
 		 * ProposalResponse resp = transactionPropResp.iterator().next(); byte[]
 		 * x = resp.getChaincodeActionResponsePayload(); // This is the data

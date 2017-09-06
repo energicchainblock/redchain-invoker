@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.hyperledger.fabric.protos.ledger.rwset.kvrwset.KvRwset;
 import org.hyperledger.fabric.sdk.BlockInfo;
@@ -112,13 +114,16 @@ public class ChannelClientPoolManager {
 	 */
  	 public SubmitRspResultDto submitRequest(ChaincodeID chaincodeID,ReqtOrderDto order) {
  		   Channel channel = getChannel(chaincodeID);
+	       SubmitRspResultDto result = new SubmitRspResultDto();
+            /**
+             * 多长时间确认
+             */
 	       int invokeWaitTime =  IGlobals.getIntProperty(LocalConstants.INVOKEWAITTIME, 10000);
-			try {
-				return  channelClientProxy.submitRequest(client,channel, chaincodeID, order)
+	       try {
+				return  channelClientProxy.submitRequest(client,channel, chaincodeID, order,result)
 				   .thenApply(transactionEvent -> {
 					
-					    SubmitRspResultDto result = new SubmitRspResultDto();
-					    result.setStatus(transactionEvent.isValid());
+					    result.setStatus(transactionEvent.isValid()? 1:0);
 					    String testTxID = transactionEvent.getTransactionID(); 
 						result.setTxId(testTxID);
 					  
@@ -127,13 +132,15 @@ public class ChannelClientPoolManager {
 					  
 					  Object[] agrs = {chaincodeID,order,e};
 				      logger.error("submitRequest chaincode:{}  order{} and errors:{}",agrs);
-					 return null;
+				      result.setStatus(-1);
+					 return result;
 				  }).get(invokeWaitTime, TimeUnit.MILLISECONDS);
 			} catch (Exception ex) {
 				Object[] agrs = {order,ex};
 				logger.error("submitRequest :request:{} and errors:{}",agrs);
-				throw new ServiceProcessException("submitRequest request"+ order); 
+				result.setStatus(-1);
 			}
+	       return result;
 	 }
  	
  	 
@@ -187,6 +194,35 @@ public class ChannelClientPoolManager {
  		return channelClientProxy.queryChaincode(client, channel,chaincodeID, reqtQueryOrderDto);
  	}	
  	
+ 	
+ 	/**
+ 	 * 区块hash 查询
+ 	 * @param chaincodeID
+ 	 * @param testTxID
+ 	 * @return
+ 	 */
+ 	public TkcTransactionBlockInfoDto querySourceBlockByHash(ChaincodeID chaincodeID, String hashQuery) {
+ 		   
+ 		   Channel channel = getChannel(chaincodeID);
+ 		   TkcTransactionBlockInfoDto dto = new TkcTransactionBlockInfoDto();
+ 		    byte[] hash;
+			try {
+				 BlockchainInfo channelInfo = channel.queryBlockchainInfo();
+				 String chainCurrentHash = Hex.encodeHexString(channelInfo.getCurrentBlockHash());
+				 //当前信息
+				 dto.setChainCurrentHash(chainCurrentHash);
+				 dto.setHeight(channelInfo.getHeight());
+				
+				 hash = Hex.decodeHex(hashQuery.toCharArray());
+				 BlockInfo  returnedBlock = channel.queryBlockByHash(hash);
+				 fillBolckInfo(dto,returnedBlock);
+				 fillTransactionInfo(dto,returnedBlock);
+			} catch (ProposalException | InvalidArgumentException | DecoderException | InvalidProtocolBufferException e) {
+				throw new ServiceProcessException(com.utsoft.blockchain.api.util.Constants.SEVER_INNER_ERROR,"query block is error hashQuery {" + hashQuery + "} e:{} ", e);
+			}
+ 		  return dto;
+ 	}
+ 	
 	/**
 	 * 查询交易链码block 信息
 	 * 
@@ -194,137 +230,158 @@ public class ChannelClientPoolManager {
 	 * @param testTxID
 	 * @return 交易链码详细信息
 	 */
-	public TkcTransactionBlockInfoDto querySourceBlockByTransactionID(ChaincodeID chaincodeID, String testTxID)
+	public TkcTransactionBlockInfoDto querySourceBlockByTransactionID(ChaincodeID chaincodeID, String txId)
 			throws ServiceProcessException {
 		Channel channel = getChannel(chaincodeID);
-
-		TkcTransactionBlockInfoDto dto = new TkcTransactionBlockInfoDto();
-		try {
-
+		TkcTransactionBlockInfoDto dto = new TkcTransactionBlockInfoDto();	
+		try
+		{
 			BlockchainInfo channelInfo = channel.queryBlockchainInfo();
 			String chainCurrentHash = Hex.encodeHexString(channelInfo.getCurrentBlockHash());
+			//当前信息
 			dto.setChainCurrentHash(chainCurrentHash);
 			dto.setHeight(channelInfo.getHeight());
 			
-			BlockInfo blockInfo = channel.queryBlockByTransactionID(testTxID);
-			String previousHash = Hex.encodeHexString(blockInfo.getPreviousHash());
-			String datahash = Hex.encodeHexString(blockInfo.getDataHash());
-			long blockNumber = blockInfo.getBlockNumber();
-			dto.setBlockNumber(blockNumber);
-			dto.setPreviousHash(previousHash);
+			/**
+			 * 区块信息
+			 */
+			BlockInfo blockInfo = channel.queryBlockByTransactionID(txId);
 			
-			TransactionInfo txInfo = channel.queryTransactionByID(testTxID);
+			fillBolckInfo(dto,blockInfo);
+			fillTransactionInfo(dto,blockInfo);
+			
+			TransactionInfo txInfo = channel.queryTransactionByID(txId);
 			dto.setTxValCodeNumber(txInfo.getValidationCode().getNumber());
-			dto.setDatahash(datahash);
-
-			List<JSONObject> envelopeObjectList = new ArrayList<>();
-			dto.getCommits().put("envelopes", envelopeObjectList);
-
-			for (BlockInfo.EnvelopeInfo envelopeInfo : blockInfo.getEnvelopeInfos()) {
-
-				JSONObject envelopeObject = new JSONObject();
-				envelopeObject.put("epoch", envelopeInfo.getEpoch());
-				envelopeObject.put("timestamp", envelopeInfo.getTimestamp());
-				envelopeObject.put("channelId", envelopeInfo.getChannelId());
-				envelopeObjectList.add(envelopeObject);
-
-				if (envelopeInfo.getType() == TRANSACTION_ENVELOPE) {
-
-					BlockInfo.TransactionEnvelopeInfo transactionEnvelopeInfo = (BlockInfo.TransactionEnvelopeInfo) envelopeInfo;
-					envelopeObject.put("transactionActionInfoCount",
-							transactionEnvelopeInfo.getTransactionActionInfoCount());
-					envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
-					envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
-
-					List<JSONObject> transactionActionInfoList = new ArrayList<>();
-					
-					for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo
-							.getTransactionActionInfos()) {
-
-						JSONObject  transactionActionInfoObject = new JSONObject();
-						
-						transactionActionInfoObject.put("responseStatus",transactionActionInfo.getResponseStatus());
-						try {
-							transactionActionInfoObject.put("responseMsg", new String(transactionActionInfo.getResponseMessageBytes(), "UTF-8"));
-						} catch (UnsupportedEncodingException e1) {
-							logger.error(" parser error by encode ",e1);
-						}
-						transactionActionInfoObject.put("endorsementsCount", transactionActionInfo.getEndorsementsCount());
-                          
-						/**
-						 * endorserInfoObjects 
-						 */
-						List<JSONObject> endorserInfoObjects = new ArrayList<>();
-						for (int n = 0; n < transactionActionInfo.getEndorsementsCount(); ++n) {
-                             
-							  BlockInfo.EndorserInfo endorserInfo = transactionActionInfo.getEndorsementInfo(n);
-                              JSONObject endorserInfoObject = new JSONObject();
-                              endorserInfoObject.put("signature", Hex.encodeHexString(endorserInfo.getSignature()));
-                              try {
-								endorserInfoObject.put("endorser", new String(endorserInfo.getEndorser(), "UTF-8"));
-							} catch (UnsupportedEncodingException e) {
-								logger.error(" parser error by encode ",e);
-							}
-                            endorserInfoObjects.add(endorserInfoObject);
-                        }
-						transactionActionInfoObject.put("endorsement", endorserInfoObjects);
-						
-						TxReadWriteSetInfo rwsetInfo = transactionActionInfo.getTxReadWriteSet();
-						if (null != rwsetInfo) {
-
-							List<JSONObject> rwsetInfoObjects = new ArrayList<>();
-							
-							for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : rwsetInfo.getNsRwsetInfos()) {
-
-								JSONObject rwsObject = new JSONObject();
-								final String namespace = nsRwsetInfo.getNaamespace();
-								KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
-
-								List<JSONObject> readObjects = new ArrayList<>();
-								for (KvRwset.KVRead readList : rws.getReadsList()) {
-									
-									JSONObject readObject = new JSONObject();
-									readObject.put("read_version_block", readList.getVersion().getBlockNum());
-									readObject.put("readKey", readList.getKey());
-									readObject.put("readVersionNum", readList.getVersion().getTxNum());
-									readObjects.add(readObject);
-								}
-								rwsObject.put("readLists", readObjects);
-
-								/**
-								 * 写数据
-								 */
-								List<JSONObject> writerObjects = new ArrayList<>();
-								for (KvRwset.KVWrite writeList : rws.getWritesList()) {
-
-									JSONObject writeObject = new JSONObject();
-									String valAsString = "";
-									try {
-										valAsString = CommonUtil.printableString(
-												new String(writeList.getValue().toByteArray(), "UTF-8"));
-										writeObject.put("writevalue", valAsString);
-									} catch (UnsupportedEncodingException e) {
-										e.printStackTrace();
-									}
-									writeObject.put("writekey", writeList.getKey());
-									writeObject.put("writenamespace", namespace);
-									writerObjects.add(writeObject);
-								}
-								rwsObject.put("writerList", writerObjects);
-								rwsetInfoObjects.add(rwsObject);
-							}
-							transactionActionInfoObject.put("sourceInfo", rwsetInfoObjects);
-							transactionActionInfoList.add(transactionActionInfoObject);
-						}
-					}
-					envelopeObject.put("list", transactionActionInfoList);
-				}
-			}
-		} catch (InvalidProtocolBufferException | InvalidArgumentException | ProposalException e) {
-			throw new ServiceProcessException(com.utsoft.blockchain.api.util.Constants.SEVER_INNER_ERROR,"query block is error testTxID {" + testTxID + "} e:{} ", e);
+			
+		} catch(ProposalException | InvalidArgumentException | InvalidProtocolBufferException  e) {
+			throw new ServiceProcessException(com.utsoft.blockchain.api.util.Constants.SEVER_INNER_ERROR,"query block is error txId {" + txId + "} e:{} ", e);
 		}
 		return dto;
 	}
+	
+	private void fillBolckInfo(TkcTransactionBlockInfoDto dto,BlockInfo blockInfo) {
+		
+		int length = blockInfo.getBlock().getData().toByteArray().length;
+		dto.setBytes(length);
+	
+		String previousHash = Hex.encodeHexString(blockInfo.getPreviousHash());
+		dto.setPreviousHash(previousHash);
+	
+		long blockNumber = blockInfo.getBlockNumber();
+		dto.setBlockNumber(blockNumber);
+		
+		String datahash = Hex.encodeHexString(blockInfo.getDataHash());
+		dto.setDatahash(datahash);
+	}
+ 	private void fillTransactionInfo(TkcTransactionBlockInfoDto dto,BlockInfo blockInfo) throws InvalidProtocolBufferException {
+		/**
+		 * 查询区块交易信息
+		 */
+		List<JSONObject> envelopeObjectList = new ArrayList<>();
+		dto.getCommits().put("envelopes", envelopeObjectList);
+		for (BlockInfo.EnvelopeInfo envelopeInfo : blockInfo.getEnvelopeInfos()) {
+
+			JSONObject envelopeObject = new JSONObject();
+			envelopeObject.put("epoch", envelopeInfo.getEpoch());
+			envelopeObject.put("timestamp", envelopeInfo.getTimestamp());
+			envelopeObject.put("channelId", envelopeInfo.getChannelId());
+			envelopeObjectList.add(envelopeObject);
+
+			if (envelopeInfo.getType() == TRANSACTION_ENVELOPE) {
+
+				BlockInfo.TransactionEnvelopeInfo transactionEnvelopeInfo = (BlockInfo.TransactionEnvelopeInfo) envelopeInfo;
+				envelopeObject.put("transactionActionInfoCount",
+						transactionEnvelopeInfo.getTransactionActionInfoCount());
+				envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
+				envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
+
+				List<JSONObject> transactionActionInfoList = new ArrayList<>();
+
+				for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo
+						.getTransactionActionInfos()) {
+
+					JSONObject transactionActionInfoObject = new JSONObject();
+
+					transactionActionInfoObject.put("responseStatus", transactionActionInfo.getResponseStatus());
+					try {
+						transactionActionInfoObject.put("responseMsg",
+								new String(transactionActionInfo.getResponseMessageBytes(), "UTF-8"));
+					} catch (UnsupportedEncodingException e1) {
+						logger.error(" parser error by encode ", e1);
+					}
+					transactionActionInfoObject.put("endorsementsCount", transactionActionInfo.getEndorsementsCount());
+
+					/**
+					 * endorserInfoObjects
+					 */
+					List<JSONObject> endorserInfoObjects = new ArrayList<>();
+					for (int n = 0; n < transactionActionInfo.getEndorsementsCount(); ++n) {
+
+						BlockInfo.EndorserInfo endorserInfo = transactionActionInfo.getEndorsementInfo(n);
+						JSONObject endorserInfoObject = new JSONObject();
+						endorserInfoObject.put("signature", Hex.encodeHexString(endorserInfo.getSignature()));
+						try {
+							endorserInfoObject.put("endorser", new String(endorserInfo.getEndorser(), "UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							logger.error(" parser error by encode ", e);
+						}
+						endorserInfoObjects.add(endorserInfoObject);
+					}
+					transactionActionInfoObject.put("endorsement", endorserInfoObjects);
+
+					TxReadWriteSetInfo rwsetInfo = transactionActionInfo.getTxReadWriteSet();
+					if (null != rwsetInfo) {
+
+						List<JSONObject> rwsetInfoObjects = new ArrayList<>();
+
+						for (TxReadWriteSetInfo.NsRwsetInfo nsRwsetInfo : rwsetInfo.getNsRwsetInfos()) {
+
+							JSONObject rwsObject = new JSONObject();
+							final String namespace = nsRwsetInfo.getNaamespace();
+							KvRwset.KVRWSet rws = nsRwsetInfo.getRwset();
+
+							List<JSONObject> readObjects = new ArrayList<>();
+							for (KvRwset.KVRead readList : rws.getReadsList()) {
+
+								JSONObject readObject = new JSONObject();
+								readObject.put("read_version_block", readList.getVersion().getBlockNum());
+								readObject.put("readKey", readList.getKey());
+								readObject.put("readVersionNum", readList.getVersion().getTxNum());
+								readObjects.add(readObject);
+							}
+							rwsObject.put("readLists", readObjects);
+
+							/**
+							 * 写数据
+							 */
+							List<JSONObject> writerObjects = new ArrayList<>();
+							for (KvRwset.KVWrite writeList : rws.getWritesList()) {
+
+								JSONObject writeObject = new JSONObject();
+								String valAsString = "";
+								try {
+									valAsString = CommonUtil
+											.printableString(new String(writeList.getValue().toByteArray(), "UTF-8"));
+									writeObject.put("writevalue", valAsString);
+								} catch (UnsupportedEncodingException e) {
+									e.printStackTrace();
+								}
+								writeObject.put("writekey", writeList.getKey());
+								writeObject.put("writenamespace", namespace);
+								writerObjects.add(writeObject);
+							}
+							rwsObject.put("writerList", writerObjects);
+							rwsetInfoObjects.add(rwsObject);
+						}
+						transactionActionInfoObject.put("sourceInfo", rwsetInfoObjects);
+						transactionActionInfoList.add(transactionActionInfoObject);
+					}
+				}
+				envelopeObject.put("list", transactionActionInfoList);
+			}
+		}
+ 	}
+
  	
 	public TransactionInfo queryBasicInfo(ChaincodeID chaincodeID,String txtId) {
 		  Channel channel = getChannel(chaincodeID);
@@ -364,7 +421,7 @@ public class ChannelClientPoolManager {
 			.thenApply(transactionEvent -> {
 				
 				    SubmitRspResultDto result = new SubmitRspResultDto();
-				    result.setStatus(transactionEvent.isValid());
+				    result.setStatus(transactionEvent.isValid()?1:0);
 				    String testTxID = transactionEvent.getTransactionID(); 
 					result.setTxId(testTxID);
 				  

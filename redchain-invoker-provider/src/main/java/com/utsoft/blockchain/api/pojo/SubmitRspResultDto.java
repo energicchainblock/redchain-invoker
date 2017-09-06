@@ -10,17 +10,22 @@ public class SubmitRspResultDto implements Serializable  {
 	private static final long serialVersionUID = 1L;
     
 	private String txId;
-	private  boolean status = false;
+	/**
+	 * -1 标识未确定 
+	 * 0 失败
+	 * 1 标识成功
+	 */
+	private  int status = -1;
 	public String getTxId() {
 		return txId;
 	}
 	public void setTxId(String txId) {
 		this.txId = txId;
 	}
-	public boolean isStatus() {
+	public int getStatus() {
 		return status;
 	}
-	public void setStatus(boolean status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 }
