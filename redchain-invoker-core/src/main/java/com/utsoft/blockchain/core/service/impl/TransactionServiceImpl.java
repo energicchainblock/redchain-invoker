@@ -1,4 +1,5 @@
 package com.utsoft.blockchain.core.service.impl;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
 import com.utsoft.blockchain.core.service.AbstractTkcBasicService;
 import com.utsoft.blockchain.core.service.ITransactionService;
+import com.utsoft.blockchain.core.service.interceptor.QueryInterceptor;
 /**
  * 记账记录链码操作
  * @author hunterfox
@@ -123,4 +125,9 @@ public class TransactionServiceImpl extends AbstractTkcBasicService implements I
 			 chaincodeManager.reconnect(chaincodeID);
 		  }
     }
+
+	@Override
+	public List<QueryInterceptor> getInterceptor() {
+		return interceptors;
+	}
 }

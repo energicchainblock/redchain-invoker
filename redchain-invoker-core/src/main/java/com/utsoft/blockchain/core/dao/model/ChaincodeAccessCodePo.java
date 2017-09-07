@@ -47,6 +47,19 @@ public class ChaincodeAccessCodePo implements Serializable {
 	@Column(name = "url_address")
 	private String urlAddress;
 	
+	
+	@Column(name = "worldstate_url")
+	private String worldstateUrl;
+	
+	
+	public String getWorldstateUrl() {
+		return worldstateUrl;
+	}
+
+	public void setWorldstateUrl(String worldstateUrl) {
+		this.worldstateUrl = worldstateUrl;
+	}
+	
 	/**
 	 * 支持http 方法
 	 */

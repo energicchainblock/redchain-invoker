@@ -1,10 +1,13 @@
 package com.utsoft.blockchain.core.service;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeAccessCodeMapper;
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeMapper;
 import com.utsoft.blockchain.core.dao.mapper.ChaincodeOrgConfigMapper;
@@ -14,10 +17,13 @@ import com.utsoft.blockchain.core.dao.model.ChaincodePo;
 import com.utsoft.blockchain.core.fabric.channel.ChannelClientPoolManager;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
+import com.utsoft.blockchain.core.service.interceptor.QueryInterceptor;
+import com.utsoft.blockchain.core.service.interceptor.SystemQueryInterceptor;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.utsoft.blockchain.core.util.SystemExceptionHandler;
+
 import tk.mybatis.mapper.entity.Example;
 /**
  * 把与交易无关代码抽象到父类
@@ -53,6 +59,10 @@ public abstract class AbstractTkcBasicService {
 	protected static HashMap<String,Integer>  chainIdCodeMap = new HashMap<>();
 	
 	protected static HashMap<Integer,ChaincodeID>  chaincodeMap = new HashMap<>();
+	/**
+	 * 区块链查询拦截器
+	 */
+	protected  static List<QueryInterceptor> interceptors = new ArrayList<>();
 	
 	/**
 	 * 初始化交易信息及链接配置信息
@@ -65,6 +75,7 @@ public abstract class AbstractTkcBasicService {
 		List<ChaincodeAccessCodePo> acesscodePoList =  chaincodeAccessCodeMapper.selectByExample(example);
 		acesscodePoList.stream().forEach(code -> {
 			chainIdCodeMap.put(code.getApplyCode(), code.getChainId());
+			interceptors.add(new SystemQueryInterceptor(code.getApplyCode(),code.getWorldstateUrl()));
 		});
 		
 		example = new Example(ChaincodePo.class);

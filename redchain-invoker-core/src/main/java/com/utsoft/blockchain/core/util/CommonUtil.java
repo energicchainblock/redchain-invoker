@@ -34,8 +34,8 @@ public class CommonUtil {
 		return DigestUtils.sha1Hex(data);
 	}
 
-	public static boolean isNotEmpty(String dbId) {
-		if (dbId != null && !"".equals(dbId)) {
+	public static boolean isNotEmpty(String text) {
+		if (text != null && !"".equals(text)) {
 			return true;
 		}
 		return false;

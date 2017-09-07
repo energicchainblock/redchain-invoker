@@ -24,6 +24,14 @@ public class ChaincodeOrgConfigPo implements Serializable {
 	@Column(name = "chain_org_id")
 	private int chainorgId;
 	
+	public int getChainorgId() {
+		return chainorgId;
+	}
+
+	public void setChainorgId(int chainorgId) {
+		this.chainorgId = chainorgId;
+	}
+
 	@Column(name = "mspid",nullable=false)
 	private String mspId;
 	
@@ -59,7 +67,6 @@ public class ChaincodeOrgConfigPo implements Serializable {
 	
 	@Column(name = "channel_name")
 	private String channelName;
-	
 	/**
 	 * 状态
 	 */

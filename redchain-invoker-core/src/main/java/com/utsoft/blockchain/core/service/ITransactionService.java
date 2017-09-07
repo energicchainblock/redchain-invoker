@@ -1,7 +1,10 @@
 package com.utsoft.blockchain.core.service;
+import java.util.List;
+
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
 import com.utsoft.blockchain.api.pojo.TkcQueryDetailRspVo;
+import com.utsoft.blockchain.core.service.interceptor.QueryInterceptor;
 /**
  * 交易相关和查询
  * @author hunterfox
@@ -69,4 +72,10 @@ public interface ITransactionService {
 	 */
 	public TkcQueryDetailRspVo selectByJson(String applyCode,String account_to, String cmd, String submitJson)
 			throws ServiceProcessException;
+	
+	/**
+	 * 获取拦截器
+	 * @return
+	 */
+	public List<QueryInterceptor> getInterceptor();
 }

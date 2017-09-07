@@ -26,6 +26,7 @@ import com.utsoft.blockchain.core.dao.model.TransactionResultPo;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
 import com.utsoft.blockchain.core.service.deamon.ASynTransactionTask;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
+import com.utsoft.blockchain.core.service.interceptor.QueryInterceptor;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.FormatUtil;
 import com.utsoft.blockchain.core.util.LocalConstants;
@@ -345,12 +346,17 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				return queryModel;
 			 } 
 			try{
-			
-			TkcQueryDetailRspVo result = transactionService.select(applyCategory,cmd);
-			 if (result == null)
-				return queryModel.setCode(Constants.ITEM_NOT_FIND);
-			 queryModel.setData(result);	
-				
+				TkcQueryDetailRspVo result = null;
+				for(QueryInterceptor interceptor : transactionService.getInterceptor()) {
+					  if(interceptor.isAppcodeMatch(applyCategory, cmd)) {
+						 result = interceptor.interceptor(created);
+					 }
+				} 
+				if(result==null)
+			    result = transactionService.select(applyCategory,cmd);
+			    if (result == null)
+				   return queryModel.setCode(Constants.ITEM_NOT_FIND);
+			    queryModel.setData(result);	
 			} catch (Exception ex) {
 				queryModel.setCode(Constants.SEVER_INNER_ERROR);
 				Object[] args = {applyCategory , cmd, ex };
