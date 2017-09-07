@@ -1,6 +1,8 @@
 package com.utsoft.blockchain.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.AnnotationBean;
 import com.weibo.api.motan.config.springsupport.BasicServiceConfigBean;
@@ -54,6 +56,11 @@ public class ExportServiceConfiguration  {
 	     config.setExport("tkcExportServer:8002");
 	     config.setRegistry("registryConfig");
 	     config.setGroup(group);
+	    
+	     String localHost = CommonUtil.getInnerIPAddress();
+	     if (CommonUtil.isNotEmpty(localHost))
+	     config.setHost(localHost);
+	     
 	     config.setAccessLog(false);
 	     config.setShareChannel(true);
 	     config.setModule("motan--rpc");

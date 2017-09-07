@@ -2,8 +2,14 @@ package com.utsoft.blockchain.core.util;
 import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -260,7 +266,7 @@ public class CommonUtil {
 		  } 
 		  if (cf==null || !cf.exists())  {
 			 // path = CommonUtil.class.getResource("/").getFile()+path;
-			  System.out.println("................."+System.getProperty("user.dir")+File.separator+path);
+			 // System.out.println("................."+System.getProperty("user.dir")+File.separator+path);
 			  cf = new File(System.getProperty("user.dir")+File.separator+path);
 		  }
 		 if (!cf.exists()) {
@@ -268,4 +274,42 @@ public class CommonUtil {
          }
           return cf;
      }
+     
+     
+ 	public  static String  getInnerIPAddress() {  
+        try {  
+         	Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();  
+             while (allNetInterfaces.hasMoreElements()) {  
+                 NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();  
+
+                 // 去除回环接口，子接口，未运行和接口
+                 if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {  
+                     continue;  
+                 }
+                 Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                 while (addresses.hasMoreElements()) {  
+                     InetAddress ip = addresses.nextElement(); 
+                     if (ip != null) {
+                         if (ip instanceof Inet4Address) {
+                         	String ipAddress = ip.getHostAddress();
+                             if (ipAddress.startsWith("192") || ipAddress.startsWith("10")  
+                                     || ipAddress.startsWith("172") || ipAddress.startsWith("169")) {  
+                                 return ipAddress;
+                             }
+                         }
+                     }
+                 }
+             }
+         } catch (SocketException e) {
+             System.err.println("Error when getting host ip address"+ e.getMessage());
+         } 
+          InetAddress addr;
+ 		try {
+ 			addr = (InetAddress) InetAddress.getLocalHost();
+ 			return addr.getHostAddress().toString(); 
+ 		} catch (UnknownHostException e) {
+ 			e.printStackTrace();
+ 		}  
+         return null;
+   }
 }
