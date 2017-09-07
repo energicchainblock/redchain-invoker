@@ -292,8 +292,7 @@ public class CommonUtil {
                      if (ip != null) {
                          if (ip instanceof Inet4Address) {
                          	String ipAddress = ip.getHostAddress();
-                             if (ipAddress.startsWith("192") || ipAddress.startsWith("10")  
-                                     || ipAddress.startsWith("172") || ipAddress.startsWith("169")) {  
+                             if (ipAddress.startsWith("192") || ipAddress.startsWith("10") || ipAddress.startsWith("169")) {  
                                  return ipAddress;
                              }
                          }
