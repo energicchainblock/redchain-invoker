@@ -57,9 +57,9 @@ public class ExportServiceConfiguration  {
 	     config.setRegistry("registryConfig");
 	     config.setGroup(group);
 	    
-	     String localHost = CommonUtil.getInnerIPAddress();
+	     /*String localHost = CommonUtil.getInnerIPAddress();
 	     if (CommonUtil.isNotEmpty(localHost))
-	     config.setHost(localHost);
+	     config.setHost(localHost);*/
 	     
 	     config.setAccessLog(false);
 	     config.setShareChannel(true);
