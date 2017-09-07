@@ -66,14 +66,13 @@
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper</artifactId>
         </dependency> 
-        
          <dependency>
-			 <groupId>org.hyperledger.fabric-sdk-java</groupId>
-			 <artifactId>fabric-sdk-java</artifactId>
+			<groupId>org.hyperledger.fabric-sdk-java</groupId>
+			<artifactId>fabric-sdk-java</artifactId>
 	    </dependency> 
 	    <dependency>
-			    <groupId>com.alibaba</groupId>
-			    <artifactId>fastjson</artifactId>
-	    </dependency>
+			 <groupId>com.alibaba</groupId>
+			 <artifactId>fastjson</artifactId>
+	     </dependency>
     </dependencies>
 </project>

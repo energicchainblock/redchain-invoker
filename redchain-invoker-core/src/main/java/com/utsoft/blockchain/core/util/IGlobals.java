@@ -44,7 +44,7 @@ public class IGlobals {
 	
 	
 	/**
-     * Returns a xinge property. If the specified property doesn't exist, the
+     * Returns a  property. If the specified property doesn't exist, the
      * <tt>defaultValue</tt> will be returned.
      *
      * @param name the name of the property to return.
@@ -121,7 +121,7 @@ public class IGlobals {
     }
 
     /**
-     * Returns a boolean value xinge property. If the property doesn't exist, the <tt>defaultValue</tt>
+     * Returns a boolean value property. If the property doesn't exist, the <tt>defaultValue</tt>
      * will be returned.
      *
      * If the specified property can't be found, or if the value is not a number, the
