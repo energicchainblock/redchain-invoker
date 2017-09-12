@@ -70,6 +70,7 @@ public class Constants {
 	 public static final int DEFAULT_ = 2*30;
 	
 	 public static final String DEFAULT_CHARSET = CharEncoding.UTF_8;
+	 public static final String DEFAULT_PWD_HASH_ALGORITHM = "MD5";
 	 
 	 public static final String RECHARGE = "recharge";
 	 public static final String MOVE = "move";

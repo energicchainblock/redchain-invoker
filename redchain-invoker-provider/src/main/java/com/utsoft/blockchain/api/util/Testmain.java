@@ -77,10 +77,7 @@ public class Testmain {
 	     	RbcAddress ress = bcECKey1.loadAddressByPublickey(publicKey);
             System.out.println(ress);
                
-             
-			String ddd= SdkUtil.encodeHexString("wangbo");
-			System.out.println(new String(SdkUtil.decodeHexStrig(ddd)));
-			
+
 	     	
 		} catch (Exception e) {
 		

@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
 import com.utsoft.blockchain.api.pojo.UserInfoRspModel;
-import com.utsoft.blockchain.api.security.BcECKey;
 import com.utsoft.blockchain.api.security.FamilySecCrypto;
-import com.utsoft.blockchain.api.security.bc.RbcAddress;
 import com.utsoft.blockchain.api.util.Constants;
 import com.utsoft.blockchain.core.dao.mapper.FabricCaUserMapper;
 import com.utsoft.blockchain.core.dao.model.FabricCaUserPo;
@@ -25,6 +23,7 @@ import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedUser;
 import com.utsoft.blockchain.core.service.ICaUserService;
 import com.utsoft.blockchain.core.service.LocalKeyPrivateStoreService;
 import com.utsoft.blockchain.core.util.CommonUtil;
+import com.utsoft.blockchain.core.util.DefaultPwdEncoder;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.utsoft.blockchain.core.util.SystemExceptionHandler;
 
@@ -111,7 +110,7 @@ public class CaUserServiceImpl implements ICaUserService {
 					 */
 					String key = IGlobals.getProperty("ca.encryption.key", "QWE123zxcw");
 					String sourceText = CommonUtil.encryptText(key, fabricAuthorizedUser.getEnrollmentSecret());
-					
+				
 					fabricCaUserPo.setEnrollmentSecret(sourceText);
 					fabricCaUserPo.setAffiliation(fabricAuthorizedUser.getAffiliation());
 					fabricCaUserPo.setGmtCreate(new Date());
@@ -126,6 +125,12 @@ public class CaUserServiceImpl implements ICaUserService {
 					String privateKey;
 					String publicKey = null;
 					try {
+						/**
+						 * hash password and token
+						 */
+						DefaultPwdEncoder defaultPwdEncoder= new DefaultPwdEncoder(); 
+						userInfo.setToken(defaultPwdEncoder.encode(fabricAuthorizedUser.getEnrollmentSecret()));
+						
 						publicKey  = familySecCrypto.loadPublicKeyByCert(fabricCaUserPo.getCert());
 						privateKey = familySecCrypto.convertPrivatelicKey(fabricAuthorizedUser.getEnrollment().getKey());
 					} catch (CryptionException e) {
@@ -133,7 +138,7 @@ public class CaUserServiceImpl implements ICaUserService {
 					}
 					userInfo.setPrivateKey(privateKey);
 					userInfo.setPublicKey(publicKey);
-					userInfo.setToken(fabricCaUserPo.getEnrollmentSecret());
+					
 					return userInfo;
 				}
 			}
@@ -147,12 +152,13 @@ public class CaUserServiceImpl implements ICaUserService {
 			try {
 				privateKey = familySecCrypto.convertPrivatelicKey(user.getEnrollment().getKey());
 				publicKey  = familySecCrypto.loadPublicKeyByCert(user.getEnrollment().getCert());
+				DefaultPwdEncoder defaultPwdEncoder= new DefaultPwdEncoder(); 
+				userInfo.setToken(defaultPwdEncoder.encode(user.getEnrollmentSecret()));
 			} catch (CryptionException e) {
 				throw new ServiceProcessException(Constants.BAD_REQUEST,"user private key is not convert");
 			}
 			userInfo.setPublicKey(publicKey);
 			userInfo.setPrivateKey(privateKey);
-			userInfo.setToken(user.getEnrollmentSecret());
 			return userInfo;
 		}
 	}
@@ -163,11 +169,16 @@ public class CaUserServiceImpl implements ICaUserService {
 		UserInfoRspModel caUserInfoDto = null;
 		Example example = new Example(FabricCaUserPo.class);
 		example.createCriteria().andEqualTo("userName", userName);
+		
+	
+		
 		List<FabricCaUserPo> userlist = fabricCaUserMapper.selectByExample(example);
 		if (CommonUtil.isCollectNotEmpty(userlist)) {
 
 			Optional<FabricCaUserPo> fabricOpational = userlist.stream()
-					.filter((s) -> token.equalsIgnoreCase(s.getEnrollmentSecret())).findFirst();
+					.filter((s) -> 
+				        	 token.equalsIgnoreCase(new DefaultPwdEncoder().encode(s.getEnrollmentSecret()))
+					).findFirst();
 			if (fabricOpational.isPresent()) {
 
 				FabricCaUserPo userPo = fabricOpational.get();
