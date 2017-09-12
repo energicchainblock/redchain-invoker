@@ -13,8 +13,8 @@ public class LocalConstants {
 	 public static final String DEPLOYWAITTIME = "fabric.deployWaitTime";
 	 public static final String PROPOSALWAITTIME = "fabric.proposalWaitTime";
 	 
-	 public static final int FABRIC_MANAGER_INVALID = 1;
-	 public static final int FABRIC_MANAGER_VALID = 0;
+	 public static final int FABRIC_MANAGER_INVALID = 0;
+	 public static final int FABRIC_MANAGER_VALID = 1;
 	 
 	 /**
 	  * 转进
