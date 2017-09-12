@@ -47,7 +47,7 @@ eureka:
       defaultZone: http://discovery.test.utouu.com/eureka/
 ---
 spring:
-  profiles: production
+  profiles: prod
   cloud:
     config:
       username: client
