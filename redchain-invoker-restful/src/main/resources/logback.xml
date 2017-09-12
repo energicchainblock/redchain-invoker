@@ -2,7 +2,7 @@
 <configuration>
     
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-	 <property name="logs.path" value="/data/server/tkcblocks/logs"/>
+	 <property name="logs.path" value="./logs"/>
 	 <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%line - %msg%n</pattern>
@@ -10,9 +10,9 @@
 		</encoder>
 	 </appender>
 	 <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.path}/tkcbolckchain.log</file>
+		<file>${logs.path}/redchain.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			 <fileNamePattern>${logs.path}/tkcbolckchain.%d{yyyy-MM-dd}.log
+			 <fileNamePattern>${logs.path}/redchain.%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 			<MaxHistory>5</MaxHistory>
 		</rollingPolicy>
