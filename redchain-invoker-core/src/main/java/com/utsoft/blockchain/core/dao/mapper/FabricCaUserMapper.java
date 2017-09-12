@@ -14,6 +14,6 @@ import com.utsoft.blockchain.core.dao.model.FabricCaUserPo;
 @Repository
 public interface FabricCaUserMapper extends MySqlBaseMapper<FabricCaUserPo> {
 
-	  @Update("update t_fabric_ca_user set status= 0 where user_name=#{username} ")
+	  @Update("update t_fabric_ca_user set status= 1 where user_name=#{username} ")
 	  int updateFabricUserStatus(@Param("username") String username);
 }

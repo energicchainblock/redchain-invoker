@@ -1,4 +1,4 @@
-package com.utsoft.blockchain.core.service.applicant;
+package com.utsoft.blockchain.core.service.applycall;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

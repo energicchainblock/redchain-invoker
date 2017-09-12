@@ -15,7 +15,7 @@ import com.utsoft.blockchain.core.dao.mapper.ChaincodeAccessCodeMapper;
 import com.utsoft.blockchain.core.dao.mapper.TransactionResultMapper;
 import com.utsoft.blockchain.core.dao.model.ChaincodeAccessCodePo;
 import com.utsoft.blockchain.core.dao.model.TransactionResultPo;
-import com.utsoft.blockchain.core.service.applicant.PushIntermissionClient;
+import com.utsoft.blockchain.core.service.applycall.PushIntermissionClient;
 import com.utsoft.blockchain.core.util.CommonUtil;
 import tk.mybatis.mapper.entity.Example;
 import org.slf4j.Logger;
