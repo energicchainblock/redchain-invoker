@@ -102,7 +102,12 @@ public class ChannelClientPoolManager {
 	public Channel getChannel(ChaincodeID chaincodeID) {
 		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgConfigByccId(chaincodeID);
 		if (orgconfig==null) return null;
-		return client.getChannel(orgconfig.getChannelName());
+		Channel channel = client.getChannel(orgconfig.getChannelName());
+		if (channel!=null && channel.isInitialized()) {
+		   return channel;
+		} else 
+		  reconnect(chaincodeID);
+		 return client.getChannel(orgconfig.getChannelName());
 	}
 	
 	/**
@@ -114,7 +119,11 @@ public class ChannelClientPoolManager {
 	 */
  	 public SubmitRspResultDto submitRequest(ChaincodeID chaincodeID,ReqtOrderDto order) {
  		   Channel channel = getChannel(chaincodeID);
-	       SubmitRspResultDto result = new SubmitRspResultDto();
+ 		   SubmitRspResultDto result = new SubmitRspResultDto();
+ 		   if (channel==null) {
+ 			  result.setStatus(0);
+ 			  return result;
+ 		   }
             /**
              * 多长时间确认
              */
