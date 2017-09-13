@@ -93,7 +93,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					SubmitRspResultDto result = transactionService.tranfer(applyCategory,from,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
-
+					else if(result.getStatus()==1) {
+					    submitRspModel.setCode(Constants.OK);
+					} else  {
+					     submitRspModel.setCode(Constants.EXECUTE_FAIL_ERROR);
+					}
 					BeanUtils.copyProperties(result, resultModel);
 					resultModel.setExternals(model.getExternals());
 					submitRspModel.setData(resultModel);
@@ -272,6 +276,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+					 if(result.getStatus()==1) {
+						  submitRspModel.setCode(Constants.OK);
+					} else  {
+						 submitRspModel.setCode(Constants.EXECUTE_FAIL_ERROR);
+				     }
 
 					/**
 					 * 记录 to 通知回调
