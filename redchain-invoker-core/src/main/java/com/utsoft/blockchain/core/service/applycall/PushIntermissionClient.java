@@ -30,6 +30,14 @@ public class PushIntermissionClient {
 	private TransactionResultMapper transactionResultMapper;
 	
  
+    public boolean sendNotPushmsg(String callbackUrl ,TransactionResultPo transactionResult)  {
+		
+		transactionResult.setStatus(200);
+		transactionResult.setCallbackTime(new Date());
+		transactionResult.setCounter((byte)1);
+		transactionResult.setResultStatus((byte)1);
+		return transactionResultMapper.updateCallBackResult(transactionResult)> 0 ? true :false ;
+	} 
 	/**
 	 * @param transactionResult
 	 * @return

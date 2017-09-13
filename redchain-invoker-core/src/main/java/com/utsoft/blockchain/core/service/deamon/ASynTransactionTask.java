@@ -96,7 +96,7 @@ public class ASynTransactionTask implements Runnable{
 				transactionResultMapper.updateMoveCallBackHisotryResult(transactionResult);
 				return;
 			}
-			intermissionClient.sendPushmsg(callbackUrl, transactionResult);
+			intermissionClient.sendNotPushmsg(callbackUrl, transactionResult);
 		 } catch (ServiceProcessException ex) {
 			 logger.error("handlermsg call back:{}", transactionResult,ex);
 		  } catch (Exception ex) {
