@@ -57,9 +57,9 @@ public class ExportServiceConfiguration  {
 	     config.setRegistry("registryConfig");
 	     config.setGroup(group);
 	    
-	     String domain = IGlobals.getProperty("fabric.getway.domain");
+	     /*String domain = IGlobals.getProperty("fabric.getway.domain");
 	     if (CommonUtil.isNotEmpty(domain))
-	     config.setHost("chain.tangkc.com");
+	     config.setHost("chain.tangkc.com");*/
 	     
 	     config.setAccessLog(false);
 	     config.setShareChannel(true);
