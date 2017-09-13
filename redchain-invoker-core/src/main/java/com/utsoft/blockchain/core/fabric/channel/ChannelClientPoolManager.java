@@ -1,5 +1,6 @@
 package com.utsoft.blockchain.core.fabric.channel;
 import static org.hyperledger.fabric.sdk.BlockInfo.EnvelopeType.TRANSACTION_ENVELOPE;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -7,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -24,6 +27,7 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.utsoft.blockchain.api.exception.ServiceProcessException;
@@ -35,8 +39,8 @@ import com.utsoft.blockchain.api.pojo.TkcTransactionBlockInfoDto;
 import com.utsoft.blockchain.core.fabric.GobalFabricMapStore;
 import com.utsoft.blockchain.core.fabric.model.FabricAuthorizedOrg;
 import com.utsoft.blockchain.core.util.CommonUtil;
-import com.utsoft.blockchain.core.util.LocalConstants;
 import com.utsoft.blockchain.core.util.IGlobals;
+import com.utsoft.blockchain.core.util.LocalConstants;
 /**
  * 区块链代理及配置manager
  * @author hunterfox
@@ -50,6 +54,8 @@ public class ChannelClientPoolManager {
 	private  static ChannelClientPoolManager channelManager = new ChannelClientPoolManager();
 	
 	private GobalFabricMapStore orgsConfigMap  = GobalFabricMapStore.getInstance();
+	
+	private ReadWriteLock lock = new ReentrantReadWriteLock(false);
 	/**
 	 * 通信封装
 	 */
@@ -170,11 +176,14 @@ public class ChannelClientPoolManager {
  	 */
  	public void connectChannel(ChaincodeID chaincodeID,FabricAuthorizedOrg orgconfig) {
  		try {
+ 			lock.writeLock().lock();
 			channelClientProxy.connectChannel(client, orgconfig.getChannelName(),orgconfig,chaincodeID);
 		} catch (Exception e) {
 			Object[] agrs = {chaincodeID,orgconfig,e};
 			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
-		}
+		} finally {
+			 lock.writeLock().unlock();
+	 	}
  	}
  	
  	/**
@@ -183,13 +192,17 @@ public class ChannelClientPoolManager {
  	 * @param orgconfig
  	 */
 	public void reconnect(ChaincodeID chaincodeID) {
-		 FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgConfigByccId(chaincodeID);
+		 
+		lock.writeLock().lock();
+		FabricAuthorizedOrg orgconfig = orgsConfigMap.getOrgConfigByccId(chaincodeID);
 	 	try {
 			channelClientProxy.connectChannel(client,orgconfig.getChannelName(),orgconfig,chaincodeID);
 		} catch (Exception e) {
 			Object[] agrs = {chaincodeID,orgconfig,e};
 			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
-		}
+		} finally {
+			 lock.writeLock().unlock();
+	 	}
  	}
 	
  	/**
