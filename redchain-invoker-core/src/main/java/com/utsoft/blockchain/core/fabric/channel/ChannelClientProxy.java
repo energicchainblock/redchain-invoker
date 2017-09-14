@@ -163,6 +163,9 @@ public class ChannelClientProxy {
 		for (ChaincodeInfo ccifo : ccinfoList) {
 			found = ccName.equals(ccifo.getName()) && ccPath.equals(ccifo.getPath())
 					&& ccVersion.equals(ccifo.getVersion());
+			if (logger.isInfoEnabled())
+			logger.info(FormatUtil.formater("check all installed chaincode: %s, at version: %s, on peer: %s, path: %s", ccifo.getName(),
+					ccifo.getVersion(), peer.getName(),ccifo.getPath()));
 			if (found) {
 				break;
 			}
