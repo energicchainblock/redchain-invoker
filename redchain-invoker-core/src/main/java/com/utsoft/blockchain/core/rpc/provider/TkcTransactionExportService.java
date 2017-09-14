@@ -87,17 +87,13 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(submitJson);
 			signaturePlayload.addPlayload(to);
 			try {
-				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
+				if (verifyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
 					SubmitRspResultDto result = transactionService.tranfer(applyCategory,from,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
-					else if(result.getStatus()==1) {
-					    submitRspModel.setCode(Constants.OK);
-					} else  {
-					     submitRspModel.setCode(Constants.EXECUTE_FAIL_ERROR);
-					}
+					
 					BeanUtils.copyProperties(result, resultModel);
 					resultModel.setExternals(model.getExternals());
 					submitRspModel.setData(resultModel);
@@ -166,7 +162,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
 			
 			try {
-				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
+				if (verifyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,cmd);
 					if (result == null)
@@ -210,7 +206,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		
 			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
 			try {
-				if (verfyPlayload(from,publicKey,signaturePlayload, sign)) {
+				if (verifyPlayload(from,publicKey,signaturePlayload, sign)) {
 
 					TkcTransactionBlockInfoDto tkcTransactionBlockInfoDto = tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);
 
@@ -270,17 +266,12 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(to);
 			
 			try {
-				if (verfyPlayload(to,publicKey,signaturePlayload, sign)) {
+				if (verifyPlayload(to,publicKey,signaturePlayload, sign)) {
 
 					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
 					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,serviceCode,submitJson);
 					if (result == null)
 						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
-					 if(result.getStatus()==1) {
-						  submitRspModel.setCode(Constants.OK);
-					} else  {
-						 submitRspModel.setCode(Constants.EXECUTE_FAIL_ERROR);
-				     }
 
 					/**
 					 * 记录 to 通知回调
@@ -384,7 +375,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	 * @param sourceSign
 	 * @return
 	 */
-	private boolean verfyPlayload(String from,String publicKey,SignaturePlayload signaturePlayload, String sourceSign) {
+	private boolean verifyPlayload(String from,String publicKey,SignaturePlayload signaturePlayload, String sourceSign) {
 		
 		byte[] plainText = signaturePlayload.originalPacket();
 		byte[] signature = SdkUtil.decodeHexStrig(sourceSign);
