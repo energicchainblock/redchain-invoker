@@ -159,20 +159,15 @@ public class ChannelClientProxy {
 					ccVersion, peer.getName()));
 
 		List<ChaincodeInfo> ccinfoList = client.queryInstalledChaincodes(peer);
-		logger.info("ccinfoList :---------------");
-		logger.info("ccinfoList :---------------"+ccinfoList.size());
 		boolean found = false;
 		for (ChaincodeInfo ccifo : ccinfoList) {
 			found = ccName.equals(ccifo.getName()) && ccPath.equals(ccifo.getPath())
 					&& ccVersion.equals(ccifo.getVersion());
-			logger.info("ccinfoList :---------------"+ccifo.toString());
-			logger.info(FormatUtil.formater("println installed chaincode: %s, at version: %s, on peer: %s, path: %s", ccifo.getName(),
-					ccifo.getVersion(), peer.getName(),ccifo.getPath()));
+			logger.info("ccifo:"+ccifo.toString());
 			if (found) {
 				break;
 			}
 		}
-
 		return found;
 	}
 
