@@ -41,7 +41,7 @@ public class ASynTransactionTask implements Runnable{
 	@Autowired
 	private PushIntermissionClient intermissionClient;
 	 
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	//private ExecutorService executor = Executors.newSingleThreadExecutor();
 	
 	/**
 	 * 控制任务执行状态
@@ -77,10 +77,10 @@ public class ASynTransactionTask implements Runnable{
 	 */
 	public void notify(TransactionResultPo transactionResult) {
 		
-		transactionResultMapper.insert(transactionResult);
-		if (!isRunning.get()) {
+		//transactionResultMapper.insert(transactionResult);
+		/*if (!isRunning.get()) {
 			executor.submit(this);
-		}	
+		}*/	
 	}
 	
 	private void handlerMsg(TransactionResultPo transactionResult) {	
