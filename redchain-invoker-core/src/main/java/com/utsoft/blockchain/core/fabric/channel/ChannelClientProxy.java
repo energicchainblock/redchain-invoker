@@ -220,7 +220,7 @@ public class ChannelClientProxy {
 		} else {
 			submit = new String[] { "move",order.getCmd(), order.getToAccount(),"", order.getJson() };
 		}
-		int proposalWaitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 120000);
+		int proposalWaitTime = IGlobals.getIntProperty(LocalConstants.PROPOSALWAITTIME, 12000);
 		TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
 		transactionProposalRequest.setChaincodeID(chaincodeID);
 		transactionProposalRequest.setFcn("invoke");
