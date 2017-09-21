@@ -80,4 +80,15 @@ public class TransactionController extends AbstractController {
 		model.setCreated(created);
 		return transactionService.recharge(model, sign);
 	}
+	
+	/**
+	 * 申请api 交易ID
+	 * @param address
+	 * @param from
+	 * @return
+	 */
+	@RequestMapping(value = "/applyGrantCode", method = {RequestMethod.POST,RequestMethod.GET})
+	public BaseResponseModel<String> applyGrantCode(@RequestParam(required=true) String address,String from) {
+		return transactionService.applyGrantCode(address, from);
+	}	
 }
