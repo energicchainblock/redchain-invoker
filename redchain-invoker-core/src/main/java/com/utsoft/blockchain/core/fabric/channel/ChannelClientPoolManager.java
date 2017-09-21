@@ -165,7 +165,7 @@ public class ChannelClientPoolManager {
 		} catch (Exception e) {
 			Object[] agrs = {chaincodeID,orgconfig,e};
 			logger.error("connectChannel chaincode:{}  orgconfig;{} and errors:{}",agrs);
-			throw new ServiceProcessException("install channel:"+e); 
+			throw new ServiceProcessException("connect channel:"+e); 
 		}
  	}
   	

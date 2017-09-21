@@ -13,30 +13,13 @@ public class Constants {
 
 	 public final static int BC_ADDRESS_VERSION = 1;
 	 public final static int OK = 200;
-	 /**
-	  * 实体无法找到
-	  */
-	 public final static int ITEM_NOT_FIND = 404;
-	 /**
-	  * 实体已经存在
-	  */
-	 public final static int ITEM_EXITS = 405;
-	 /**
-	  * 服务器内部处理错误
-	  */
-	 public final static int SEVER_INNER_ERROR = 500;
-	 /**
-	  * 流程处理错误
-	  */
-	 public final static int  EXECUTE_PROCESS_ERROR = 501;
-	 /**
-	  * 执行失败
-	  */
-	 public final static int  EXECUTE_FAIL_ERROR = 502;
+	
+	/********************4xx 请求错误**********************************/
 	 /**
 	  * 错误请求
 	  */
 	 public final static int BAD_REQUEST = 400;
+	 
 	 /**
 	  * 参数错误,不能为空
 	  */
@@ -50,13 +33,45 @@ public class Constants {
 	  * 并发处理错误，重复提交订单
 	  */
 	 public final static int CONCURRENT_PROCESS_ERROR = 403;
+	 
+	 /**
+	  * 实体无法找到
+	  */
+	 public final static int ITEM_NOT_FIND = 404;
+	 /**
+	  * 实体已经存在
+	  */
+	 public final static int ITEM_EXITS = 407;
+	
 	 /**
 	  * 地址解析错误
 	  */
 	 public final static int ADDRESS_PARSER_ERROR = 406;
 	 
+	 /**
+	  * 订单已经锁定
+	  */
+	 public final static int  ORDER_APPLY_LOCKER = 408;
+	 
 	 public final static int METHOD_NOT_ALLOW = 405;
+	 
 	 public final static int MEDIA_NOT_SUPPORT = 415;
+	 
+	 /*****************5xxx 是服务错误*******************************************/
+	 /**
+	  * 服务器内部处理错误
+	  */
+	 public final static int SEVER_INNER_ERROR = 500;
+	 /**
+	  * 流程处理错误
+	  */
+	 public final static int  EXECUTE_PROCESS_ERROR = 501;
+	 /**
+	  * 执行失败
+	  */
+	 public final static int  EXECUTE_FAIL_ERROR = 502;
+
+	 
 	 public final static String PIC_INTERVAL_SYMBOL ="||";
 	 
 	 public static final long SECOND = 1000;

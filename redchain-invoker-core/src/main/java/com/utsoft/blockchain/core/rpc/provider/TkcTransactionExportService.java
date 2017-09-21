@@ -3,11 +3,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.pojo.BaseResponseModel;
 import com.utsoft.blockchain.api.pojo.SubmitRspResultDto;
@@ -24,6 +22,7 @@ import com.utsoft.blockchain.api.util.SdkUtil;
 import com.utsoft.blockchain.api.util.SignaturePlayload;
 import com.utsoft.blockchain.core.dao.model.TransactionResultPo;
 import com.utsoft.blockchain.core.rpc.AbstractTkcRpcBasicService;
+import com.utsoft.blockchain.core.rpc.locker.TransactionSequencingService;
 import com.utsoft.blockchain.core.service.deamon.ASynTransactionTask;
 import com.utsoft.blockchain.core.service.impl.RedisRepository;
 import com.utsoft.blockchain.core.service.interceptor.QueryInterceptor;
@@ -45,10 +44,13 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 	private RedisRepository<String,Object> redisRepository;
     
     @Autowired
-    private  RedisTemplate<String, String> stringRedisTemplate;
+    private RedisTemplate<String, String> stringRedisTemplate;
     
 	@Autowired
 	private ASynTransactionTask aSynTransactionTask;
+	
+	@Autowired
+	private TransactionSequencingService sequencingService;
 	
 	@Override
 	public BaseResponseModel<TkcSubmitRspVo> tranfer(TkcTransferModel model,String sign) {
@@ -66,6 +68,13 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		 */
 		if (CommonUtil.isEmpty(applyCategory,from,serviceCode,submitJson,created,sign,publicKey) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		/**
+		 * 订单是否提前申请
+		 */
+		boolean isGrant = sequencingService.isTokenGrant(from,created);
+		if (!isGrant){
+		   return submitRspModel.setCode(Constants.ORDER_APPLY_LOCKER); 
 		}
 		
 		synchronized(created) {
@@ -130,6 +139,9 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 				Object[] args = { signaturePlayload, ex };
 				logger.error("tranfer signaturePlayload:{} error:{} ", args);
+			} finally {
+				sequencingService.releaseLocker(from);
+				sequencingService.releaseLocker(to);
 			}
 			return submitRspModel;
 		}
@@ -159,7 +171,7 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			signaturePlayload.addPlayload(created);
 			signaturePlayload.addPlayload(from);
 			signaturePlayload.addPlayload(publicKey);
-			stringRedisTemplate.boundValueOps(userPrefix).set(signaturePlayload.toString(),120L,TimeUnit.SECONDS);
+			stringRedisTemplate.boundValueOps(userPrefix).set(userPrefix,120L,TimeUnit.SECONDS);
 			
 			try {
 				if (verifyPlayload(from,publicKey,signaturePlayload, sign)) {
@@ -245,7 +257,11 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		if (CommonUtil.isEmpty(applyCategory,to,submitJson,publicKey,created,sign) ){
 		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
 		}
-	
+		
+		boolean isGrant = sequencingService.isTokenGrant(to,created);
+		if (!isGrant){
+		   return submitRspModel.setCode(Constants.ORDER_APPLY_LOCKER); 
+		}
 		synchronized(created) {
 			
 			String userPrefix = FormatUtil.redisRechargePrefix(to,created);
@@ -296,6 +312,8 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
 				Object[] args = { signaturePlayload, ex };
 				logger.error("tranfer signaturePlayload:{} error:{} ", args);
+			} finally {			
+			    sequencingService.releaseLocker(to);	
 			}
 			return submitRspModel;
 		}
@@ -366,6 +384,19 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		}
 	}
 	
+  
+	@Override
+	public BaseResponseModel<String> applyGrantCode(String address, String from) {
+		
+		 BaseResponseModel<String> lockModel = BaseResponseModel.build();
+		 if (CommonUtil.isEmpty(address) && CommonUtil.isEmpty(from)){
+		    return lockModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		 }
+		 if (CommonUtil.isEmpty(from))
+			return sequencingService.applyTransactionOrderToken(address);
+		 else
+		 return sequencingService.applyTransactionOrderToken(address,from);
+	}
 	
 	/**
 	 * 签名验证

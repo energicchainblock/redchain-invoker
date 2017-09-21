@@ -39,6 +39,10 @@ public class FormatUtil {
 		 return  redis_cache_prefix(prefix,key);
 	  }
 	  
+	  public static String redisAddressPrefix(String prefix,String key) {
+			 return  redis_cache_prefix(prefix,key);
+		  }
+	  
 	  public static String redisTransferPrefix(String ... key) {
 		 return redis_cache_prefix(LocalConstants.TKC_TRANSFER_MOVE,key);
 	  }  

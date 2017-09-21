@@ -1,8 +1,11 @@
 package com.utsoft.blockchain.config;
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.AnnotationBean;
 import com.weibo.api.motan.config.springsupport.BasicServiceConfigBean;
@@ -67,4 +70,14 @@ public class ExportServiceConfiguration  {
 	     config.setApplication(application);
 	     return config;
 	 }
+	 
+	 @Bean
+	 public CuratorFramework curatorFramework(){
+		
+		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 30);
+		String  zookeeper_address = IGlobals.getProperty("zookeeper.address");
+		CuratorFramework client = CuratorFrameworkFactory.newClient(zookeeper_address, retryPolicy);
+		client.start();
+		return client;
+	}
 }

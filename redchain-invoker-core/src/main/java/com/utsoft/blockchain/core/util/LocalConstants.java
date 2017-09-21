@@ -12,7 +12,7 @@ public class LocalConstants {
 	 public static final String INVOKEWAITTIME = "fabric.invokeWaitTime";
 	 public static final String DEPLOYWAITTIME = "fabric.deployWaitTime";
 	 public static final String PROPOSALWAITTIME = "fabric.proposalWaitTime";
-	 
+	 public static final String USER_TRANSACTION_ID = "user.transaction.id";
 	 public static final int FABRIC_MANAGER_INVALID = 0;
 	 public static final int FABRIC_MANAGER_VALID = 1;
 	 

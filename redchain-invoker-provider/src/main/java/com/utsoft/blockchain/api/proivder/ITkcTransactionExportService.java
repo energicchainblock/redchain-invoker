@@ -10,7 +10,7 @@ import com.utsoft.blockchain.api.pojo.TkcTransferModel;
 import com.utsoft.blockchain.api.pojo.TransactionBaseModel;
 import com.weibo.api.motan.transport.async.MotanAsync;
 /**
- * tkc 区块链交易，查询 对外服务器rpc 接口
+ * tkc 区块链交易，查询 对外服务器rpc 接口，订单锁定
  * <ul>
  *    <li>transfer accounts</li>
  *    <li>query accounts info</li>
@@ -82,4 +82,11 @@ public interface ITkcTransactionExportService {
 	 * @return
 	 */
 	BaseResponseModel<TkcQueryDetailRspVo> getSystemDetail(String applyCategory,String cmd,String created);
+	/**
+	 * 申请订单交易号(关联自己和目标号)
+	 * @param address
+	 * @param from
+	 * @return
+	 */
+	 BaseResponseModel<String> applyGrantCode(String address,String from);
 }
