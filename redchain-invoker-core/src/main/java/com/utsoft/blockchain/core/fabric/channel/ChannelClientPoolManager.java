@@ -133,7 +133,7 @@ public class ChannelClientPoolManager {
             /**
              * 多长时间确认
              */
-	       int invokeWaitTime =  IGlobals.getIntProperty(LocalConstants.INVOKEWAITTIME, 3000);
+	       int invokeWaitTime =  IGlobals.getIntProperty(LocalConstants.INVOKEWAITTIME, 35000);
 	       try {
 				return  channelClientProxy.submitRequest(client,channel, chaincodeID, order,result)
 				   .thenApply(transactionEvent -> {
