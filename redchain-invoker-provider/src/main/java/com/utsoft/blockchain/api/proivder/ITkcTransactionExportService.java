@@ -42,6 +42,7 @@ public interface ITkcTransactionExportService {
 	 * @throws ServiceProcessException
 	 */
 	public BaseResponseModel<TkcSubmitRspVo> recharge(TransactionBaseModel model,String sign);
+	
 	/**
 	 * 查询个人账号余额
 	 * @param applyCategory 业务代码
@@ -89,4 +90,21 @@ public interface ITkcTransactionExportService {
 	 * @return
 	 */
 	 BaseResponseModel<String> applyGrantCode(String address,String from);
+	 
+	 
+	 /**
+	  * 查询个人账号信息
+	  * @param applyCategory
+	  * @param cmd
+	  * @param from
+	  * @return
+	  */
+	 BaseResponseModel<TkcQueryDetailRspVo> getAccountDesc(String applyCategory,String cmd,String from);
+	
+	/**
+	 * 提供快转模式
+	 * @param model
+	 * @return
+	 */
+	public BaseResponseModel<TkcSubmitRspVo> directTranfer(TkcTransferModel model);
 }

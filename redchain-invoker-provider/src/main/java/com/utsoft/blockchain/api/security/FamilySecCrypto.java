@@ -1,7 +1,9 @@
 package com.utsoft.blockchain.api.security;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
+
 import com.utsoft.blockchain.api.exception.CryptionException;
 import com.utsoft.blockchain.api.exception.WrongfulArgumentException;
 /** 
@@ -82,6 +84,13 @@ public interface FamilySecCrypto {
       */
      String convertPublicKey(String key) throws CryptionException;
      
+     /**
+      *  公钥转化成文本
+      * @param key
+      * @return
+      * @throws CryptionException
+      */
+      String convertPublicKey(PublicKey key) throws  CryptionException;
     
      /**
       * from String convert PrivateKey
@@ -89,8 +98,7 @@ public interface FamilySecCrypto {
       * @return PrivateKey otherwise null;
       * @throws CryptionException
       */
-      PrivateKey loadPrivateKeyByStr(String privateKey) throws  CryptionException;   
-      
+      PrivateKey loadPrivateKeyByStr(String privateKey) throws  CryptionException;  
       /**
        * 从证书中获取公钥信息
        * @param certificate

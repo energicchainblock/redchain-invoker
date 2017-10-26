@@ -320,6 +320,11 @@ public class DefaultCryptionSuite implements FamilySecCrypto {
 	}
 	
 	@Override
+	public String convertPublicKey(PublicKey key) throws CryptionException {
+	    return SdkUtil.encodeHexString(key.getEncoded());
+	}
+	
+	@Override
 	public PrivateKey loadPrivateKeyByStr(String privateKeyStr) throws CryptionException {
 		try {
 		   byte[] sourcePrivateKey  = SdkUtil.decodeHexStrig(privateKeyStr);

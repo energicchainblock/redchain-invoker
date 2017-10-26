@@ -1,7 +1,5 @@
-
 package com.utsoft.blockchain.api.util;
-import com.google.common.io.ByteStreams;
-import com.google.common.primitives.*;
+import static com.google.common.base.Preconditions.checkArgument;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +8,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.io.ByteStreams;
+import com.google.common.primitives.Ints;
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
  * map. It also checks that the length is correct and provides a bit more type safety.

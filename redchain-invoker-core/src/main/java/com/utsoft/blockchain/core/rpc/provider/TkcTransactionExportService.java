@@ -419,4 +419,106 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 		}
 		return false;
 	}
+
+	@Override
+	public BaseResponseModel<TkcQueryDetailRspVo> getAccountDesc(String applyCategory, String cmd, String from) {
+		
+		BaseResponseModel<TkcQueryDetailRspVo> queryModel = BaseResponseModel.build();
+		if (CommonUtil.isEmpty(applyCategory,from,cmd) ){
+		    return queryModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		try {
+			TkcQueryDetailRspVo result = transactionService.select(applyCategory, from,cmd);
+			if (result == null)
+				return queryModel.setCode(Constants.ITEM_NOT_FIND);
+			queryModel.setData(result);	
+		} catch (Exception ex) {
+			queryModel.setCode(Constants.SEVER_INNER_ERROR);
+			Object[] args = { from, ex };
+			logger.error("select getAccountDesc from:{} error :{}", args);
+		}
+		return queryModel;
+	}
+
+	
+	@Override
+	public BaseResponseModel<TkcSubmitRspVo> directTranfer(TkcTransferModel model) {
+		
+		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
+		String applyCategory = model.getApplyCategory();
+		String from = model.getFrom();
+		String to = model.getTo();
+		String submitJson = model.getSubmitJson();
+		String serviceCode = model.getServiceCode();
+		String created = model.getCreated();
+		String publicKey = model.getPublicKey();
+		
+		if (CommonUtil.isEmpty(applyCategory,from,serviceCode,submitJson,created,publicKey) ){
+		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		
+		/**
+		 * 订单是否提前申请
+		 */
+		boolean isGrant = sequencingService.isTokenGrant(from,created);
+		if (!isGrant){
+		   return submitRspModel.setCode(Constants.ORDER_APPLY_LOCKER); 
+		}
+		
+       synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisTransferPrefix(from,created);
+			TkcTransferModel processOrder = (TkcTransferModel) redisRepository.get(userPrefix);
+			if (processOrder!=null) {
+				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return submitRspModel;
+			} 
+			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
+			try {
+
+					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
+					SubmitRspResultDto result = transactionService.tranfer(applyCategory,from,to,serviceCode,submitJson);
+					if (result == null)
+						return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+					
+					BeanUtils.copyProperties(result, resultModel);
+					resultModel.setExternals(model.getExternals());
+					submitRspModel.setData(resultModel);
+					
+					/**
+					 * 记录 to 通知回调
+					 */
+					TransactionResultPo transactionResult =new TransactionResultPo();
+					transactionResult.setTo(to);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)result.getStatus());
+					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
+					aSynTransactionTask.notify(transactionResult);
+					/**
+					 * 记录b 通知回调
+					 */
+					transactionResult =new TransactionResultPo();
+					transactionResult.setTo(from);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)result.getStatus());
+					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_OUTCONMING);
+					aSynTransactionTask.notify(transactionResult);
+				
+			} catch (Exception ex) {
+				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = {model , ex };
+				logger.error("tranfer model:{} error:{} ", args);
+			} finally {
+				sequencingService.releaseLocker(from);
+				sequencingService.releaseLocker(to);
+			}
+			return submitRspModel;
+        }	
+	}
 }
