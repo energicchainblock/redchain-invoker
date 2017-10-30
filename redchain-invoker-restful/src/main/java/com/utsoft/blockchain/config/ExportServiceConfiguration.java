@@ -6,6 +6,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.utsoft.blockchain.core.util.CommonUtil;
 import com.utsoft.blockchain.core.util.IGlobals;
 import com.weibo.api.motan.config.springsupport.AnnotationBean;
 import com.weibo.api.motan.config.springsupport.BasicServiceConfigBean;
@@ -64,6 +65,14 @@ public class ExportServiceConfiguration  {
 	     if (CommonUtil.isNotEmpty(domain))
 	     config.setHost("chain.tangkc.com");*/
 	     
+	     boolean  isPublicMather = IGlobals.getBooleanProperty("motan.public.match",false);
+	     if (isPublicMather) {
+	    	 String localHost = CommonUtil.getPublicIPAddress();
+	    	 config.setHost(localHost); 
+	     } else {
+	    	String localHost = CommonUtil.getInnerIPAddress();
+	    	config.setHost(localHost);
+	     }
 	     config.setAccessLog(false);
 	     config.setShareChannel(true);
 	     config.setModule("motan--rpc");

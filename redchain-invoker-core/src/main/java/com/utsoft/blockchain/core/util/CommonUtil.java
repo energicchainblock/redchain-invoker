@@ -311,4 +311,40 @@ public class CommonUtil {
  		}  
          return null;
    }
+ 	
+	public  static String  getPublicIPAddress() {  
+       try {  
+        	Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();  
+            while (allNetInterfaces.hasMoreElements()) {  
+                NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();  
+
+                // 去除回环接口，子接口，未运行和接口
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {  
+                    continue;  
+                }
+                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {  
+                    InetAddress ip = addresses.nextElement(); 
+                    if (ip != null) {
+                        if (ip instanceof Inet4Address) {
+                        	String ipAddress = ip.getHostAddress();
+                            if (!ipAddress.startsWith("192") && !ipAddress.startsWith("10")) {  
+                                return ipAddress;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            System.err.println("Error when getting host ip address"+ e.getMessage());
+        } 
+         InetAddress addr;
+		try {
+			addr = (InetAddress) InetAddress.getLocalHost();
+			return addr.getHostAddress().toString(); 
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}  
+        return null;
+  }
 }

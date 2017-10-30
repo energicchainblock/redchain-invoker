@@ -45,6 +45,9 @@ eureka:
   client: 
     serviceUrl: 
       defaultZone: http://discovery.test.utouu.com/eureka/
+motan:
+  public:
+    match: true
 ---
 spring:
   profiles: production
