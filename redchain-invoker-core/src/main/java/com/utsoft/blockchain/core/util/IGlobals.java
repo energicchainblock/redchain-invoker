@@ -1,4 +1,5 @@
 package com.utsoft.blockchain.core.util;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -12,11 +13,11 @@ public class IGlobals {
 	
 	//private static final Logger Log = LoggerFactory.getLogger(IGlobals.class);
     private static Locale locale = null;
-    private  Properties properties ;
+    private  HashMap<String,Object> properties ;
 	private IGlobals() {
-		properties = new Properties();   
+		properties = new HashMap<>();   
  	}
-	public final Properties getProperties() {
+	public final  HashMap<String,Object> getProperties() {
 		return properties;
 	}
 	private  static IGlobals confGlobals = new IGlobals();
@@ -25,15 +26,16 @@ public class IGlobals {
     }
 	
 	public static  String getProperty(String name) {
-	     return IGlobals.getInstance().properties.getProperty(name);
+		Object value = IGlobals.getInstance().properties.get(name);
+		return String.valueOf(value) ;
 	}
 	
 	public static Properties getPeerProperties(String name) {
 		Properties dbproperties = new Properties();
 		
-		for (Map.Entry<Object,Object>  entry: IGlobals.getInstance().properties.entrySet())
+		for (Map.Entry<String,Object>  entry: IGlobals.getInstance().properties.entrySet())
 		{
-			String key = (String)entry.getKey();
+			String key = entry.getKey();
 			if (key!=null&&key.startsWith(name)) {
 				dbproperties.put(entry.getKey(), entry.getValue());
 			}
@@ -61,9 +63,6 @@ public class IGlobals {
         }
     }
 
-    public void setProperties(Properties properties) {
-		this.properties = properties;
-	}
 
 	/**
      * Returns an integer value xinge property. If the specified property doesn't exist, the
@@ -146,7 +145,7 @@ public class IGlobals {
         if (locale == null) {
             if (IGlobals.getInstance().properties != null) {
                 String [] localeArray;
-                String localeProperty = IGlobals.getInstance().properties.getProperty("locale");
+                String localeProperty = getProperty("locale");
                 if (localeProperty != null) {
                     localeArray = localeProperty.split("_");
                 }
