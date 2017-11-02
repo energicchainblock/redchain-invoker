@@ -521,4 +521,69 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			return submitRspModel;
         }	
 	}
+
+	@Override
+	public BaseResponseModel<TkcSubmitRspVo> directRecharge(TransactionBaseModel model) {
+		
+		BaseResponseModel<TkcSubmitRspVo> submitRspModel = BaseResponseModel.build();
+		String applyCategory = model.getApplyCategory();
+		String to = model.getTo();
+		String submitJson = model.getSubmitJson();
+		String serviceCode = model.getServiceCode();
+		String created = model.getCreated();
+		
+		/**
+		 * 输入参数检查
+		 */
+		if (CommonUtil.isEmpty(applyCategory,to,submitJson,created) ){
+		    return submitRspModel.setCode(Constants.PARAMETER_ERROR_NULl);
+		}
+		
+		boolean isGrant = sequencingService.isTokenGrant(to,created);
+		if (!isGrant){
+		   return submitRspModel.setCode(Constants.ORDER_APPLY_LOCKER); 
+		}
+		synchronized(created) {
+			
+			String userPrefix = FormatUtil.redisRechargePrefix(to,created);
+			TkcTransferModel processOrder = (TkcTransferModel) redisRepository.get(userPrefix);
+			if (processOrder!=null) {
+				submitRspModel.setCode(Constants.EXECUTE_PROCESS_ERROR);
+				return submitRspModel;
+			} 
+			redisRepository.set(userPrefix,model,120L,TimeUnit.SECONDS);
+			try {
+			
+					TkcSubmitRspVo resultModel = new TkcSubmitRspVo();
+					SubmitRspResultDto result = transactionService.recharge(applyCategory,to,serviceCode,submitJson);
+					if (result == null)
+					  return submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+
+					/**
+					 * 记录 to 通知回调
+					 */
+					TransactionResultPo transactionResult =new TransactionResultPo();
+					transactionResult.setTo(to);
+					transactionResult.setApplyCode(applyCategory);
+					transactionResult.setSubmitId(created);
+					transactionResult.setTxId(result.getTxId());
+					transactionResult.setBlockStatus((byte)result.getStatus());
+					transactionResult.setGmtCreate(new Date());
+					transactionResult.setForward(LocalConstants.TRANSACTION_INCONMING);
+					aSynTransactionTask.notify(transactionResult);
+					
+					BeanUtils.copyProperties(result, resultModel);
+					resultModel.setExternals(model.getExternals());
+					submitRspModel.setData(resultModel);
+				
+			} catch (Exception ex) {
+				submitRspModel.setCode(Constants.SEVER_INNER_ERROR);
+				Object[] args = { model, ex };
+				logger.error("tranfer signaturePlayload:{} error:{} ", args);
+			} finally {			
+			    sequencingService.releaseLocker(to);	
+			}
+			return submitRspModel;
+		}
+	}
 }

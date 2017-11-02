@@ -107,4 +107,11 @@ public interface ITkcTransactionExportService {
 	 * @return
 	 */
 	public BaseResponseModel<TkcSubmitRspVo> directTranfer(TkcTransferModel model);
+	
+	/**
+	 * 提供快转充值
+	 * @param model
+	 * @return
+	 */
+	public BaseResponseModel<TkcSubmitRspVo> directRecharge(TransactionBaseModel model);
 }
