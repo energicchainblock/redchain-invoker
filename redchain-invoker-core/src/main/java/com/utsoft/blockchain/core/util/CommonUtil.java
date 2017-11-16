@@ -275,8 +275,51 @@ public class CommonUtil {
           return cf;
      }
      
-     
- 	public  static String  getInnerIPAddress() {  
+	   /**
+     * 获取内网IP
+     * @return
+     */
+    public static String getInnerIPAddress() {
+    	try {  
+         	Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();  
+             while (allNetInterfaces.hasMoreElements()) {  
+                 NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();  
+
+                 // 去除回环接口，子接口，未运行和接口
+                 if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {  
+                     continue;  
+                 }
+                 Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                 while (addresses.hasMoreElements()) {  
+                     InetAddress ip = addresses.nextElement(); 
+                     if (ip != null) {
+                         if (ip instanceof Inet4Address) {
+                         	String ipAddress = ip.getHostAddress();
+                             if (internalIp(ipAddress)) {  
+                                 return ipAddress;
+                             }
+                         }
+                     }
+                 }
+             }
+         } catch (SocketException e) {
+             System.err.println("Error  getting host ip inner address"+ e.getMessage());
+         } 
+    	InetAddress addr;
+  		try {
+  			addr = (InetAddress) InetAddress.getLocalHost();
+  			return addr.getHostAddress().toString(); 
+  		} catch (UnknownHostException e) {
+  			e.printStackTrace();
+  		} 
+  		return null;
+    }
+    
+    /**
+     * 获取外网IP
+     * @return
+     */
+    public  static String  getPublicIPAddress() {  
         try {  
          	Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();  
              while (allNetInterfaces.hasMoreElements()) {  
@@ -292,7 +335,7 @@ public class CommonUtil {
                      if (ip != null) {
                          if (ip instanceof Inet4Address) {
                          	String ipAddress = ip.getHostAddress();
-                             if (ipAddress.startsWith("192") || ipAddress.startsWith("10") || ipAddress.startsWith("169")) {  
+                             if (!internalIp(ipAddress)) {  
                                  return ipAddress;
                              }
                          }
@@ -302,49 +345,57 @@ public class CommonUtil {
          } catch (SocketException e) {
              System.err.println("Error when getting host ip address"+ e.getMessage());
          } 
-          InetAddress addr;
- 		try {
- 			addr = (InetAddress) InetAddress.getLocalHost();
- 			return addr.getHostAddress().toString(); 
- 		} catch (UnknownHostException e) {
- 			e.printStackTrace();
- 		}  
          return null;
-   }
- 	
-	public  static String  getPublicIPAddress() {  
-       try {  
-        	Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();  
-            while (allNetInterfaces.hasMoreElements()) {  
-                NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();  
-
-                // 去除回环接口，子接口，未运行和接口
-                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {  
-                    continue;  
-                }
-                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {  
-                    InetAddress ip = addresses.nextElement(); 
-                    if (ip != null) {
-                        if (ip instanceof Inet4Address) {
-                        	String ipAddress = ip.getHostAddress();
-                            if (!ipAddress.startsWith("192") && !ipAddress.startsWith("10") && !ipAddress.startsWith("172")) {  
-                                return ipAddress;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            System.err.println("Error when getting host ip address"+ e.getMessage());
-        } 
-         InetAddress addr;
+     }
+    
+    /**
+	 * Class A 10.0.0.0-10.255.255.255 | 255.0.0.0
+	 * Class B 172.16.0.0-172.31.255.255 | 255.240.0.0 
+	 * Class C 192.168.0.0-192.168.255.255 | 255.255.0.0
+     * @param ip
+     * @return true is inneral ip Address
+     */
+     public static boolean internalIp(String ip) {
+        byte[] addr = null;
 		try {
-			addr = (InetAddress) InetAddress.getLocalHost();
-			return addr.getHostAddress().toString(); 
+			addr = ipToBytes(ip);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}  
-        return null;
-  }
+			return false;
+		}   //IPAddressUtil.textToNumericFormatV4(ip);
+        return internalIp(addr);
+    }
+
+    private static byte[] ipToBytes(String ip) throws UnknownHostException {
+        return InetAddress.getByName(ip).getAddress();
+    }
+        
+    public static boolean internalIp(byte[] addr) {
+        final byte b0 = addr[0];
+        final byte b1 = addr[1];
+        //10.x.x.x/8
+        final byte SECTION_1 = 0x0A;
+        //172.16.x.x/12
+        final byte SECTION_2 = (byte) 0xAC;
+        final byte SECTION_3 = (byte) 0x10;
+        final byte SECTION_4 = (byte) 0x1F;
+        //192.168.x.x/16
+        final byte SECTION_5 = (byte) 0xC0;
+        final byte SECTION_6 = (byte) 0xA8;
+        switch (b0) {
+            case SECTION_1:
+                return true;
+            case SECTION_2:
+                if (b1 >= SECTION_3 && b1 <= SECTION_4) {
+                    return true;
+                }
+            case SECTION_5:
+                switch (b1) {
+                    case SECTION_6:
+                        return true;
+                }
+            default:
+                return false;
+        }
+    }
+
 }
