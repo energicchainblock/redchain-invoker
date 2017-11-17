@@ -29,7 +29,7 @@ public class LocalConstants {
 	 /**
 	  * 默认过期时间
 	  */
-	 public static final long REDIS_EXPIRE_TTL = 60*60*24;
+	 public static final long REDIS_EXPIRE_TTL = 60*60;
 	 public static final String TKC_PREFIX ="TKCBC";
 	 
 	 public static final  String TKC_TRANSFER_MOVE = "TKC_TRANSFER_MOVE";
