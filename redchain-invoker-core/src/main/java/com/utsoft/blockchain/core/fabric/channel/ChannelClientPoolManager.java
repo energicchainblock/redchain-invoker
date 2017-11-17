@@ -323,7 +323,6 @@ public class ChannelClientPoolManager {
 						.getTransactionActionInfos()) {
 
 					JSONObject transactionActionInfoObject = new JSONObject();
-
 					transactionActionInfoObject.put("responseStatus", transactionActionInfo.getResponseStatus());
 					try {
 						transactionActionInfoObject.put("responseMsg",
@@ -332,7 +331,8 @@ public class ChannelClientPoolManager {
 						logger.error(" parser error by encode ", e1);
 					}
 					transactionActionInfoObject.put("endorsementsCount", transactionActionInfo.getEndorsementsCount());
-
+					byte []  content = transactionActionInfo.getProposalResponsePayload();
+					transactionActionInfoObject.put("responseAck", new String(content));
 					/**
 					 * endorserInfoObjects
 					 */
