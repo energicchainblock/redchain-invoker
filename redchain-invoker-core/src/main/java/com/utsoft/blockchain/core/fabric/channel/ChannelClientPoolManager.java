@@ -316,7 +316,10 @@ public class ChannelClientPoolManager {
 						transactionEnvelopeInfo.getTransactionActionInfoCount());
 				envelopeObject.put("transactionActionInfoIsValid", transactionEnvelopeInfo.isValid());
 				envelopeObject.put("validationCode", transactionEnvelopeInfo.getValidationCode());
-
+				envelopeObject.put("txId", transactionEnvelopeInfo.getTransactionID());
+				envelopeObject.put("txepoch",transactionEnvelopeInfo.getEpoch());
+				envelopeObject.put("txtimestamp",CommonUtil.dateConvertToText(transactionEnvelopeInfo.getTimestamp()));
+				
 				List<JSONObject> transactionActionInfoList = new ArrayList<>();
 
 				for (BlockInfo.TransactionEnvelopeInfo.TransactionActionInfo transactionActionInfo : transactionEnvelopeInfo

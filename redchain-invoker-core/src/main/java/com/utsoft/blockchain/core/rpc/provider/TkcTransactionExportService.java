@@ -327,14 +327,14 @@ public class TkcTransactionExportService extends AbstractTkcRpcBasicService impl
 			return dataList;
 		}
 		for (String txId: txIds) {
-			 TkcTransactionBlockInfoVo tkcBlockVoInfo  =  null;//(TkcTransactionBlockInfoVo)redisRepository.get(txId);
+			 TkcTransactionBlockInfoVo tkcBlockVoInfo = (TkcTransactionBlockInfoVo)redisRepository.get(txId);
 			if (tkcBlockVoInfo==null) {
 			 try {
 					TkcTransactionBlockInfoDto blockInfo = (TkcTransactionBlockInfoDto)tkcBcRepository.queryTransactionBlockByID(applyCategory, txId);	
 					 if (blockInfo!=null) {
 						tkcBlockVoInfo = new TkcTransactionBlockInfoVo();
 						BeanUtils.copyProperties(blockInfo, tkcBlockVoInfo);
-						//redisRepository.set(txId, tkcBlockVoInfo);
+						redisRepository.set(txId, tkcBlockVoInfo);
 					} 
 				} 
 				catch (Exception ex) {

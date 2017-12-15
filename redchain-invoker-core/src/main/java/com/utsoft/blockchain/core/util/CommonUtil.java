@@ -8,7 +8,11 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -33,9 +37,20 @@ public class CommonUtil {
 
 	 private static final String Algorithm = "Blowfish"; //定义加密算法,可用 DES,DESede,Blowfish  
 	  
-	private CommonUtil() {
+	 public static DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+	 private CommonUtil() {
 	}
 
+    public static String dateConvertToText(Date date){
+			try {
+			  return sdf.format(date);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		 return "";
+	 }
+	
 	public static String getSha1(String data) {
 		return DigestUtils.sha1Hex(data);
 	}
