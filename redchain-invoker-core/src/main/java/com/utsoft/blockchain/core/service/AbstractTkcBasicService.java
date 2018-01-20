@@ -148,7 +148,7 @@ public abstract class AbstractTkcBasicService {
 	                try {
 	                     
 	                	 File findFile = CommonUtil.getFilepath(sb.toString());
-	                	 File privateKey = CommonUtil.findFileSk(findFile);
+	                	 File privateKey = CommonUtil.findFileSk(findFile,sb.toString());
 	                	/**
 	                	 * 获取公约
 	                	 */

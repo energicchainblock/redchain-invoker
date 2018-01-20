@@ -1,5 +1,6 @@
 package com.utsoft.blockchain.core.util;
 import static java.lang.String.format;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -8,7 +9,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -17,14 +17,19 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hyperledger.fabric.sdk.helper.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
+
 import com.utsoft.blockchain.api.util.SdkUtil;
 /**
  * 简单工具
@@ -35,6 +40,7 @@ import com.utsoft.blockchain.api.util.SdkUtil;
  */
 public class CommonUtil {
 
+	private static final Logger Log = LoggerFactory.getLogger(IGlobals.class);
 	 private static final String Algorithm = "Blowfish"; //定义加密算法,可用 DES,DESede,Blowfish  
 	  
 	 public static DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -143,7 +149,7 @@ public class CommonUtil {
 				: location;
 	}
 	
-   public static File findFileSk(File directory) {
+   public static File findFileSk(File directory,String rootPath){
 
         File[] matches = directory.listFiles((dir, name) -> name.endsWith("_sk"));
 
@@ -152,7 +158,7 @@ public class CommonUtil {
         }
 
         if (matches.length != 1) {
-            throw new RuntimeException(format("Expected in %s only 1 sk file but found %d", directory.getAbsoluteFile().getName(), matches.length));
+        	Log.warn(rootPath+format(":Expected in %s only 1 sk file but found %d", directory.getAbsoluteFile().getName(), matches.length));
         }
         return matches[0];
     }
