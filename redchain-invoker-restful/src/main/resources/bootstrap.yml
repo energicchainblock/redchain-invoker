@@ -5,57 +5,58 @@ spring:
     config: 
       failFast: true
       enabled: true
-      name: tkc-invoker-server
+      name: tkcinvokerserver
       discovery: 
         enabled: true
-        service-id: CONFIG
+        service-id: CONFIG-SERVER
       profile: ${spring.profiles.active}
   profiles: 
     active: test 
-
 eureka: 
   client: 
     cache-refresh-executor-thread-pool-size: 2
     register-with-eureka: false
-
+  instance:
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+   
 health:
   config:
     enabled: false
----
-spring: 
-  profiles: development
-  cloud:
-    config:
-      username: client
-      password: 'QWE123zxc'
-  
-eureka: 
-  client: 
-    serviceUrl: 
-      defaultZone: http://discovery.dev.utouu.com/eureka/
-
 ---
 spring:
   profiles: test
   cloud:
     config:
       username: client
-      password: 'QWE123zxc'
-eureka: 
-  client: 
-    serviceUrl: 
-      defaultZone: http://discovery.test.utouu.com/eureka/
-motan:
-  public:
-    match: true
+      password: db1ab002-1fba-476d-a421-22113355
+
+#注册服务地址
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://120.27.163.51:1221/eureka/
+  instance:
+    hostname: 120.27.163.51
+    prefer-ip-address: false   
 ---
 spring:
   profiles: production
   cloud:
     config:
       username: client
-      password: 'QWE123zxc!@#'
-eureka: 
-  client: 
-    serviceUrl: 
-      defaultZone: http://discovery.internal.utouu.com/eureka/
+      password: 3eq32fd2-5f2r-s132-sdf12-2f454111
+
+#eureka集群配置
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    use-dns-for-fetching-service-urls: true
+    eureka-server-d-n-s-name: eureka.reeed.org
+    eureka-server-port: 1221
+    eureka-server-u-r-l-context: eureka
+    fetch-registry: true
+    register-with-eureka: true
+    region: eureka-server-region
+    prefer-same-zone-eureka: true
